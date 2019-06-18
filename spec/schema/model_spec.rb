@@ -30,4 +30,20 @@ describe Schema::Model do
       end
     end
   end
+
+  context 'setter/getter' do
+    let(:value) { rand(1_000_000).to_s }
+
+    let(:model) do
+      model_class.attribute :id, :integer
+      model_class.new
+    end
+
+    it 'get/set model attribute' do
+      model.id = value
+      expect(model.instance_variable_get(:@id)).to eq(value.to_i)
+      expect(model.id).to eq(value.to_i)
+      expect(model.instance_variable_get(:@id).object_id).to eq(model.id.object_id)
+    end
+  end
 end

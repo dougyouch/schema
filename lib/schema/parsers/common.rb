@@ -1,12 +1,15 @@
 module Schema
   module Parsers
     module Common
+      INTEGER_REGEX = /^(?:[1-9]\d*|0)$/
+      NUMBER_REGEX = /^(?:[1-9]\d*|0)(?:\.\d+)?$/
+
       def parse_integer(field_name, parsing_errors, value)
         case value
         when Integer
           value
         when String
-          if value =~ /^(?:[1-9]\d*|0)$/
+          if INTEGER_REGEX.match?(value)
             Integer(value)
           else
             parsing_errors.add(field_name, :invalid)
@@ -42,7 +45,7 @@ module Schema
         when Integer
           value.to_f
         when String
-          if value =~ /^(?:[1-9]\d*|0)(?:\.\d+)?$/
+          if NUMBER_REGEX.match?(value)
             Float(value)
           else
             parsing_errors.add(field_name, :invalid)
