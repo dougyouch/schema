@@ -19,8 +19,11 @@ module Schema
           getter: name.to_s,
           setter: "#{name}=",
           instance_variable: "@#{name}",
-          parser: "parse_#{type}"
+          parser: "parse_#{type}",
+          const_name: "SCHEMA_MODEL_ATTRIBUTE_#{name.upcase}"
         }.merge(options)
+
+        const_set(options[:const_name], name)
 
         add_value_to_class_method(:schema, name => options)
 
@@ -30,7 +33,7 @@ def #{options[:getter]}
 end
 
 def #{options[:setter]}(v)
-  #{options[:instance_variable]} = #{options[:parser]}('#{name}', errors, v)
+  #{options[:instance_variable]} = #{options[:parser]}(#{options[:const_name]}, errors, v)
 end
 STR
         )
