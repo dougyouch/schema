@@ -44,6 +44,15 @@ describe Schema::Parsers::Common do
         expect(has_parsing_errors).to eq(false)
       end
 
+      describe 'zero' do
+        let(:value) { '0' }
+
+        it 'has no errors' do
+          expect(subject).to eq(0)
+          expect(has_parsing_errors).to eq(false)
+        end
+      end
+
       describe 'not a number' do
         let(:value) { 'not_a_number' }
 
@@ -160,6 +169,24 @@ describe Schema::Parsers::Common do
       it 'has no errors' do
         expect(subject).to eq(value.to_f)
         expect(has_parsing_errors).to eq(false)
+      end
+
+      describe 'zero' do
+        let(:value) { '0' }
+
+        it 'has no errors' do
+          expect(subject).to eq(0)
+          expect(has_parsing_errors).to eq(false)
+        end
+      end
+
+      describe 'starts with zero' do
+        let(:value) { rand.to_s }
+
+        it 'has no errors' do
+          expect(subject).to eq(value.to_f)
+          expect(has_parsing_errors).to eq(false)
+        end
       end
 
       describe 'not a number' do

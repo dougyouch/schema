@@ -14,21 +14,23 @@ module Schema
       end
 
       def attribute(name, type, options={})
-        add_value_to_class_method(:schema,
-                                  name => {
-                                    type: type,
-                                    getter_method: name.to_s,
-                                    setter_method: "#{name}="
-                                  }.merge(options)
-                                 )
+        options = {
+          type: type,
+          getter: name.to_s,
+          setter: "#{name}=",
+          instance_variable: "@#{name}",
+          parser: "parse_#{type}"
+        }.merge(options)
+
+        add_value_to_class_method(:schema, name => options)
 
         class_eval(<<-STR
-def #{name}
-  @#{name}
+def #{options[:getter]}
+  #{options[:instance_variable]}
 end
 
-def #{name}=(v)
-  @#{name} = parse_#{type}('#{name}', errors, v)
+def #{options[:setter]}(v)
+  #{options[:instance_variable]} = #{options[:parser]}('#{name}', errors, v)
 end
 STR
         )
@@ -41,8 +43,8 @@ STR
 
     def update_attributes(data)
       self.class.schema.each do |field_name, field_options|
-        next unless value = data[field_name]
-        public_send(field_options[:setter_method], value)
+        next unless data.has_key?(field_name)
+        public_send(field_options[:setter], value)
       end
       self
     end

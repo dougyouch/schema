@@ -6,7 +6,7 @@ module Schema
         when Integer
           value
         when String
-          if value =~ /^[1-9]\d*$/
+          if value =~ /^(?:[1-9]\d*|0)$/
             Integer(value)
           else
             parsing_errors.add(field_name, :invalid)
@@ -42,7 +42,7 @@ module Schema
         when Integer
           value.to_f
         when String
-          if value =~ /^[1-9]\d*(?:\.\d+)?$/
+          if value =~ /^(?:[1-9]\d*|0)(?:\.\d+)?$/
             Float(value)
           else
             parsing_errors.add(field_name, :invalid)
