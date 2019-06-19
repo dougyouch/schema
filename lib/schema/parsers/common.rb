@@ -1,8 +1,11 @@
+require 'time'
+
 module Schema
   module Parsers
     module Common
       INTEGER_REGEX = /^(?:[1-9]\d*|0)$/
-      NUMBER_REGEX = /^(?:[1-9]\d*|0)(?:\.\d+)?$/
+      FLOAT_REGEX = /^(?:[1-9]\d*|0)(?:\.\d+)?$/
+      BOOLEAN_REGEX = /^(?:1|t|true|on|y|yes)$/i
 
       def parse_integer(field_name, parsing_errors, value)
         case value
@@ -20,6 +23,8 @@ module Schema
             parsing_errors.add(field_name, :incompatable)
           end
           value.to_i
+        when nil
+          nil
         else
           parsing_errors.add(field_name, :unhandled_type)
           nil
@@ -33,24 +38,86 @@ module Schema
         when Hash, Array
           parsing_errors.add(field_name, :incompatable)
           nil
+        when nil
+          nil
         else
           String(value)
         end
       end
 
-      def parse_number(field_name, parsing_errors, value)
+      def parse_float(field_name, parsing_errors, value)
         case value
         when Float
           value
         when Integer
           value.to_f
         when String
-          if NUMBER_REGEX.match?(value)
+          if FLOAT_REGEX.match?(value)
             Float(value)
           else
             parsing_errors.add(field_name, :invalid)
             nil
           end
+        when nil
+          nil
+        else
+          parsing_errors.add(field_name, :unhandled_type)
+          nil
+        end
+      end
+
+      def parse_time(field_name, parsing_errors, value)
+        case value
+        when Time
+          value
+        when Date
+          value.to_time
+        when String
+          begin
+            Time.xmlschema(value)
+          rescue ArgumentError
+            parsing_errors.add(field_name, :invalid)
+            nil
+          end
+        when nil
+          nil
+        else
+          parsing_errors.add(field_name, :unhandled_type)
+          nil
+        end
+      end
+
+      def parse_date(field_name, parsing_errors, value)
+        case value
+        when Date
+          value
+        when Time
+          value.to_date
+        when String
+          begin
+            Date.parse(value)
+          rescue ArgumentError
+            parsing_errors.add(field_name, :invalid)
+            nil
+          end
+        when nil
+          nil
+        else
+          parsing_errors.add(field_name, :unhandled_type)
+          nil
+        end
+      end
+
+      def parse_boolean(field_name, parsing_errors, value)
+        case value
+        when TrueClass, FalseClass
+          value
+        when Integer, Float
+          value != 0
+        when String
+          BOOLEAN_REGEX.match?(value)
+        when nil
+          nil
         else
           parsing_errors.add(field_name, :unhandled_type)
           nil
