@@ -6,6 +6,10 @@ describe Schema::Model do
     kls = Class.new do
       include ActiveModel::Validations
       include Schema::Model
+
+      attribute :id, :integer
+      attribute :name, :string
+      attribute :cost, :float
     end
     Object.const_set(model_class_name, kls)
     Object.const_get(model_class_name)
@@ -21,7 +25,7 @@ describe Schema::Model do
 
   context 'attribute' do
     describe 'adds setter/getter methods to the class' do
-      let(:attribute_name) { :id }
+      let(:attribute_name) { :other }
       subject { model_class.attribute attribute_name, :integer }
 
       it 'adds the attriburte to the schema' do
@@ -33,17 +37,31 @@ describe Schema::Model do
 
   context 'setter/getter' do
     let(:value) { rand(1_000_000).to_s }
-
-    let(:model) do
-      model_class.attribute :id, :integer
-      model_class.new
-    end
+    let(:model) { model_class.new }
 
     it 'get/set model attribute' do
       model.id = value
       expect(model.instance_variable_get(:@id)).to eq(value.to_i)
       expect(model.id).to eq(value.to_i)
       expect(model.instance_variable_get(:@id).object_id).to eq(model.id.object_id)
+    end
+  end
+
+  context 'from_hash' do
+    let(:value) { rand(1_000_000).to_s }
+
+    subject { model_class.from_hash id: value }
+
+    it 'transformed and assigned the value' do
+      expect(subject.id).to eq(value.to_i)
+    end
+
+    describe 'string keys' do
+      subject { model_class.from_hash 'id' => value }
+
+      it 'transformed and assigned the value' do
+        expect(subject.id).to eq(value.to_i)
+      end
     end
   end
 end
