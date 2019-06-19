@@ -14,8 +14,13 @@ module Schema
       end
 
       def attribute(name, type, options={})
+        if options.has_key?(:alias)
+          options[:aliases] = [options[:alias]]
+        end
+
         options = {
           key: name.to_s,
+          name: name,
           type: type,
           getter: name.to_s,
           setter: "#{name}=",
@@ -35,6 +40,14 @@ def #{options[:setter]}(v)
 end
 STR
         )
+
+        if options[:aliases]
+          options[:aliases].each do |alias_name|
+            add_value_to_class_method(:schema, alias_name.to_sym => options.merge(key: alias_name.to_s, alias_of: name))
+            alias_method(alias_name, options[:getter])
+            alias_method("#{alias_name}=", options[:setter])
+          end
+        end
       end
 
       def from_hash(data)

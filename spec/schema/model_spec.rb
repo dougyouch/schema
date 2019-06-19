@@ -7,8 +7,8 @@ describe Schema::Model do
       include ActiveModel::Validations
       include Schema::Model
 
-      attribute :id, :integer
-      attribute :name, :string
+      attribute :id, :integer, alias: :identifier
+      attribute :name, :string, aliases: [:my_name]
       attribute :cost, :float
     end
     Object.const_set(model_class_name, kls)
@@ -57,7 +57,7 @@ describe Schema::Model do
     end
 
     describe 'string keys' do
-      subject { model_class.from_hash 'id' => value }
+      subject { model_class.from_hash 'identifier' => value }
 
       it 'transformed and assigned the value' do
         expect(subject.id).to eq(value.to_i)
