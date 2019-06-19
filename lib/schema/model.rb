@@ -19,13 +19,13 @@ module Schema
         end
 
         options = {
-          key: name.to_s,
+          key: name.to_s.freeze,
           name: name,
           type: type,
-          getter: name.to_s,
-          setter: "#{name}=",
-          instance_variable: "@#{name}",
-          parser: "parse_#{type}"
+          getter: name.to_s.freeze,
+          setter: "#{name}=".freeze,
+          instance_variable: "@#{name}".freeze,
+          parser: "parse_#{type}".freeze
         }.merge(options)
 
         add_value_to_class_method(:schema, name => options)
@@ -67,5 +67,20 @@ STR
 
       self
     end
+
+    def as_json(opts={})
+      self.class.schema.inject({}) do |memo, (field_name, field_options)|
+        unless field_options[:alias_of]
+          value = public_send(field_options[:getter])
+          memo[field_name] = value if ! value.nil? || opts[:include_nils]
+        end
+        memo
+      end
+    end
+
+    def to_hash
+      as_json(include_nils: true)
+    end
+    alias to_h to_hash
   end
 end

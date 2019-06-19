@@ -16,9 +16,9 @@ describe Schema::Model do
   end
   let(:model_data) do
     {
-      'id' => rand(1_000_000),
-      'name' => SecureRandom.hex(10),
-      'cost' => (rand(1_000).to_f + rand).round(2)
+      id: rand(1_000_000),
+      name: SecureRandom.hex(10),
+      cost: (rand(1_000).to_f + rand).round(2)
     }
   end
   let(:model) { model_class.from_hash(model_data) }
@@ -61,6 +61,60 @@ describe Schema::Model do
 
       it 'transformed and assigned the value' do
         expect(subject.id).to eq(value.to_i)
+      end
+    end
+  end
+
+  context 'as_json' do
+    let(:include_nils) { false }
+    subject { model.as_json(include_nils: include_nils) }
+
+    it 'returns a hash' do
+      expect(subject).to eq(model_data)
+    end
+
+    describe 'nil values' do
+      let(:model_data) do
+        {
+          id: rand(1_000_000),
+          name: nil,
+          cost: (rand(1_000).to_f + rand).round(2)
+        }
+      end
+
+      it 'omits nil values' do
+        expect(subject).to eq(id: model_data[:id],
+                              cost: model_data[:cost])
+      end
+
+      describe 'include nils values' do
+        let(:include_nils) { true }
+
+        it 'returns a hash with nil values' do
+          expect(subject).to eq(model_data)
+        end
+      end
+    end
+  end
+
+  context 'to_hash' do
+    subject { model.to_hash }
+
+    it 'returns a hash' do
+      expect(subject).to eq(model_data)
+    end
+
+    describe 'nil values' do
+      let(:model_data) do
+        {
+          id: rand(1_000_000),
+          name: nil,
+          cost: (rand(1_000).to_f + rand).round(2)
+        }
+      end
+
+      it 'returns a hash with nil values' do
+        expect(subject).to eq(model_data)
       end
     end
   end
