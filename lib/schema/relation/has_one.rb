@@ -30,10 +30,8 @@ def #{options[:getter]}
 end
 
 def #{options[:setter]}(v)
-  if v.is_a?(Hash)
-    #{options[:instance_variable]} = #{options[:class_name]}.from_hash(v)
-  elsif ! v.nil?
-    errors.add(#{name.inspect}, :invalid)
+  if schema = ::Schema::Utils.create_schema(self, #{options[:class_name]}, #{name.inspect}, v)
+    #{options[:instance_variable]} = schema
   end
 end
 STR
