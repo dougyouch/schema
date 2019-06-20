@@ -9,10 +9,10 @@ module Schema
     def create_schema(base_schema, schema_class, schema_name, data)
       if data.is_a?(Hash)
         schema = schema_class.from_hash(data)
-        base_schema.errors.add(schema_name, :invalid) unless schema.errors.empty?
+        base_schema.parsing_errors.add(schema_name, :invalid) unless schema.parsing_errors.empty?
         schema
       elsif ! data.nil?
-        base_schema.errors.add(schema_name, :incompatable)
+        base_schema.parsing_errors.add(schema_name, :incompatable)
         nil
       else
         nil

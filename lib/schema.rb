@@ -1,4 +1,5 @@
 module Schema
+  autoload :Errors, 'schema/errors'
   autoload :Model, 'schema/model'
   autoload :Utils, 'schema/utils'
 

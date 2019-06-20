@@ -5,7 +5,6 @@ describe Schema::Model do
   let(:model_class) do
     kls = Class.new do
       include Schema::Model
-      schema_include ActiveModel::Validations
 
       attribute :id, :integer, alias: :identifier
       attribute :name, :string, aliases: [:my_name]

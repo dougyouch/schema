@@ -6,7 +6,6 @@ describe Schema::Relation::HasOne do
     kls = Class.new do
       include Schema::Model
       schema_include Schema::Relation::HasOne
-      schema_include ActiveModel::Validations
       attribute :name, :string
 
       has_one :item do
@@ -29,7 +28,7 @@ describe Schema::Relation::HasOne do
     }
   end
   let(:model) { model_class.from_hash(model_data) }
-  let(:parsing_errors) { model.errors }
+  let(:parsing_errors) { model.parsing_errors }
   let(:has_parsing_errors) { ! parsing_errors.empty? }
 
   context 'has_one' do

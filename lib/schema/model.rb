@@ -46,7 +46,7 @@ def #{options[:getter]}
 end
 
 def #{options[:setter]}(v)
-  #{options[:instance_variable]} = #{options[:parser]}(#{name.inspect}, errors, v)
+  #{options[:instance_variable]} = #{options[:parser]}(#{name.inspect}, parsing_errors, v)
 end
 STR
         )
@@ -99,5 +99,9 @@ STR
       as_json(include_nils: true)
     end
     alias to_h to_hash
+
+    def parsing_errors
+      @parsing_errors ||= ::Schema::Errors.new
+    end
   end
 end

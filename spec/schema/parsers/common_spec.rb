@@ -11,8 +11,11 @@ describe Schema::Parsers::Common do
       :date,
       :active
     ) do
-      include ActiveModel::Validations
       include Schema::Parsers::Common
+
+      def parsing_errors
+        @parsing_errors ||= ::Schema::Errors.new
+      end
     end
     Object.const_set(model_class_name, kls)
     Object.const_get(model_class_name)
@@ -24,7 +27,7 @@ describe Schema::Parsers::Common do
   let(:model_date) { model_time.to_date }
   let(:model_active) { true }
   let(:model) { model_class.new(model_id, model_name, model_cost, model_time, model_date, model_active) }
-  let(:parsing_errors) { model.errors }
+  let(:parsing_errors) { model.parsing_errors }
   let(:has_parsing_errors) { ! parsing_errors.empty? }
 
   context 'parse_integer' do

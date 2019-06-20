@@ -3,6 +3,7 @@
 require 'rubygems'
 require 'bundler'
 require 'json'
+require 'securerandom'
 
 begin
   Bundler.require(:default, :development, :spec)
