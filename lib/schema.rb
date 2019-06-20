@@ -4,4 +4,8 @@ module Schema
   module Parsers
     autoload :Common, 'schema/parsers/common'
   end
+
+  module Relation
+    autoload :HasOne, 'schema/relation/has_one'
+  end
 end

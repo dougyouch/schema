@@ -8,9 +8,24 @@ module Schema
       base.extend ClassMethods
     end
 
+    def self.default_attribute_options(name, type)
+      {
+        key: name.to_s.freeze,
+        name: name,
+        type: type,
+        getter: name.to_s.freeze,
+        setter: "#{name}=".freeze,
+        instance_variable: "@#{name}".freeze,
+      }
+    end
+
     module ClassMethods
       def schema
         {}.freeze
+      end
+
+      def schema_config
+        {schema_includes: []}.freeze
       end
 
       def attribute(name, type, options={})
@@ -18,15 +33,10 @@ module Schema
           options[:aliases] = [options[:alias]]
         end
 
-        options = {
-          key: name.to_s.freeze,
-          name: name,
-          type: type,
-          getter: name.to_s.freeze,
-          setter: "#{name}=".freeze,
-          instance_variable: "@#{name}".freeze,
-          parser: "parse_#{type}".freeze
-        }.merge(options)
+        options = ::Schema::Model.default_attribute_options(name, type)
+                    .merge(
+                      parser: "parse_#{type}".freeze
+                    ).merge(options)
 
         add_value_to_class_method(:schema, name => options)
 
@@ -52,6 +62,13 @@ STR
 
       def from_hash(data)
         new.update_attributes(data)
+      end
+
+      def schema_include(mod)
+        config = schema_config.dup
+        config[:schema_includes] = config[:schema_includes] + [mod]
+        redefine_class_method(:schema_config, config.freeze)
+        include mod
       end
     end
 
