@@ -11,7 +11,7 @@ module Schema
 
       module ClassMethods
         def has_one(name, options={}, &block)
-          class_name = HasOne.class_name('SchemaHashOne', name.to_s)
+          class_name = HasOne.classify_name('SchemaHashOne', name.to_s)
           kls = Class.new do
             include ::Schema::Model
           end
@@ -21,10 +21,26 @@ module Schema
           const_set(class_name, kls)
           kls.class_eval(&block)
           const_get(class_name)
-        end
-      end
 
-      def schema_set_has_one(name, value)
+
+          options = ::Schema::Model.default_attribute_options(name, :has_one)
+                      .merge(
+                        class_name: class_name
+                      ).merge(options)
+
+          add_value_to_class_method(:schema, name => options)
+
+          class_eval(<<-STR
+def #{options[:getter]}
+  #{options[:instance_variable]}
+end
+
+def #{options[:setter]}(v)
+  #{options[:instance_variable]} = #{options[:class_name]}.from_hash(v)
+end
+STR
+                    )
+        end
       end
     end
   end
