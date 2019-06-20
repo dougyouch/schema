@@ -54,5 +54,24 @@ describe Schema::Relation::HasOne do
         expect(has_parsing_errors).to eq(false)
       end
     end
+
+    describe 'parsing errors propogate' do
+      let(:model_data) do
+        {
+          name: SecureRandom.uuid,
+          item: {
+            id: 'not a number',
+            name: SecureRandom.hex(10),
+            cost: (rand(1_000).to_f + rand).round(2)
+          }
+        }
+      end
+
+      it 'has errors' do
+        expect(model.item.id).to eq(nil)
+        expect(model.item.name).to eq(model_data[:item][:name])
+        expect(has_parsing_errors).to eq(true)
+      end
+    end
   end
 end
