@@ -1,5 +1,6 @@
 module Schema
   autoload :Model, 'schema/model'
+  autoload :Utils, 'schema/utils'
 
   module Parsers
     autoload :Common, 'schema/parsers/common'

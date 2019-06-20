@@ -5,13 +5,9 @@ module Schema
         base.extend ClassMethods
       end
 
-      def self.classify_name(base, name)
-        base + name.gsub(/(^.|_.)/) { |m| m[-1].upcase }
-      end
-
       module ClassMethods
         def has_one(name, options={}, &block)
-          class_name = HasOne.classify_name('SchemaHashOne', name.to_s)
+          class_name = ::Schema::Utils.classify_name('SchemaHashOne', name.to_s)
           kls = Class.new do
             include ::Schema::Model
           end
@@ -20,8 +16,6 @@ module Schema
           end
           const_set(class_name, kls)
           kls.class_eval(&block)
-          const_get(class_name)
-
 
           options = ::Schema::Model.default_attribute_options(name, :has_one)
                       .merge(
@@ -36,10 +30,16 @@ def #{options[:getter]}
 end
 
 def #{options[:setter]}(v)
-  #{options[:instance_variable]} = #{options[:class_name]}.from_hash(v)
+  if v.is_a?(Hash)
+    #{options[:instance_variable]} = #{options[:class_name]}.from_hash(v)
+  elsif ! v.nil?
+    errors.add(#{name.inspect}, :invalid)
+  end
 end
 STR
                     )
+
+          const_get(class_name)
         end
       end
     end

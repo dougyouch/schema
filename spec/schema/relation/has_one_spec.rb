@@ -29,10 +29,31 @@ describe Schema::Relation::HasOne do
     }
   end
   let(:model) { model_class.from_hash(model_data) }
+  let(:parsing_errors) { model.errors }
+  let(:has_parsing_errors) { ! parsing_errors.empty? }
 
   context 'has_one' do
     it 'sets the relation object' do
       expect(model.item.id).to eq(model_data[:item][:id])
+      expect(has_parsing_errors).to eq(false)
+    end
+
+    describe 'incorrect model data' do
+      let(:model_data) { {item: 'not valid'} }
+
+      it 'relationship is nil' do
+        expect(model.item).to eq(nil)
+        expect(has_parsing_errors).to eq(true)
+      end
+    end
+
+    describe 'nil model data' do
+      let(:model_data) { {item: nil} }
+
+      it 'relationship is nil' do
+        expect(model.item).to eq(nil)
+        expect(has_parsing_errors).to eq(false)
+      end
     end
   end
 end
