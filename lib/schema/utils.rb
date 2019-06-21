@@ -12,6 +12,10 @@ module Schema
         include ::Schema::Model
       end
 
+      class_name = classify_name(class_name_prefix, name.to_s)
+      base_schema_class.const_set(class_name, kls)
+      kls = base_schema_class.const_get(class_name)
+
       # make sure additional schema classes use this base class
       kls.schema_base_class = schema_config[:schema_base_class] if schema_config[:schema_base_class]
 
@@ -21,8 +25,6 @@ module Schema
 
       kls.class_eval(&block)
 
-      class_name = classify_name(class_name_prefix, name.to_s)
-      base_schema_class.const_set(class_name, kls)
       return kls, class_name
     end
 
