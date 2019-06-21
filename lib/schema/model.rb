@@ -25,7 +25,9 @@ module Schema
       end
 
       def schema_config
-        {schema_includes: []}.freeze
+        {
+          schema_includes: []
+        }.freeze
       end
 
       def attribute(name, type, options={})
@@ -69,6 +71,16 @@ STR
         config[:schema_includes] = config[:schema_includes] + [mod]
         redefine_class_method(:schema_config, config.freeze)
         include mod
+      end
+
+      def schema_base_class=(kls)
+        config = schema_config.dup
+        config[:schema_base_class] = kls
+        redefine_class_method(:schema_config, config.freeze)
+      end
+
+      def set_schema_base_class_to_superclass
+        self.schema_base_class = superclass
       end
     end
 

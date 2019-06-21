@@ -7,15 +7,7 @@ module Schema
 
       module ClassMethods
         def has_one(name, options={}, &block)
-          class_name = ::Schema::Utils.classify_name('SchemaHashOne', name.to_s)
-          kls = Class.new do
-            include ::Schema::Model
-          end
-          schema_config[:schema_includes].each do |mod|
-            kls.schema_include(mod)
-          end
-          const_set(class_name, kls)
-          kls.class_eval(&block)
+          _, class_name = ::Schema::Utils.create_schema_class(self, 'SchemaHashOne', name, &block)
 
           options = ::Schema::Model.default_attribute_options(name, :has_one)
                       .merge(
@@ -30,7 +22,7 @@ def #{options[:getter]}
 end
 
 def #{options[:setter]}(v)
-  if schema = ::Schema::Utils.create_schema(self, #{options[:class_name]}, #{name.inspect}, v)
+  if schema = ::Schema::Utils.create_schema(self, #{class_name}, #{name.inspect}, v)
     #{options[:instance_variable]} = schema
   end
 end
