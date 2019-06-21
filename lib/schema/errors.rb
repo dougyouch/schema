@@ -6,10 +6,15 @@ module Schema
       @errors = {}
     end
 
+    def [](name)
+      @errors[name] || []
+    end
+
     def add(name, error)
       @errors[name] ||= []
       @errors[name] << error
     end
+    alias []= add
 
     def empty?
       @errors.empty?
