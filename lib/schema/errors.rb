@@ -2,12 +2,14 @@ module Schema
   class Errors
     attr_reader :errors
 
+    EMPTY_ARRAY = [].freeze
+
     def initialize
       @errors = {}
     end
 
     def [](name)
-      @errors[name] || []
+      @errors[name] || EMPTY_ARRAY
     end
 
     def add(name, error)

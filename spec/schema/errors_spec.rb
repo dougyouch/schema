@@ -30,4 +30,28 @@ describe Schema::Errors do
       expect(subject.empty?).to eq(false)
     end
   end
+
+  context '[]' do
+    before(:each) do
+      errors[:name] = :invalid
+    end
+
+    it 'returns an array of errors' do
+      expect(errors[:name]).to eq([:invalid])
+    end
+
+    it 'returns an empty array' do
+      expect(errors[:other].empty?).to eq(true)
+    end
+
+    describe 'additional errors' do
+      before(:each) do
+        errors[:name] = :incompatable
+      end
+
+      it 'returns an array of errors' do
+        expect(errors[:name]).to eq([:invalid, :incompatable])
+      end
+    end
+  end
 end
