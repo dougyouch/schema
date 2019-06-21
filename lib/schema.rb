@@ -8,6 +8,7 @@ module Schema
   end
 
   module Relation
+    autoload :HasMany, 'schema/relation/has_many'
     autoload :HasOne, 'schema/relation/has_one'
   end
 end

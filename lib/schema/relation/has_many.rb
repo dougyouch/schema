@@ -1,15 +1,15 @@
 module Schema
   module Relation
-    module HasOne
+    module HasMany
       def self.included base
         base.extend ClassMethods
       end
 
       module ClassMethods
-        def has_one(name, options={}, &block)
-          _, class_name = ::Schema::Utils.create_schema_class(self, 'SchemaHasOne', name, &block)
+        def has_many(name, options={}, &block)
+          _, class_name = ::Schema::Utils.create_schema_class(self, 'SchemaHasMany', name, &block)
 
-          options = ::Schema::Model.default_attribute_options(name, :has_one)
+          options = ::Schema::Model.default_attribute_options(name, :has_many)
                       .merge(
                         class_name: class_name
                       ).merge(options)
@@ -22,8 +22,8 @@ def #{options[:getter]}
 end
 
 def #{options[:setter]}(v)
-  if schema = ::Schema::Utils.create_schema(self, #{class_name}, #{name.inspect}, v)
-    #{options[:instance_variable]} = schema
+  if schemas = ::Schema::Utils.create_schemas(self, #{class_name}, #{name.inspect}, v)
+    #{options[:instance_variable]} = schemas
   end
 end
 STR
