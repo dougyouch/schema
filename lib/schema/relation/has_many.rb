@@ -22,7 +22,7 @@ def #{options[:getter]}
 end
 
 def #{options[:setter]}(v)
-  if schemas = ::Schema::Utils.create_schemas(self, #{class_name}, #{name.inspect}, v)
+  if schemas = ::Schema::Utils.create_schemas(self, #{options[:class_name]}, #{name.inspect}, v)
     #{options[:instance_variable]} = schemas
   end
 end
