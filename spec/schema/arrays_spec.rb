@@ -25,6 +25,10 @@ describe Schema::Arrays do
       has_many :friends, size: 2 do
         attribute :name, :string, indexes: [5, 7]
         attribute :status, :string, indexes: [6, 8]
+
+        has_one :game do
+          attribute :name, :string, indexes: [10, 11]
+        end
       end
     end
 
@@ -42,7 +46,9 @@ describe Schema::Arrays do
       'Good',
       'Frank',
       'Poor',
-      'Unused Value'
+      'Unused Value',
+      'Pirates',
+      'Swords'
     ]
   end
   let(:model) { model_class.from_array(model_data) }
@@ -58,7 +64,9 @@ describe Schema::Arrays do
     expect(model.company.location.state).to eq('UU')
     expect(model.friends[0].name).to eq('Jimmy')
     expect(model.friends[0].status).to eq('Good')
+    expect(model.friends[0].game.name).to eq('Pirates')
     expect(model.friends[1].name).to eq('Frank')
     expect(model.friends[1].status).to eq('Poor')
+    expect(model.friends[1].game.name).to eq('Swords')
   end
 end
