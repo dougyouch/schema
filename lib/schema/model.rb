@@ -2,7 +2,7 @@ require 'inheritance-helper'
 
 module Schema
   module Model
-    def self.included base
+    def self.included(base)
       base.extend InheritanceHelper::Methods
       base.include Schema::Parsers::Common
       base.extend ClassMethods
