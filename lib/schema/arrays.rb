@@ -42,6 +42,7 @@ module Schema
 
       self.class.schema.each do |_, field_options|
         next unless field_options[:type] == :has_many
+        next unless field_options[:size]
 
         instance_variable_set(
           field_options[:instance_variable],

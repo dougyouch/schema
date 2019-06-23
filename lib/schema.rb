@@ -1,4 +1,5 @@
 module Schema
+  autoload :ArrayHeaders, 'schema/array_headers'
   autoload :Arrays, 'schema/arrays'
   autoload :Errors, 'schema/errors'
   autoload :Model, 'schema/model'
