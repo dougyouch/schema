@@ -20,6 +20,7 @@ describe Schema::ArrayHeaders do
         has_one :location do
           attribute :city, :string, aliases: ['CompanyCity']
           attribute :state, :string, aliases: ['CompanyStateCode']
+          attribute :country, :string, aliases: ['CompanyCountry']
         end
       end
 
@@ -29,6 +30,7 @@ describe Schema::ArrayHeaders do
 
         has_one :game do
           attribute :name, :string, aliases: ['FavoriteGameName']
+          attribute :high_score, :integer, aliases: ['HighScore']
         end
       end
     end
@@ -91,5 +93,11 @@ describe Schema::ArrayHeaders do
     expect(model.friends[2].name).to eq(nil)
     expect(model.friends[2].status).to eq(nil)
     expect(model.friends[2].game.name).to eq('Ninja')
+  end
+
+  context 'get_unmapped_field_names' do
+    it 'returns list of unmapped fields' do
+      expect(subject.class.get_unmapped_field_names).to eq(['unknown', 'CompanyCountry', 'FriendsXHighScore'])
+    end
   end
 end

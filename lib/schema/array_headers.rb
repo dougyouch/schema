@@ -12,8 +12,9 @@ module Schema
 
         schema.each do |field_name, field_options|
           if header_prefix
-            cnt = 1
+            cnt = field_options[:starting_index] || 1
             indexes = []
+            # finding all headers that look like Company1Name through CompanyXName
             while index = headers.index(header_prefix + cnt.to_s + field_options[:key])
               cnt += 1
               indexes << index
@@ -41,6 +42,7 @@ module Schema
 
         schema.each do |field_name, field_options|
           next unless field_options[:type] == :has_many
+          next unless field_options[:header_prefix]
           size = self.const_get(field_options[:class_name]).map_headers_to_attributes(headers, field_options[:header_prefix])
           new_schema[field_name][:size] = size
         end
@@ -48,6 +50,26 @@ module Schema
         redefine_class_method(:schema, new_schema)
 
         max_size
+      end
+
+      def get_unmapped_field_names(header_prefix=nil)
+        unmapped_fields = []
+        schema.each do |field_name, field_options|
+          if field_options[:type] == :has_one
+            unmapped_fields += self.const_get(field_options[:class_name]).get_unmapped_field_names(header_prefix)
+          elsif field_options[:type] == :has_many
+            unmapped_fields += self.const_get(field_options[:class_name]).get_unmapped_field_names(field_options[:header_prefix])
+          else
+            next if field_options[:index] || field_options[:indexes]
+            next if field_options[:alias_of]
+            field_name = field_options[:aliases].first if field_options[:aliases]
+            if header_prefix
+              field_name = header_prefix + 'X' + field_name.to_s
+            end
+            unmapped_fields << field_name.to_s
+          end
+        end
+        unmapped_fields
       end
     end
   end
