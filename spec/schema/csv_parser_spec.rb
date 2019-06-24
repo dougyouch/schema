@@ -1,5 +1,5 @@
 require 'spec_helper'
 
-dssc Schema::CSVParser do
+describe Schema::CSVParser do
   
 end
