@@ -71,6 +71,26 @@ module Schema
         end
         unmapped_fields
       end
+
+      def get_mapped_field_names(header_prefix=nil)
+        mapped_fields = []
+        schema.each do |field_name, field_options|
+          if field_options[:type] == :has_one
+            mapped_fields += self.const_get(field_options[:class_name]).get_mapped_field_names(header_prefix)
+          elsif field_options[:type] == :has_many
+            mapped_fields += self.const_get(field_options[:class_name]).get_mapped_field_names(field_options[:header_prefix])
+          else
+            next if field_options[:alias_of]
+            next unless field_options[:index] || field_options[:indexes]
+            field_name = field_options[:aliases].first if field_options[:aliases]
+            if header_prefix
+              field_name = header_prefix + 'X' + field_name.to_s
+            end
+            mapped_fields << field_name.to_s
+          end
+        end
+        mapped_fields
+      end
     end
   end
 end

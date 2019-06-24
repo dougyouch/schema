@@ -100,4 +100,10 @@ describe Schema::ArrayHeaders do
       expect(subject.class.get_unmapped_field_names).to eq(['unknown', 'CompanyCountry', 'FriendsXHighScore'])
     end
   end
+
+  context 'get_mapped_field_names' do
+    it 'returns list of unmapped fields' do
+      expect(subject.class.get_mapped_field_names).to eq(['ID', 'PersonName', 'CompanyName', 'CompanyCity', 'CompanyStateCode', 'FriendsXName', 'FriendsXStatus', 'FriendsXFavoriteGameName'])
+    end
+  end
 end
