@@ -346,7 +346,7 @@ describe Schema::Parsers::Common do
     end
 
     describe 'string value' do
-      let(:time) { Time.now }
+      let(:time) { Time.new(2020, 1, 20) }
       let(:date) { time.to_date }
       let(:value) { date.to_s }
 
