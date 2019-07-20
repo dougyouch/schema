@@ -3,6 +3,7 @@ module Schema
   autoload :Arrays, 'schema/arrays'
   autoload :CSVParser, 'schema/csv_parser'
   autoload :Errors, 'schema/errors'
+  autoload :CSVParser, 'schema/csv_parser'
   autoload :Model, 'schema/model'
   autoload :Utils, 'schema/utils'
 
