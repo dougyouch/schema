@@ -1,11 +1,13 @@
+# frozen_string_literal: true
+
 require 'time'
 
 module Schema
   module Parsers
     module Common
-      INTEGER_REGEX = /^(?:[1-9]\d*|0)$/
-      FLOAT_REGEX = /^(?:[1-9]\d*|0)(?:\.\d+)?$/
-      BOOLEAN_REGEX = /^(?:1|t|true|on|y|yes)$/i
+      INTEGER_REGEX = /^(?:[1-9]\d*|0)$/.freeze
+      FLOAT_REGEX = /^(?:[1-9]\d*|0)(?:\.\d+)?$/.freeze
+      BOOLEAN_REGEX = /^(?:1|t|true|on|y|yes)$/i.freeze
 
       def parse_integer(field_name, parsing_errors, value)
         case value
@@ -19,9 +21,7 @@ module Schema
             nil
           end
         when Float
-          if (value % 1) > 0.0
-            parsing_errors.add(field_name, :incompatable)
-          end
+          parsing_errors.add(field_name, :incompatable) if (value % 1) > 0.0
           value.to_i
         when nil
           nil
@@ -126,4 +126,3 @@ module Schema
     end
   end
 end
-

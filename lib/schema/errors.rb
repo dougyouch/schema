@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Schema
   class Errors
     attr_reader :errors

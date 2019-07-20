@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'inheritance-helper'
 
 module Schema
@@ -14,8 +16,8 @@ module Schema
         name: name,
         type: type,
         getter: name.to_s.freeze,
-        setter: "#{name}=".freeze,
-        instance_variable: "@#{name}".freeze,
+        setter: "#{name}=",
+        instance_variable: "@#{name}"
       }
     end
 
@@ -30,35 +32,31 @@ module Schema
         }.freeze
       end
 
-      def attribute(name, type, options={})
-        if options.has_key?(:alias)
-          options[:aliases] = [options[:alias]]
-        end
+      def attribute(name, type, options = {})
+        options[:aliases] = [options[:alias]] if options.key?(:alias)
 
         options = ::Schema::Model.default_attribute_options(name, type)
-                    .merge(
-                      parser: "parse_#{type}".freeze
-                    ).merge(options)
+                                 .merge(
+                                   parser: "parse_#{type}"
+                                 ).merge(options)
 
         add_value_to_class_method(:schema, name => options)
 
-        class_eval(<<-STR
-def #{options[:getter]}
-  #{options[:instance_variable]}
-end
-
-def #{options[:setter]}(v)
-  #{options[:instance_variable]} = #{options[:parser]}(#{name.inspect}, parsing_errors, v)
-end
-STR
-        )
-
-        if options[:aliases]
-          options[:aliases].each do |alias_name|
-            add_value_to_class_method(:schema, alias_name.to_sym => options.merge(key: alias_name.to_s, alias_of: name))
-            alias_method(alias_name, options[:getter])
-            alias_method("#{alias_name}=", options[:setter])
+        class_eval(<<~STR
+          def #{options[:getter]}
+            #{options[:instance_variable]}
           end
+
+          def #{options[:setter]}(v)
+            #{options[:instance_variable]} = #{options[:parser]}(#{name.inspect}, parsing_errors, v)
+          end
+        STR
+                  )
+
+        options[:aliases]&.each do |alias_name|
+          add_value_to_class_method(:schema, alias_name.to_sym => options.merge(key: alias_name.to_s, alias_of: name))
+          alias_method(alias_name, options[:getter])
+          alias_method("#{alias_name}=", options[:setter])
         end
       end
 
@@ -86,7 +84,7 @@ STR
 
     def update_attributes(data)
       self.class.schema.each do |field_name, field_options|
-        next if ! data.has_key?(field_options[:key]) && ! data.has_key?(field_name)
+        next if !data.key?(field_options[:key]) && !data.key?(field_name)
 
         public_send(
           field_options[:setter],
@@ -97,13 +95,12 @@ STR
       self
     end
 
-    def as_json(opts={})
-      self.class.schema.inject({}) do |memo, (field_name, field_options)|
+    def as_json(opts = {})
+      self.class.schema.each_with_object({}) do |(field_name, field_options), memo|
         unless field_options[:alias_of]
           value = public_send(field_options[:getter])
-          memo[field_name] = value if ! value.nil? || opts[:include_nils]
+          memo[field_name] = value if !value.nil? || opts[:include_nils]
         end
-        memo
       end
     end
 

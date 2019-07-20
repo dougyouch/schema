@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Schema
   autoload :ArrayHeaders, 'schema/array_headers'
   autoload :Arrays, 'schema/arrays'

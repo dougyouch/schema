@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 module Schema
   module Utils
-    extend self
+    module_function
 
     def classify_name(prefix, name)
       prefix + name.gsub(/[^\da-z_-]/, '').gsub(/(^.|[_|-].)/) { |m| m[-1].upcase }
@@ -25,7 +27,7 @@ module Schema
 
       kls.class_eval(&block)
 
-      return kls, class_name
+      [kls, class_name]
     end
 
     def create_schema(base_schema, schema_class, schema_name, data)
@@ -33,10 +35,8 @@ module Schema
         schema = schema_class.from_hash(data)
         base_schema.parsing_errors.add(schema_name, :invalid) unless schema.parsing_errors.empty?
         schema
-      elsif ! data.nil?
+      elsif !data.nil?
         base_schema.parsing_errors.add(schema_name, :incompatable)
-        nil
-      else
         nil
       end
     end
@@ -44,10 +44,8 @@ module Schema
     def create_schemas(base_schema, schema_class, schema_name, list)
       if list.is_a?(Array)
         list.each_with_index.map { |data, idx| create_schema(base_schema, schema_class, "#{idx}:#{schema_name}", data) }
-      elsif ! list.nil?
+      elsif !list.nil?
         base_schema.parsing_errors.add(schema_name, :incompatable)
-        nil
-      else
         nil
       end
     end

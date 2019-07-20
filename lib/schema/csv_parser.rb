@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 module Schema
   class CSVParser
     include Enumerable
 
-    def initialize(csv, schema_class, headers=nil)
+    def initialize(csv, schema_class, headers = nil)
       @csv = csv
       @schema_class = schema_class
       schema_class.map_headers_to_attributes(headers || csv.shift)

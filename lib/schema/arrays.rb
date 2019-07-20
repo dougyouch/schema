@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Schema
   module Arrays
     def self.included(base)
@@ -10,7 +12,7 @@ module Schema
       end
     end
 
-    def update_attributes_with_array(array, offset=nil)
+    def update_attributes_with_array(array, offset = nil)
       self.class.schema.each do |_, field_options|
         if offset
           next unless field_options[:indexes]
@@ -30,7 +32,7 @@ module Schema
       self
     end
 
-    def update_nested_schemas_from_array(array, current_offset=nil)
+    def update_nested_schemas_from_array(array, current_offset = nil)
       self.class.schema.each do |_, field_options|
         next unless field_options[:type] == :has_one
 
