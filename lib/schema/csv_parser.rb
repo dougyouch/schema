@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module Schema
+  # Schema::CSVParser is used to create schema models from a csv
   class CSVParser
     include Enumerable
 
@@ -15,13 +16,13 @@ module Schema
     end
 
     def shift
-      if row = @csv.shift
+      if (row = @csv.shift)
         @schema_class.from_array(row)
       end
     end
 
     def each
-      while schema = shift
+      while (schema = shift)
         yield schema
       end
     end
