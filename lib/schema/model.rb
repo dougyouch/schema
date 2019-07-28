@@ -69,16 +69,17 @@ module Schema
       end
 
       def add_attribute_methods(name, options)
-        class_eval(<<~STR, __FILE__, __LINE__ + 1
-          def #{options[:getter]}
-            #{options[:instance_variable]}
-          end
+        class_eval(
+          <<~STR, __FILE__, __LINE__ + 1
+            def #{options[:getter]}
+              #{options[:instance_variable]}
+            end
 
-          def #{options[:setter]}(v)
-            #{options[:instance_variable]} = #{options[:parser]}(#{name.inspect}, parsing_errors, v)
-          end
+            def #{options[:setter]}(v)
+              #{options[:instance_variable]} = #{options[:parser]}(#{name.inspect}, parsing_errors, v)
+            end
         STR
-                  )
+        )
       end
 
       def add_aliases(name, options)

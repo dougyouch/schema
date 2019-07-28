@@ -21,18 +21,19 @@ module Schema
 
           add_value_to_class_method(:schema, name => options)
 
-          class_eval(<<~STR, __FILE__, __LINE__ + 1
-            def #{options[:getter]}
-              #{options[:instance_variable]}
-            end
-
-            def #{options[:setter]}(v)
-              if schemas = ::Schema::Utils.create_schemas(self, #{options[:class_name]}, #{name.inspect}, v)
-                #{options[:instance_variable]} = schemas
+          class_eval(
+            <<~STR, __FILE__, __LINE__ + 1
+              def #{options[:getter]}
+                #{options[:instance_variable]}
               end
-            end
+
+              def #{options[:setter]}(v)
+                if schemas = ::Schema::Utils.create_schemas(self, #{options[:class_name]}, #{name.inspect}, v)
+                  #{options[:instance_variable]} = schemas
+                end
+              end
           STR
-                    )
+          )
 
           const_get(class_name)
         end
