@@ -12,7 +12,8 @@ module Schema
       module ClassMethods
         # rubocop:disable Naming/PredicateName
         def has_many(name, options = {}, &block)
-          _, class_name = ::Schema::Utils.create_schema_class(self, 'SchemaHasMany', name, &block)
+          class_name = 'SchemaHasMany' + ::Schema::Utils.classify_name(name.to_s)
+          kls = ::Schema::Utils.create_schema_class(self, class_name, options[:base_class] || Object, &block)
 
           options = ::Schema::Model.default_attribute_options(name, :has_many)
                                    .merge(
@@ -35,7 +36,7 @@ module Schema
           STR
           )
 
-          const_get(class_name)
+          kls
         end
         # rubocop:enable Naming/PredicateName
       end

@@ -5,25 +5,23 @@ module Schema
   module Utils
     module_function
 
-    def classify_name(prefix, name)
-      prefix + name.gsub(/[^\da-z_-]/, '').gsub(/(^.|[_|-].)/) { |m| m[-1].upcase }
+    def classify_name(name)
+      name.gsub(/[^\da-z_-]/, '').gsub(/(^.|[_|-].)/) { |m| m[-1].upcase }
     end
 
-    def create_schema_class(base_schema_class, class_name_prefix, name, &block)
+    def create_schema_class(base_schema_class, class_name, base_class, &block)
       schema_config = base_schema_class.schema_config
-      kls = Class.new(schema_config[:schema_base_class] || Object) do
+      kls = Class.new(base_class) do
         include ::Schema::Model
       end
 
-      class_name = classify_name(class_name_prefix, name.to_s)
       base_schema_class.const_set(class_name, kls)
       kls = base_schema_class.const_get(class_name)
 
-      # make sure additional schema classes use this base class
-      kls.schema_base_class = schema_config[:schema_base_class] if schema_config[:schema_base_class]
-
-      schema_config[:schema_includes].each do |mod|
-        kls.schema_include(mod)
+      if base_class == Object
+        schema_config[:schema_includes].each do |mod|
+          kls.schema_include(mod)
+        end
       end
 
       kls.class_eval(&block)
