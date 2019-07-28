@@ -9,31 +9,52 @@ describe Schema::Arrays do
       schema_include Schema::Relation::HasMany
       schema_include Schema::Arrays
 
-      attribute :id, :integer, index: 0
-      attribute :name, :string, index: 2
+      attribute :id, :integer
+      attribute :name, :string
       attribute :unknown, :string
 
       has_one :company do
-        attribute :name, :string, index: 1
+        attribute :name, :string
 
         has_one :location do
-          attribute :city, :string, index: 4
-          attribute :state, :string, index: 3
+          attribute :city, :string
+          attribute :state, :string
         end
       end
 
-      has_many :friends, size: 2 do
-        attribute :name, :string, indexes: [5, 7]
-        attribute :status, :string, indexes: [6, 8]
+      has_many :friends do
+        attribute :name, :string
+        attribute :status, :string
 
         has_one :game do
-          attribute :name, :string, indexes: [10, 11]
+          attribute :name, :string
         end
       end
     end
 
     Object.const_set(model_class_name, kls)
     Object.const_get(model_class_name)
+  end
+  let(:mapped_headers) do
+    {
+      id: {index: 0},
+      name: {index: 2},
+      company: {
+        name: {index: 1},
+        location: {
+          city: {index: 4},
+          state: {index: 3}
+        }
+      },
+      friends: {
+        __size: 2,
+        name: {indexes: [5, 7]},
+        status: {indexes: [6, 8]},
+        game: {
+          name: {indexes: [10, 11]}
+        }
+      }
+    }
   end
   let(:model_data) do
     [
@@ -51,7 +72,7 @@ describe Schema::Arrays do
       'Swords'
     ]
   end
-  let(:model) { model_class.from_array(model_data) }
+  let(:model) { model_class.from_array(model_data, mapped_headers) }
 
   subject { model }
 
