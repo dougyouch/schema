@@ -1,11 +1,11 @@
 require 'spec_helper'
 
-describe Schema::Relation::HasOne do
+describe Schema::Associations::HasOne do
   let(:model_class_name) { 'ModelClass' + SecureRandom.hex(10) }
   let(:model_class) do
     kls = Class.new do
       include Schema::Model
-      schema_include Schema::Relation::HasOne
+      schema_include Schema::Associations::HasOne
       attribute :name, :string
 
       has_one :item do
@@ -32,7 +32,7 @@ describe Schema::Relation::HasOne do
   let(:has_parsing_errors) { ! parsing_errors.empty? }
 
   context 'has_one' do
-    it 'sets the relation object' do
+    it 'sets the associated object' do
       expect(model.item.id).to eq(model_data[:item][:id])
       expect(has_parsing_errors).to eq(false)
     end
@@ -40,7 +40,7 @@ describe Schema::Relation::HasOne do
     describe 'incorrect model data' do
       let(:model_data) { {item: 'not valid'} }
 
-      it 'relationship is nil' do
+      it 'association is nil' do
         expect(model.item).to eq(nil)
         expect(has_parsing_errors).to eq(true)
       end
@@ -49,7 +49,7 @@ describe Schema::Relation::HasOne do
     describe 'nil model data' do
       let(:model_data) { {item: nil} }
 
-      it 'relationship is nil' do
+      it 'association is nil' do
         expect(model.item).to eq(nil)
         expect(has_parsing_errors).to eq(false)
       end

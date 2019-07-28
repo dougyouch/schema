@@ -15,9 +15,9 @@ module Schema
     autoload :Common, 'schema/parsers/common'
   end
 
-  # Schema::Relation mange the associations between schema models
-  module Relation
-    autoload :HasMany, 'schema/relation/has_many'
-    autoload :HasOne, 'schema/relation/has_one'
+  # Schema::Associations mange the associations between schema models
+  module Associations
+    autoload :HasMany, 'schema/associations/has_many'
+    autoload :HasOne, 'schema/associations/has_one'
   end
 end

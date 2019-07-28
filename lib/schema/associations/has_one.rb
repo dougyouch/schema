@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module Schema
-  module Relation
-    # Schema::Relation::HasOne is used to create a nested schema object
+  module Associations
+    # Schema::Associations::HasOne is used to create a nested schema object
     module HasOne
       def self.included(base)
         base.extend ClassMethods

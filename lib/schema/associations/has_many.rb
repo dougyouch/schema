@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
 module Schema
-  module Relation
-    # Schema::Relation::HasMany is used to create a list nested schema objects
+  module Associations
+    # Schema::Associations::HasMany is used to create a list nested schema objects
     module HasMany
       def self.included(base)
         base.extend ClassMethods

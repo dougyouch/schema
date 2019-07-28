@@ -7,8 +7,8 @@ describe Schema::CSVParser do
   let(:model_class) do
     kls = Class.new do
       include Schema::Model
-      schema_include Schema::Relation::HasOne
-      schema_include Schema::Relation::HasMany
+      schema_include Schema::Associations::HasOne
+      schema_include Schema::Associations::HasMany
       schema_include Schema::ArrayHeaders
       schema_include Schema::Arrays
 

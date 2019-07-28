@@ -1,11 +1,11 @@
 require 'spec_helper'
 
-describe Schema::Relation::HasMany do
+describe Schema::Associations::HasMany do
   let(:model_class_name) { 'ModelClass' + SecureRandom.hex(10) }
   let(:model_class) do
     kls = Class.new do
       include Schema::Model
-      schema_include Schema::Relation::HasMany
+      schema_include Schema::Associations::HasMany
       attribute :name, :string
 
       has_many :items do
@@ -39,7 +39,7 @@ describe Schema::Relation::HasMany do
   let(:has_parsing_errors) { ! parsing_errors.empty? }
 
   context 'has_many' do
-    it 'sets the relation object' do
+    it 'sets the associated object' do
       expect(model.items.size).to eq(2)
       expect(model.items.first.id).to eq(model_data[:items].first[:id])
       expect(model.items.last.id).to eq(model_data[:items].last[:id])
@@ -49,7 +49,7 @@ describe Schema::Relation::HasMany do
     describe 'incorrect model data' do
       let(:model_data) { {items: 'not valid'} }
 
-      it 'relationship is nil' do
+      it 'association is nil' do
         expect(model.items).to eq(nil)
         expect(has_parsing_errors).to eq(true)
       end
@@ -58,7 +58,7 @@ describe Schema::Relation::HasMany do
     describe 'nil model data' do
       let(:model_data) { {items: nil} }
 
-      it 'relationship is nil' do
+      it 'association is nil' do
         expect(model.items).to eq(nil)
         expect(has_parsing_errors).to eq(false)
       end
