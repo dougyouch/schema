@@ -2,12 +2,15 @@
 
 module Schema
   module Relation
+    # Schema::Relation::HasMany is used to create a list nested schema objects
     module HasMany
       def self.included(base)
         base.extend ClassMethods
       end
 
+      # no-doc
       module ClassMethods
+        # rubocop:disable Naming/PredicateName
         def has_many(name, options = {}, &block)
           _, class_name = ::Schema::Utils.create_schema_class(self, 'SchemaHasMany', name, &block)
 
@@ -18,7 +21,7 @@ module Schema
 
           add_value_to_class_method(:schema, name => options)
 
-          class_eval(<<~STR
+          class_eval(<<~STR, __FILE__, __LINE__ + 1
             def #{options[:getter]}
               #{options[:instance_variable]}
             end
@@ -33,6 +36,7 @@ module Schema
 
           const_get(class_name)
         end
+        # rubocop:enable Naming/PredicateName
       end
     end
   end

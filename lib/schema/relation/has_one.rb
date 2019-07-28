@@ -2,12 +2,15 @@
 
 module Schema
   module Relation
+    # Schema::Relation::HasOne is used to create a nested schema object
     module HasOne
       def self.included(base)
         base.extend ClassMethods
       end
 
+      # no-doc
       module ClassMethods
+        # rubocop:disable Naming/PredicateName
         def has_one(name, options = {}, &block)
           _, class_name = ::Schema::Utils.create_schema_class(self, 'SchemaHasOne', name, &block)
 
@@ -18,7 +21,7 @@ module Schema
 
           add_value_to_class_method(:schema, name => options)
 
-          class_eval(<<~STR
+          class_eval(<<~STR, __FILE__, __LINE__ + 1
             def #{options[:getter]}
               #{options[:instance_variable]}
             end
@@ -33,6 +36,7 @@ module Schema
 
           const_get(class_name)
         end
+        # rubocop:enable Naming/PredicateName
       end
     end
   end

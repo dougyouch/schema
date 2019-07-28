@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module Schema
+  # Schema::Utils is a collection of common utility methods used in this gem
   module Utils
     module_function
 

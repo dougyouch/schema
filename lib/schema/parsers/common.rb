@@ -4,11 +4,13 @@ require 'time'
 
 module Schema
   module Parsers
+    # Schema::Parsers::Common are parser methods for basic types
     module Common
       INTEGER_REGEX = /^(?:[1-9]\d*|0)$/.freeze
       FLOAT_REGEX = /^(?:[1-9]\d*|0)(?:\.\d+)?$/.freeze
       BOOLEAN_REGEX = /^(?:1|t|true|on|y|yes)$/i.freeze
 
+      # rubocop:disable Metrics/CyclomaticComplexity
       def parse_integer(field_name, parsing_errors, value)
         case value
         when Integer
@@ -30,6 +32,7 @@ module Schema
           nil
         end
       end
+      # rubocop:enable Metrics/CyclomaticComplexity
 
       def parse_string(field_name, parsing_errors, value)
         case value

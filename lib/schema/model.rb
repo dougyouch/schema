@@ -3,6 +3,7 @@
 require 'inheritance-helper'
 
 module Schema
+  # Schema::Model adds schema building methods to a class
   module Model
     def self.included(base)
       base.extend InheritanceHelper::Methods
@@ -21,6 +22,7 @@ module Schema
       }
     end
 
+    # no-doc
     module ClassMethods
       def schema
         {}.freeze
@@ -41,23 +43,8 @@ module Schema
                                  ).merge(options)
 
         add_value_to_class_method(:schema, name => options)
-
-        class_eval(<<~STR
-          def #{options[:getter]}
-            #{options[:instance_variable]}
-          end
-
-          def #{options[:setter]}(v)
-            #{options[:instance_variable]} = #{options[:parser]}(#{name.inspect}, parsing_errors, v)
-          end
-        STR
-                  )
-
-        options[:aliases]&.each do |alias_name|
-          add_value_to_class_method(:schema, alias_name.to_sym => options.merge(key: alias_name.to_s, alias_of: name))
-          alias_method(alias_name, options[:getter])
-          alias_method("#{alias_name}=", options[:setter])
-        end
+        add_attribute_methods(name, options)
+        add_aliases(name, options)
       end
 
       def from_hash(data)
@@ -79,6 +66,27 @@ module Schema
 
       def set_schema_base_class_to_superclass
         self.schema_base_class = superclass
+      end
+
+      def add_attribute_methods(name, options)
+        class_eval(<<~STR, __FILE__, __LINE__ + 1
+          def #{options[:getter]}
+            #{options[:instance_variable]}
+          end
+
+          def #{options[:setter]}(v)
+            #{options[:instance_variable]} = #{options[:parser]}(#{name.inspect}, parsing_errors, v)
+          end
+        STR
+                  )
+      end
+
+      def add_aliases(name, options)
+        options[:aliases]&.each do |alias_name|
+          add_value_to_class_method(:schema, alias_name.to_sym => options.merge(key: alias_name.to_s, alias_of: name))
+          alias_method(alias_name, options[:getter])
+          alias_method("#{alias_name}=", options[:setter])
+        end
       end
     end
 

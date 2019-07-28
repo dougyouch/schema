@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 module Schema
+  # Schema::Errors used internally for testing mainly, recommend using ActiveModel::Validations
   class Errors
     attr_reader :errors
 
