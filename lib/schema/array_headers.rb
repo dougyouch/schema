@@ -78,10 +78,10 @@ module Schema
         schema.each do |field_name, field_options|
           if header_prefix
             unless (indexes = find_indexes_for_field(headers, field_options, header_prefix)).empty?
-              mapped_headers[field_options[:alias_of] || field_name] = {indexes: indexes}
+              mapped_headers[field_options[:alias_of] || field_name] = { indexes: indexes }
             end
           elsif (index = headers.index(field_options[:key]))
-            mapped_headers[field_options[:alias_of] || field_name] = {index: index}
+            mapped_headers[field_options[:alias_of] || field_name] = { index: index }
           end
         end
         mapped_headers
@@ -100,7 +100,7 @@ module Schema
 
       def largest_number_of_indexes_from_map(mapped_model)
         size = 0
-        mapped_model.each do |name, info|
+        mapped_model.each do |_, info|
           if info[:indexes]
             size = info[:indexes].size if info[:indexes] && info[:indexes].size > size
           else
