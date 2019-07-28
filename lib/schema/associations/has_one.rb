@@ -12,14 +12,8 @@ module Schema
       module ClassMethods
         # rubocop:disable Naming/PredicateName
         def has_one(name, options = {}, &block)
-          class_name = 'SchemaHasOne' + ::Schema::Utils.classify_name(name.to_s)
-          kls = ::Schema::Utils.create_schema_class(self, class_name, options[:base_class] || Object, &block)
-
-          options = ::Schema::Model.default_attribute_options(name, :has_one)
-                                   .merge(
-                                     class_name: class_name
-                                   ).merge(options)
-
+          options = ::Schema::Utils.association_options(name, :has_one, options)
+          kls = ::Schema::Utils.create_schema_class(self, options[:class_name], options[:base_class] || Object, &block)
           add_value_to_class_method(:schema, name => options)
 
           class_eval(

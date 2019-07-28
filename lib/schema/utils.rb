@@ -48,5 +48,10 @@ module Schema
         nil
       end
     end
+
+    def association_options(name, type, options)
+      options[:class_name] ||= 'Schema' + classify_name(type.to_s) + classify_name(name.to_s)
+      ::Schema::Model.default_attribute_options(name, type).merge(options)
+    end
   end
 end
