@@ -28,19 +28,14 @@ module Schema
       def get_field_names(mapped_headers, header_prefix = nil, mapped = true)
         fields = []
         schema.each do |field_name, field_options|
-          if field_options[:type] == :has_one
-            mapped_model = mapped_headers[field_name] || {}
-            fields += const_get(field_options[:class_name]).get_field_names(mapped_model, header_prefix, mapped)
-          elsif field_options[:type] == :has_many
-            mapped_model = mapped_headers[field_name] || {}
-            fields += const_get(field_options[:class_name]).get_field_names(mapped_model, field_options[:header_prefix], mapped)
+          case field_options[:type]
+          when :has_one,
+               :has_many
+            fields += get_model_field_names(field_name, field_options, mapped_headers, header_prefix, mapped)
           else
-            next if field_options[:alias_of]
-            next if mapped == mapped_headers[field_name].nil?
+            next if skip_field?(field_name, field_options, mapped_headers, mapped)
 
-            field_name = field_options[:aliases].first if field_options[:aliases]
-            field_name = header_prefix + 'X' + field_name.to_s if header_prefix
-            fields << field_name.to_s
+            fields << generate_field_name(field_name, field_options, header_prefix)
           end
         end
         fields
@@ -48,11 +43,41 @@ module Schema
 
       private
 
+      def get_model_field_names(field_name, field_options, mapped_headers, header_prefix, mapped)
+        mapped_model = mapped_headers[field_name] || {}
+        const_get(field_options[:class_name]).get_field_names(
+          mapped_model,
+          header_prefix || field_options[:header_prefix],
+          mapped
+        )
+      end
+
+      def skip_field?(field_name, field_options, mapped_headers, mapped)
+        # skip alias fields
+        return true if field_options[:alias_of]
+
+        if mapped
+          mapped_headers[field_name].nil?
+        else
+          !mapped_headers[field_name].nil?
+        end
+      end
+
+      def generate_field_name(field_name, field_options, header_prefix)
+        field_name = field_options[:aliases].first if field_options[:aliases]
+        field_name = header_prefix + 'X' + field_name.to_s if header_prefix
+        field_name.to_s
+      end
+
+      def get_mapped_model(field_options, headers, header_prefix)
+        const_get(field_options[:class_name]).map_headers_to_attributes(headers, header_prefix)
+      end
+
       def map_headers_to_has_one_associations(headers, mapped_headers, header_prefix)
         schema.each do |field_name, field_options|
           next unless field_options[:type] == :has_one
 
-          mapped_model = const_get(field_options[:class_name]).map_headers_to_attributes(headers, header_prefix)
+          mapped_model = get_mapped_model(field_options, headers, header_prefix)
           next if mapped_model.empty?
 
           mapped_headers[field_name] = mapped_model
@@ -65,7 +90,7 @@ module Schema
           next unless field_options[:type] == :has_many
           next unless field_options[:header_prefix]
 
-          mapped_model = const_get(field_options[:class_name]).map_headers_to_attributes(headers, field_options[:header_prefix])
+          mapped_model = get_mapped_model(field_options, headers, field_options[:header_prefix])
           next if mapped_model.empty?
 
           mapped_model[:__size] = largest_number_of_indexes_from_map(mapped_model)
