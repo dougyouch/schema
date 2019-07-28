@@ -93,7 +93,6 @@ module Schema
           mapped_model = get_mapped_model(field_options, headers, field_options[:header_prefix])
           next if mapped_model.empty?
 
-          mapped_model[:__size] = largest_number_of_indexes_from_map(mapped_model)
           mapped_headers[field_name] = mapped_model
         end
         mapped_headers
@@ -121,19 +120,6 @@ module Schema
           indexes << index
         end
         indexes
-      end
-
-      def largest_number_of_indexes_from_map(mapped_model)
-        size = 0
-        mapped_model.each do |_, info|
-          if info[:indexes]
-            size = info[:indexes].size if info[:indexes] && info[:indexes].size > size
-          else
-            new_size = largest_number_of_indexes_from_map(info)
-            size = new_size if new_size > size
-          end
-        end
-        size
       end
     end
   end

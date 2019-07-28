@@ -58,9 +58,11 @@ module Schema
         next unless field_options[:type] == :has_many
         next unless (mapped_model = mapped_headers[field_options[:name]])
 
+        size = largest_number_of_indexes_from_map(mapped_model)
+
         instance_variable_set(
           field_options[:instance_variable],
-          mapped_model[:__size].times.map do |offset|
+          size.times.map do |offset|
             create_schema_with_array(field_options, array, mapped_model, offset)
           end
         )
@@ -69,6 +71,19 @@ module Schema
 
     def create_schema_with_array(field_options, array, mapped_model, offset)
       self.class.const_get(field_options[:class_name]).new.update_attributes_with_array(array, mapped_model, offset)
+    end
+
+    def largest_number_of_indexes_from_map(mapped_model)
+      size = 0
+      mapped_model.each do |_, info|
+        if info[:indexes]
+          size = info[:indexes].size if info[:indexes] && info[:indexes].size > size
+        else
+          new_size = largest_number_of_indexes_from_map(info)
+          size = new_size if new_size > size
+        end
+      end
+      size
     end
   end
 end

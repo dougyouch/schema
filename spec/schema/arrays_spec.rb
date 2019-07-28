@@ -47,7 +47,6 @@ describe Schema::Arrays do
         }
       },
       friends: {
-        __size: 2,
         name: {indexes: [5, 7]},
         status: {indexes: [6, 8]},
         game: {
