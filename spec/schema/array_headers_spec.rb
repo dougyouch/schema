@@ -74,7 +74,8 @@ describe Schema::ArrayHeaders do
       'Ninja'
     ]
   end
-  let(:model) { model_class.from_array(model_data) }
+  let(:mapped_headers) { model_class.map_headers_to_attributes(model_data_headers) }
+  let(:model) { model_class.from_array(model_data, mapped_headers) }
 
   subject { model }
 
@@ -97,13 +98,13 @@ describe Schema::ArrayHeaders do
 
   context 'get_unmapped_field_names' do
     it 'returns list of unmapped fields' do
-      expect(subject.class.get_unmapped_field_names).to eq(['unknown', 'CompanyCountry', 'FriendsXHighScore'])
+      expect(subject.class.get_unmapped_field_names(mapped_headers)).to eq(['unknown', 'CompanyCountry', 'FriendsXHighScore'])
     end
   end
 
   context 'get_mapped_field_names' do
     it 'returns list of unmapped fields' do
-      expect(subject.class.get_mapped_field_names).to eq(['ID', 'PersonName', 'CompanyName', 'CompanyCity', 'CompanyStateCode', 'FriendsXName', 'FriendsXStatus', 'FriendsXFavoriteGameName'])
+      expect(subject.class.get_mapped_field_names(mapped_headers)).to eq(['ID', 'PersonName', 'CompanyName', 'CompanyCity', 'CompanyStateCode', 'FriendsXName', 'FriendsXStatus', 'FriendsXFavoriteGameName'])
     end
   end
 end

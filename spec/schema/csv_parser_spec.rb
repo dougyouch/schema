@@ -37,8 +37,6 @@ describe Schema::CSVParser do
       end
     end
 
-    kls.map_headers_to_attributes(model_data_headers)
-
     Object.const_set(model_class_name, kls)
     Object.const_get(model_class_name)
   end
