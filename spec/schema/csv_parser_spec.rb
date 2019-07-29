@@ -14,6 +14,7 @@ describe Schema::CSVParser do
 
       attribute :id, :integer, aliases: ['ID']
       attribute :name, :string, aliases: ['PersonName']
+      attribute :zip_code, :string, aliases: ['ZipCode']
       attribute :unknown, :string
 
       has_one :company do
@@ -56,6 +57,9 @@ describe Schema::CSVParser do
       'Friends2FavoriteGameName',
       'Friends3FavoriteGameName'
     ]
+  end
+  let(:required_data_headers) do
+    model_data_headers + ['ZipCode'] - ['NotUsed']
   end
   let(:model_data) do
     [
@@ -103,5 +107,13 @@ describe Schema::CSVParser do
     expect(model.friends[2].name).to eq(nil)
     expect(model.friends[2].status).to eq(nil)
     expect(model.friends[2].game.name).to eq('Ninja')
+  end
+
+  context '#missing_fields' do
+    subject { csv_parser.missing_fields(required_data_headers) }
+
+    it 'expects ZipCode to be missing' do
+      expect(subject).to eq(['ZipCode'])
+    end
   end
 end

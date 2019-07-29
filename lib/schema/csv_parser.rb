@@ -8,11 +8,12 @@ module Schema
     def initialize(csv, schema_class, headers = nil)
       @csv = csv
       @schema_class = schema_class
-      @mapped_headers = schema_class.map_headers_to_attributes(headers || csv.shift)
+      @headers = headers || csv.shift
+      @mapped_headers = schema_class.map_headers_to_attributes(@headers)
     end
 
     def missing_fields(required_fields)
-      required_fields - @schema_class.get_mapped_field_names
+      required_fields - get_mapped_headers(@mapped_headers)
     end
 
     def shift
@@ -25,6 +26,20 @@ module Schema
       while (schema = shift)
         yield schema
       end
+    end
+
+    def get_mapped_headers(mapped_headers)
+      indexed_headers = []
+      mapped_headers.each do |_, info|
+        if (index = info[:index])
+          indexed_headers << @headers[index]
+        elsif (indexes = info[:indexes])
+          indexed_headers += indexes.map { |index| @headers[index] }
+        else
+          indexed_headers += get_mapped_headers(info)
+        end
+      end
+      indexed_headers
     end
   end
 end
