@@ -58,16 +58,6 @@ module Schema
         include mod
       end
 
-      def schema_base_class=(kls)
-        config = schema_config.dup
-        config[:schema_base_class] = kls
-        redefine_class_method(:schema_config, config.freeze)
-      end
-
-      def set_schema_base_class_to_superclass
-        self.schema_base_class = superclass
-      end
-
       def add_attribute_methods(name, options)
         class_eval(
           <<~STR, __FILE__, __LINE__ + 1
