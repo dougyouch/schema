@@ -53,5 +53,17 @@ module Schema
       options[:class_name] ||= 'Schema' + classify_name(type.to_s) + classify_name(name.to_s)
       ::Schema::Model.default_attribute_options(name, type).merge(options)
     end
+
+    def add_association_class(base_schema_class, name, type, options, &block)
+      options = ::Schema::Utils.association_options(name, type, options)
+      ::Schema::Utils.create_schema_class(
+        base_schema_class,
+        options[:class_name],
+        options[:base_class] || Object,
+        &block
+      )
+      base_schema_class.add_value_to_class_method(:schema, name => options)
+      options
+    end
   end
 end
