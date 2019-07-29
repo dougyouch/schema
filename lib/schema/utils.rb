@@ -10,23 +10,22 @@ module Schema
     end
 
     def create_schema_class(base_schema_class, class_name, base_class, &block)
-      schema_config = base_schema_class.schema_config
-      kls = Class.new(base_class) do
-        include ::Schema::Model
-      end
-
+      kls = Class.new(base_class)
       base_schema_class.const_set(class_name, kls)
       kls = base_schema_class.const_get(class_name)
 
-      if base_class == Object
-        schema_config[:schema_includes].each do |mod|
-          kls.schema_include(mod)
-        end
+      include_schema_modules(kls, base_schema_class.schema_config) if base_class == Object
+
+      kls.class_eval(&block) if block
+
+      kls
+    end
+
+    def include_schema_modules(kls, schema_config)
+      kls.include ::Schema::Model
+      schema_config[:schema_includes].each do |mod|
+        kls.schema_include(mod)
       end
-
-      kls.class_eval(&block)
-
-      [kls, class_name]
     end
 
     def create_schema(base_schema, schema_class, schema_name, data)
