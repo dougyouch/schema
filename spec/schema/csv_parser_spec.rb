@@ -90,7 +90,7 @@ describe Schema::CSVParser do
   let(:csv_parser) do
     Schema::CSVParser.new(csv, model_class)
   end
-  let(:model) { csv_parser.shift }
+  let(:model) { csv_parser.first }
 
   it 'uses the index values to assign elmeents from the array' do
     expect(model.id).to eq(4)

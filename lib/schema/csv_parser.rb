@@ -34,7 +34,7 @@ module Schema
         if (index = info[:index])
           indexed_headers << @headers[index]
         elsif (indexes = info[:indexes])
-          indexed_headers += indexes.map { |index| @headers[index] }
+          indexed_headers += indexes.map { |i| @headers[i] }
         else
           indexed_headers += get_mapped_headers(info)
         end
