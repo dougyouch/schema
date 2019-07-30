@@ -19,5 +19,6 @@ module Schema
   module Associations
     autoload :HasMany, 'schema/associations/has_many'
     autoload :HasOne, 'schema/associations/has_one'
+    autoload :SchemaCreator, 'schema/associations/schema_creator'
   end
 end
