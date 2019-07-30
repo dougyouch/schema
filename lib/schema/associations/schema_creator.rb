@@ -8,11 +8,20 @@ module Schema
         options = base_schema.class.schema[name]
         @schema_name = name
         @schema_class = base_schema.class.const_get(options[:class_name])
+        @aliases = options[:aliases] || []
+        @type_field = options[:type_field]
+        @external_type_field = options[:external_type_field]
+        @types = options[:types]
+        @ignorecase = !options[:type_ignorecase].nil?
       end
 
       def create_schema(base_schema, data, error_name = nil)
         if data.is_a?(Hash)
-          schema = @schema_class.from_hash(data)
+          unless (schema_class = get_schema_class(base_schema, data))
+            base_schema.parsing_errors.add(error_name || @schema_class, :unknown)
+            return nil
+          end
+          schema = schema_class.from_hash(data)
           base_schema.parsing_errors.add(error_name || @schema_name, :invalid) unless schema.parsing_errors.empty?
           schema
         elsif !data.nil?
@@ -27,6 +36,47 @@ module Schema
         elsif !list.nil?
           base_schema.parsing_errors.add(@schema_name, :incompatable)
           nil
+        end
+      end
+
+      def get_schema_class(base_schema, data)
+        if dynamic?
+          get_dynamic_schema_class(base_schema, data)
+        else
+          @schema_class
+        end
+      end
+
+      def dynamic?
+        !@type_field.nil? || !@external_type_field.nil?
+      end
+
+      def get_dynamic_schema_class(base_schema, data)
+        type = get_dynamic_type(base_schema, data)
+        type = type.to_s.downcase if @ignorecase
+        @types.each do |name, kls|
+          if @ignorecase
+            return kls if name.downcase == type
+          elsif name == type
+            return kls
+          end
+        end
+        nil
+      end
+
+      def get_dynamic_type(base_schema, data)
+        if @type_field
+          type = data[@type_field] || data[@type_field.to_s]
+          return type if type
+
+          @aliases.each do |alias_name|
+            next unless (type = data[alias_name])
+
+            return type
+          end
+          nil
+        elsif @external_type_field
+          base_schema.public_send(@external_type_field)
         end
       end
     end
