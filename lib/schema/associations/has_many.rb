@@ -20,10 +20,12 @@ module Schema
                 #{options[:instance_variable]}
               end
 
+              def #{name}_schema_creator
+                @#{name}_schema_creator ||= ::Schema::Associations::SchemaCreator.new(self, #{name.inspect})
+              end
+
               def #{options[:setter]}(v)
-                if schemas = ::Schema::Utils.create_schemas(self, #{options[:class_name]}, #{name.inspect}, v)
-                  #{options[:instance_variable]} = schemas
-                end
+                #{options[:instance_variable]} = #{name}_schema_creator.create_schemas(self, v)
               end
           STR
           )
