@@ -18,7 +18,7 @@ module Schema
       def create_schema(base_schema, data, error_name = nil)
         if data.is_a?(Hash)
           unless (schema_class = get_schema_class(base_schema, data))
-            base_schema.parsing_errors.add(error_name || @schema_class, :unknown)
+            base_schema.parsing_errors.add(error_name || @schema_name, :unknown)
             return nil
           end
           schema = schema_class.from_hash(data)
@@ -66,18 +66,21 @@ module Schema
 
       def get_dynamic_type(base_schema, data)
         if @type_field
-          type = data[@type_field] || data[@type_field.to_s]
-          return type if type
-
-          @aliases.each do |alias_name|
-            next unless (type = data[alias_name])
-
-            return type
+          type_fields.each do |name|
+            type = data[name]
+            return type if type
           end
           nil
         elsif @external_type_field
           base_schema.public_send(@external_type_field)
         end
+      end
+
+      def type_fields
+        @type_fields ||= [
+          @type_field,
+          @type_field.to_s
+        ] + @aliases
       end
     end
   end

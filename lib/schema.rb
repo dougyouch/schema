@@ -17,6 +17,7 @@ module Schema
 
   # Schema::Associations mange the associations between schema models
   module Associations
+    autoload :DynamicTypes, 'schema/associations/dynamic_types'
     autoload :HasMany, 'schema/associations/has_many'
     autoload :HasOne, 'schema/associations/has_one'
     autoload :SchemaCreator, 'schema/associations/schema_creator'

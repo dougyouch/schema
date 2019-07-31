@@ -9,12 +9,32 @@ module Schema
       name.gsub(/[^\da-z_-]/, '').gsub(/(^.|[_|-].)/) { |m| m[-1].upcase }
     end
 
-    def create_schema_class(base_schema_class, class_name, base_class, &block)
-      kls = Class.new(base_class)
-      base_schema_class.const_set(class_name, kls)
-      kls = base_schema_class.const_get(class_name)
+    def create_schema_class(base_schema_class, name, options, &block)
+      base_schema_class.add_value_to_class_method(:schema, name => options)
+      kls = Class.new(options[:base_class] || Object) do
+        @base_schema_class_name = base_schema_class.name
+        def self.base_schema_class_name
+          @base_schema_class_name
+        end
 
-      include_schema_modules(kls, base_schema_class.schema_config) if base_class == Object
+        def self.base_schema_class
+          Object.const_get(base_schema_class_name)
+        end
+
+        @schema_name = name
+        def self.schema_name
+          @schema_name
+        end
+
+        def self.schema_options
+          base_schema_class.schema[schema_name]
+        end
+      end
+      kls.include ::Schema::Associations::DynamicTypes if options[:type_field] || options[:external_type_field]
+      base_schema_class.const_set(options[:class_name], kls)
+      kls = base_schema_class.const_get(options[:class_name])
+
+      include_schema_modules(kls, base_schema_class.schema_config) unless options[:base_class]
 
       kls.class_eval(&block) if block
 
@@ -35,13 +55,12 @@ module Schema
 
     def add_association_class(base_schema_class, name, type, options, &block)
       options = ::Schema::Utils.association_options(name, type, options)
-      ::Schema::Utils.create_schema_class(
+      kls = ::Schema::Utils.create_schema_class(
         base_schema_class,
-        options[:class_name],
-        options[:base_class] || Object,
+        name,
+        options,
         &block
       )
-      base_schema_class.add_value_to_class_method(:schema, name => options)
       options
     end
   end
