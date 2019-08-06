@@ -6,6 +6,7 @@ gem 'inheritance-helper'
 
 group :development do
   gem 'rubocop'
+  gem 'activemodel'
 end
 
 group :spec do
