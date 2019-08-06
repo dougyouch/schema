@@ -9,6 +9,7 @@ describe Schema::Associations::DynamicTypes do
       include Schema::Model
       schema_include Schema::Associations::HasOne
       attribute :name, :string
+      attribute :type, :string
 
       has_one :item, type_field: :type do
         attribute :id, :integer
@@ -138,6 +139,61 @@ describe Schema::Associations::DynamicTypes do
         it 'creates the dynamic association' do
           expect(subject.item.foo).to eq(foo_value)
         end
+      end
+    end
+  end
+
+  context 'external_type_field option' do
+    before(:each) do
+      schema_options = model_class.schema[:item].dup
+      schema_options.delete(:type_field)
+      schema_options[:external_type_field] = :type
+      model_class.add_value_to_class_method(:schema, item: schema_options)
+    end
+
+    describe 'valid type' do
+      let(:foo_value) { 'value of foo ' + SecureRandom.hex(8) }
+      let(:payload) do
+        {
+          name: 'Name ' + SecureRandom.hex(8),
+          type: 'foo',
+          item: {
+            id: rand(1_000_000),
+            name: 'ItemName ' + SecureRandom.hex(8),
+            foo: foo_value
+          }
+        }
+      end
+
+      subject { model_class.from_hash(payload) }
+
+      it 'creates the dynamic association' do
+        expect(subject.item.foo).to eq(foo_value)
+      end
+    end
+
+    describe 'invalid type' do
+      let(:foo_value) { 'value of foo ' + SecureRandom.hex(8) }
+      let(:payload) do
+        {
+          name: 'Name ' + SecureRandom.hex(8),
+          type: 'invalid',
+          item: {
+            id: rand(1_000_000),
+            name: 'ItemName ' + SecureRandom.hex(8),
+            foo: foo_value
+          }
+        }
+      end
+
+      subject { model_class.from_hash(payload) }
+
+      it 'association is nil when the type is invalid' do
+        expect(subject.item).to eq(nil)
+      end
+
+      it 'parsing_errors unknown item' do
+        expect(subject.parsing_errors[:item]).to eq([:unknown])
       end
     end
   end
