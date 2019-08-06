@@ -1,5 +1,7 @@
 # frozen_string_literal: true
 
+autoload :SchemaValidator, 'schema_validator'
+
 # Schema is a series of tools for transforming data into models
 module Schema
   autoload :ArrayHeaders, 'schema/array_headers'

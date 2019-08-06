@@ -1,6 +1,5 @@
 require 'spec_helper'
 require 'active_model'
-require 'schema_validator'
 
 describe SchemaValidator do
   let(:model_class_name) { 'ModelClass' + SecureRandom.hex(10) }
