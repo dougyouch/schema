@@ -18,14 +18,14 @@ module Schema
       def create_schema(base_schema, data, error_name = nil)
         if data.is_a?(Hash)
           unless (schema_class = get_schema_class(base_schema, data))
-            base_schema.parsing_errors.add(error_name || @schema_name, :unknown)
+            add_parsing_error(base_schema, error_name, :unknown)
             return nil
           end
           schema = schema_class.from_hash(data)
-          base_schema.parsing_errors.add(error_name || @schema_name, :invalid) unless schema.parsing_errors.empty?
+          add_parsing_error(base_schema, error_name, :invalid) unless schema.parsing_errors.empty?
           schema
         elsif !data.nil?
-          base_schema.parsing_errors.add(error_name || @schema_name, :incompatable)
+          add_parsing_error(base_schema, error_name, :incompatable)
           nil
         end
       end
@@ -34,7 +34,7 @@ module Schema
         if list.is_a?(Array)
           list.each_with_index.map { |data, idx| create_schema(base_schema, data, "#{@schema_name}:#{idx}") }
         elsif !list.nil?
-          base_schema.parsing_errors.add(@schema_name, :incompatable)
+          add_parsing_error(base_schema, @schema_name, :incompatable)
           nil
         end
       end
@@ -78,6 +78,10 @@ module Schema
           @type_field,
           @type_field.to_s
         ] + @aliases
+      end
+
+      def add_parsing_error(base_schema, error_name, error_msg)
+        base_schema.parsing_errors.add(error_name || @schema_name, error_msg)
       end
     end
   end
