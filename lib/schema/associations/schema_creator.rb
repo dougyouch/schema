@@ -32,7 +32,7 @@ module Schema
 
       def create_schemas(base_schema, list)
         if list.is_a?(Array)
-          list.each_with_index.map { |data, idx| create_schema(base_schema, data, "#{idx}:#{@schema_name}") }
+          list.each_with_index.map { |data, idx| create_schema(base_schema, data, "#{@schema_name}:#{idx}") }
         elsif !list.nil?
           base_schema.parsing_errors.add(@schema_name, :incompatable)
           nil
