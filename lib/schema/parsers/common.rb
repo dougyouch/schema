@@ -38,7 +38,7 @@ module Schema
         case value
         when String
           value
-        when Hash, Array
+        when ::Hash, ::Array
           parsing_errors.add(field_name, :incompatable)
           nil
         when nil

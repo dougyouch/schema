@@ -12,7 +12,9 @@ module Schema
 
   # Schema::Parsers are used to convert values into the correct data type
   module Parsers
+    autoload :Array, 'schema/parsers/array'
     autoload :Common, 'schema/parsers/common'
+    autoload :Hash, 'schema/parsers/hash'
   end
 
   # Schema::Associations mange the associations between schema models
