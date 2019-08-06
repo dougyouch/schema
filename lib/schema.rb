@@ -15,6 +15,7 @@ module Schema
     autoload :Array, 'schema/parsers/array'
     autoload :Common, 'schema/parsers/common'
     autoload :Hash, 'schema/parsers/hash'
+    autoload :Json, 'schema/parsers/json'
   end
 
   # Schema::Associations mange the associations between schema models
