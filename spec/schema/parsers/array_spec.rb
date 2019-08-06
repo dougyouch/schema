@@ -85,6 +85,19 @@ describe Schema::Parsers::Array do
         it 'returns costs' do
           expect(subject.costs).to eq([1, 4, 2, 6])
         end
+
+        describe 'invalid values' do
+          let(:costs) { 'invalid,4,,6' }
+
+          it 'returns costs' do
+            expect(subject.costs).to eq([nil, 4, nil, 6])
+          end
+
+          it 'has parsing_errors' do
+            expect(subject.parsing_errors['costs:0']).to eq([:invalid])
+            expect(subject.parsing_errors['costs:2']).to eq([:invalid])
+          end
+        end
       end
     end
   end
