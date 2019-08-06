@@ -19,6 +19,14 @@ module Schema
           kls
         end
 
+        def dynamic_types
+          schema_options[:types]
+        end
+
+        def dynamic_type_names
+          dynamic_types.keys
+        end
+
         private
 
         def schema_dynamic_type_class_name(type)

@@ -28,6 +28,14 @@ describe Schema::Associations::DynamicTypes do
     Object.const_get(model_class_name)
   end
 
+  let(:item_class) { model_class.const_get(model_class.schema[:item][:class_name]) }
+
+  context '.dynamic_type_names' do
+    it 'item has 2 types' do
+      expect(item_class.dynamic_type_names).to eq(['foo', 'bar'])
+    end
+  end
+
   context '#add_type' do
     it 'item has 2 types' do
       expect(model_class.schema[:item][:types].keys).to eq(['foo', 'bar'])
