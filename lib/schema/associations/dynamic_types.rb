@@ -11,15 +11,26 @@ module Schema
       # no-doc
       module ClassMethods
         def add_type(type, options = {}, &block)
-          class_name = options[:class_name] || 'AssociationType' + ::Schema::Utils.classify_name(type.to_s)
-          kls = ::Schema::Utils.create_schema_class(self, type, class_name: class_name, base_class: self, &block)
-          schema_options = self.schema_options.dup
+          class_name = options[:class_name] || schema_dynamic_type_class_name(type)
           types = (schema_options[:types] ||= {}).dup
-          types[type] = kls
-          types.freeze
-          schema_options[:types] = types
-          self.base_schema_class.add_value_to_class_method(:schema, self.schema_name => schema_options)
-          kls
+          types[type] = class_name
+
+          ::Schema::Utils.create_schema_class(
+            base_schema_class,
+            schema_name,
+            class_name: class_name,
+            base_class: self,
+            types: types.freeze,
+            &block
+          )
+        end
+
+        private
+
+        def schema_dynamic_type_class_name(type)
+          ::Schema::Utils.classify_name(schema_name.to_s) +
+            'AssociationType' +
+            ::Schema::Utils.classify_name(type.to_s)
         end
       end
     end

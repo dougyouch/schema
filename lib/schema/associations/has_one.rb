@@ -12,7 +12,7 @@ module Schema
       module ClassMethods
         # rubocop:disable Naming/PredicateName
         def has_one(name, options = {}, &block)
-          options = ::Schema::Utils.add_association_class(self, name, :has_one, options, &block)
+          options = ::Schema::Utils.add_association_class(self, name, :has_one, options)
 
           class_eval(
             <<~STR, __FILE__, __LINE__ + 1
@@ -30,7 +30,9 @@ module Schema
           STR
           )
 
-          const_get(options[:class_name])
+          kls = const_get(options[:class_name])
+          kls.class_eval(&block) if block
+          kls
         end
         # rubocop:enable Naming/PredicateName
       end

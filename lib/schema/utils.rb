@@ -9,35 +9,11 @@ module Schema
       name.gsub(/[^\da-z_-]/, '').gsub(/(^.|[_|-].)/) { |m| m[-1].upcase }
     end
 
-    def create_schema_class(base_schema_class, name, options, &block)
-      base_schema_class.add_value_to_class_method(:schema, name => options)
-      kls = Class.new(options[:base_class] || Object) do
-        @base_schema_class_name = base_schema_class.name
-        def self.base_schema_class_name
-          @base_schema_class_name
-        end
-
-        def self.base_schema_class
-          Object.const_get(base_schema_class_name)
-        end
-
-        @schema_name = name
-        def self.schema_name
-          @schema_name
-        end
-
-        def self.schema_options
-          base_schema_class.schema[schema_name]
-        end
-      end
-      kls.include ::Schema::Associations::DynamicTypes if options[:type_field] || options[:external_type_field]
-      base_schema_class.const_set(options[:class_name], kls)
-      kls = base_schema_class.const_get(options[:class_name])
-
+    def create_schema_class(base_schema_class, schema_name, options)
+      base_schema_class.add_value_to_class_method(:schema, schema_name => options)
+      kls = Class.new(options[:base_class] || Object)
+      kls = base_schema_class.const_set(options[:class_name], kls)
       include_schema_modules(kls, base_schema_class.schema_config) unless options[:base_class]
-
-      kls.class_eval(&block) if block
-
       kls
     end
 
@@ -48,20 +24,33 @@ module Schema
       end
     end
 
-    def association_options(name, type, options)
-      options[:class_name] ||= 'Schema' + classify_name(type.to_s) + classify_name(name.to_s)
-      ::Schema::Model.default_attribute_options(name, type).merge(options)
+    def association_options(schema_name, schema_type, options)
+      options[:class_name] ||= 'Schema' + classify_name(schema_type.to_s) + classify_name(schema_name.to_s)
+      ::Schema::Model.default_attribute_options(schema_name, schema_type).merge(options)
     end
 
-    def add_association_class(base_schema_class, name, type, options, &block)
-      options = ::Schema::Utils.association_options(name, type, options)
+    def add_association_class(base_schema_class, schema_name, schema_type, options)
+      options = ::Schema::Utils.association_options(schema_name, schema_type, options)
       kls = ::Schema::Utils.create_schema_class(
         base_schema_class,
-        name,
-        options,
-        &block
+        schema_name,
+        options
       )
+      add_association_defaults(kls, base_schema_class, schema_name)
+      add_association_dynamic_types(kls, options)
       options
+    end
+
+    def add_association_defaults(kls, base_schema_class, schema_name)
+      kls.include ::Schema::Associations::Base
+      kls.base_schema_class = base_schema_class
+      kls.schema_name = schema_name
+    end
+
+    def add_association_dynamic_types(kls, options)
+      return if !options[:type_field] && !options[:external_type_field]
+
+      kls.include ::Schema::Associations::DynamicTypes
     end
   end
 end
