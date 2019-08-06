@@ -53,5 +53,39 @@ describe Schema::Parsers::Array do
         expect(subject.parsing_errors[:costs]).to eq([:incompatable])
       end
     end
+
+    describe 'string value' do
+      let(:costs) { '1,4,2,6' }
+      let(:payload) do
+        {
+          id: rand(1_000_000),
+          name: 'Name ' + SecureRandom.hex(8),
+          costs: costs
+        }
+      end
+
+      subject { model_class.from_hash(payload) }
+
+      it 'returns nil' do
+        expect(subject.costs).to eq(nil)
+      end
+
+      it 'parsing_errors contains incompatable' do
+        expect(subject.parsing_errors[:costs]).to eq([:incompatable])
+      end
+
+      describe 'separator option' do
+        before(:each) do
+          schema_options = model_class.schema[:costs].dup
+          schema_options[:separator] = ','
+          schema_options[:data_type] = :integer
+          model_class.add_value_to_class_method(:schema, costs: schema_options)
+        end
+
+        it 'returns costs' do
+          expect(subject.costs).to eq([1, 4, 2, 6])
+        end
+      end
+    end
   end
 end
