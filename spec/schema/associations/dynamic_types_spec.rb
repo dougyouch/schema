@@ -31,5 +31,114 @@ describe Schema::Associations::DynamicTypes do
     it 'item has 2 types' do
       expect(model_class.schema[:item][:types].keys).to eq(['foo', 'bar'])
     end
+
+    describe 'valid type' do
+      let(:foo_value) { 'value of foo ' + SecureRandom.hex(8) }
+      let(:payload) do
+        {
+          name: 'Name ' + SecureRandom.hex(8),
+          item: {
+            id: rand(1_000_000),
+            name: 'ItemName ' + SecureRandom.hex(8),
+            type: 'foo',
+            foo: foo_value
+          }
+        }
+      end
+
+      subject { model_class.from_hash(payload) }
+
+      it 'creates the dynamic association' do
+        expect(subject.item.foo).to eq(foo_value)
+      end
+    end
+
+    describe 'invalid type' do
+      let(:foo_value) { 'value of foo ' + SecureRandom.hex(8) }
+      let(:payload) do
+        {
+          name: 'Name ' + SecureRandom.hex(8),
+          item: {
+            id: rand(1_000_000),
+            name: 'ItemName ' + SecureRandom.hex(8),
+            type: 'foo2',
+            foo: foo_value
+          }
+        }
+      end
+
+      subject { model_class.from_hash(payload) }
+
+      it 'association is nil when the type is invalid' do
+        expect(subject.item).to eq(nil)
+      end
+
+      it 'parsing_errors unknown item' do
+        expect(subject.parsing_errors[:item]).to eq([:unknown])
+      end
+    end
+
+    describe 'valid type unknown fields' do
+      let(:foo_value) { 'value of foo ' + SecureRandom.hex(8) }
+      let(:payload) do
+        {
+          name: 'Name ' + SecureRandom.hex(8),
+          item: {
+            id: rand(1_000_000),
+            name: 'ItemName ' + SecureRandom.hex(8),
+            type: 'bar',
+            foo: foo_value
+          }
+        }
+      end
+
+      subject { model_class.from_hash(payload) }
+
+      it 'creates the dynamic association' do
+        expect(subject.item.bar).to eq(nil)
+      end
+
+      xit 'parsing_errors unknown_attribute' do
+        expect(subject.parsing_errors[:item]).to eq([:unknown_attribute])
+        expect(subject.item.parsing_errors[:foo]).to eq([:unknown])
+      end
+    end
+
+    describe 'valid type upcased' do
+      let(:foo_value) { 'value of foo ' + SecureRandom.hex(8) }
+      let(:payload) do
+        {
+          name: 'Name ' + SecureRandom.hex(8),
+          item: {
+            id: rand(1_000_000),
+            name: 'ItemName ' + SecureRandom.hex(8),
+            type: 'FOO',
+            foo: foo_value
+          }
+        }
+      end
+
+      subject { model_class.from_hash(payload) }
+
+      it 'association is nil when the type is invalid' do
+        expect(subject.item).to eq(nil)
+      end
+
+      it 'parsing_errors unknown item' do
+        expect(subject.parsing_errors[:item]).to eq([:unknown])
+      end
+
+      describe 'with type_ignorecase flag' do
+        before(:each) do
+          schema_options = model_class.schema[:item].dup
+          schema_options[:type_ignorecase] = true
+          model_class.add_value_to_class_method(:schema, item: schema_options)
+        end
+
+        it 'creates the dynamic association' do
+          expect(subject.item.foo).to eq(foo_value)
+        end
+      end
+    end
   end
 end

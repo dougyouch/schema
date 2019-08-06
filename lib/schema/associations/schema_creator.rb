@@ -55,11 +55,8 @@ module Schema
         type = get_dynamic_type(base_schema, data)
         type = type.to_s.downcase if @ignorecase
         @types.each do |name, class_name|
-          if @ignorecase
-            return base_schema.const_get(class_name) if name.downcase == type
-          elsif name == type
-            return base_schema.const_get(class_name)
-          end
+          name = name.downcase if @ignorecase
+          return base_schema.class.const_get(class_name) if name == type
         end
         nil
       end
