@@ -5,8 +5,8 @@ source 'http://rubygems.org'
 gem 'inheritance-helper'
 
 group :development do
-  gem 'rubocop'
   gem 'activemodel'
+  gem 'rubocop'
 end
 
 group :spec do
