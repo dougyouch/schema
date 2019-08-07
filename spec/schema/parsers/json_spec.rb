@@ -54,5 +54,26 @@ describe Schema::Parsers::Json do
         expect(subject.parsing_errors[:costs]).to eq([:invalid])
       end
     end
+
+    describe 'incompatable payload' do
+      let(:costs) { 1_000_000 }
+      let(:payload) do
+        {
+          id: rand(1_000_000),
+          name: 'Name ' + SecureRandom.hex(8),
+          costs: costs
+        }
+      end
+
+      subject { model_class.from_hash(payload) }
+
+      it 'returns nil' do
+        expect(subject.costs).to eq(nil)
+      end
+
+      it 'parsing_errors contains incompatable' do
+        expect(subject.parsing_errors[:costs]).to eq([:incompatable])
+      end
+    end
   end
 end
