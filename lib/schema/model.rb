@@ -94,7 +94,7 @@ module Schema
       schema = get_schema(data)
       data.each do |key, value|
         unless schema.key?(key)
-          parsing_errors.add(key, :unknown_attribute)
+          parsing_errors.add(key, 'unknown_attribute')
           next
         end
 
