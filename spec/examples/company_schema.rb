@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Example that show cases multiple features
 class CompanySchema
   # changes the class to a schema model, adds the attribute method and includes common types
@@ -5,6 +7,9 @@ class CompanySchema
 
   # includes ActiveModel::Validations and changes parsing_errors to ActiveModel::Errors
   include Schema::ActiveModelValidations
+
+  # schema_include is used to add include(s) to associated schemas,
+  # keeps you from having to re-add same includes for every has_one or has_many
 
   # adds nested schemas
   schema_include Schema::Associations::HasOne
@@ -16,8 +21,10 @@ class CompanySchema
   # adds the hash attribute
   schema_include Schema::Parsers::Hash
 
-  attribute :name, :string
-  attribute :industry_type, :string
+  # add common attributes
+  # attributes support additional names through the alias(es) option
+  attribute :name, :string, alias: 'CompanyName'
+  attribute :industry_type, :string, aliases: %w[IndustryType industry]
 
   # will take a string split on the separator and use the parse_<data_type> method on every element
   # basically take a list of comma separated numbers and create an array of integers
@@ -77,11 +84,11 @@ class CompanySchema
     add_type(:default)
 
     # dynamic_type_names returns all the types used, except for :default
-    validates :type, inclusion: {in: dynamic_type_names}
+    validates :type, inclusion: { in: dynamic_type_names }
   end
 
   validates :name, presence: true
-  validates :industry_type, inclusion: {in: industry_assoc.dynamic_type_names}
+  validates :industry_type, inclusion: { in: industry_assoc.dynamic_type_names }
 
   # use the schema validator
   validates :industry, presence: true, schema: true

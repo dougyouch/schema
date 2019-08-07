@@ -1,6 +1,6 @@
 {
-  "name": "Good Burger",
-  "industry_type": "qsr",
+  "CompanyName": "Good Burger",
+  "IndustryType": "qsr",
   "industry": {
     "name": "Food & Beverage",
     "number_of_locations": 2
