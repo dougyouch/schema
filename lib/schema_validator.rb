@@ -11,6 +11,12 @@ class SchemaValidator < ActiveModel::EachValidator
   def valid_schema?(value)
     return true unless value
 
-    value.is_a?(Array) ? value.all?(:valid?) : value.valid?
+    if value.is_a?(Array)
+      value.all? do |schema|
+        !schema || schema.valid?
+      end
+    else
+      value.valid?
+    end
   end
 end

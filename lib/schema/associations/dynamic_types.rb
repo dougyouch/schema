@@ -24,7 +24,7 @@ module Schema
         end
 
         def dynamic_type_names
-          dynamic_types.keys
+          dynamic_types.keys - [:default]
         end
 
         private

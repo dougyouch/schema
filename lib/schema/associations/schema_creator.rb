@@ -58,7 +58,13 @@ module Schema
           name = name.downcase if @ignorecase
           return base_schema.class.const_get(class_name) if name == type
         end
-        nil
+        get_default_dynamic_schema_class(base_schema)
+      end
+
+      def get_default_dynamic_schema_class(base_schema)
+        return unless (class_name = @types[:default])
+
+        base_schema.class.const_get(class_name)
       end
 
       def get_dynamic_type(base_schema, data)
