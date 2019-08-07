@@ -28,6 +28,15 @@ module Schema
         {}.freeze
       end
 
+      def schema_with_string_keys
+        @schema_with_string_keys ||=
+          begin
+            hsh = {}
+            schema.each { |field_name, field_options| hsh[field_name.to_s] = field_options }
+            hsh.freeze
+          end
+      end
+
       def schema_config
         {
           schema_includes: []
@@ -82,13 +91,14 @@ module Schema
     end
 
     def update_attributes(data)
-      self.class.schema.each do |field_name, field_options|
-        next if !data.key?(field_options[:key]) && !data.key?(field_name)
+      schema = get_schema(data)
+      data.each do |key, value|
+        unless schema.key?(key)
+          parsing_errors.add(key, :unknown_attribute)
+          next
+        end
 
-        public_send(
-          field_options[:setter],
-          data[field_options[:key]] || data[field_name.to_sym]
-        )
+        public_send(schema[key][:setter], value)
       end
 
       self
@@ -110,6 +120,15 @@ module Schema
 
     def parsing_errors
       @parsing_errors ||= ::Schema::Errors.new
+    end
+
+    def get_schema(data)
+      data.each_key do |key|
+        break unless key.is_a?(Symbol)
+
+        return self.class.schema
+      end
+      self.class.schema_with_string_keys
     end
   end
 end

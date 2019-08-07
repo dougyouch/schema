@@ -107,9 +107,9 @@ describe Schema::Associations::DynamicTypes do
         expect(subject.item.bar).to eq(nil)
       end
 
-      xit 'parsing_errors unknown_attribute' do
-        expect(subject.parsing_errors[:item]).to eq([:unknown_attribute])
-        expect(subject.item.parsing_errors[:foo]).to eq([:unknown])
+      it 'parsing_errors unknown_attribute' do
+        expect(subject.parsing_errors[:item]).to eq([:invalid])
+        expect(subject.item.parsing_errors[:foo]).to eq([:unknown_attribute])
       end
     end
 
