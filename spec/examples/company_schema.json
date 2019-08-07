@@ -1,0 +1,35 @@
+{
+  "name": "Good Burger",
+  "industry_type": "qsr",
+  "industry": {
+    "name": "Food & Beverage",
+    "number_of_locations": 2
+  },
+  "locations": [
+    {
+      "type": "headquarters",
+      "city": "Boston",
+      "main_floor": 5
+    },
+    {
+      "type": "store_front",
+      "address": "1st Ave",
+      "zip": "02211",
+      "main_entrance": "side door"
+    }
+  ],
+  "employees": [
+    {
+      "type": 2,
+      "name": "Queen Bee",
+      "start_date": "2016-01-09",
+      "rank": "0.9"
+    },
+    {
+      "type": 1,
+      "name": "Worker Bee",
+      "start_date": "2018-05-10",
+      "manager_name": "Queen Bee"
+    }
+  ]
+}
