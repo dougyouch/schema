@@ -12,11 +12,11 @@ module Schema
           begin
             ::JSON.parse(value)
           rescue ::JSON::ParserError
-            parsing_errors.add(field_name, :invalid)
+            parsing_errors.add(field_name, ::Schema::ParsingErrors::INVALID)
             nil
           end
         else
-          parsing_errors.add(field_name, :incompatable)
+          parsing_errors.add(field_name, ::Schema::ParsingErrors::INCOMPATABLE)
           nil
         end
       end

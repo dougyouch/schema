@@ -50,7 +50,7 @@ describe Schema::Parsers::Hash do
       end
 
       it 'parsing_errors contains incompatable' do
-        expect(subject.parsing_errors[:costs]).to eq([:incompatable])
+        expect(subject.parsing_errors[:costs]).to eq([Schema::ParsingErrors::INCOMPATABLE])
       end
     end
   end

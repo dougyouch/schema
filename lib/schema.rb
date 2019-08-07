@@ -10,6 +10,7 @@ module Schema
   autoload :Errors, 'schema/errors'
   autoload :CSVParser, 'schema/csv_parser'
   autoload :Model, 'schema/model'
+  autoload :ParsingErrors, 'schema/parsing_errors'
   autoload :Utils, 'schema/utils'
 
   # Schema::Parsers are used to convert values into the correct data type

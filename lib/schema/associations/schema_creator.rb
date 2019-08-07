@@ -4,6 +4,8 @@ module Schema
   module Associations
     # Schema::Associations::SchemaCreator is used to create schema objects for associations
     class SchemaCreator
+      include ::Schema::ParsingErrors
+
       def initialize(base_schema, name)
         options = base_schema.class.schema[name]
         @schema_name = name
@@ -16,14 +18,14 @@ module Schema
       def create_schema(base_schema, data, error_name = nil)
         if data.is_a?(Hash)
           unless (schema_class = get_schema_class(base_schema, data))
-            add_parsing_error(base_schema, error_name, :unknown)
+            add_parsing_error(base_schema, error_name, UNKNOWN)
             return nil
           end
           schema = schema_class.from_hash(data)
-          add_parsing_error(base_schema, error_name, :invalid) unless schema.parsing_errors.empty?
+          add_parsing_error(base_schema, error_name, INVALID) unless schema.parsing_errors.empty?
           schema
         elsif !data.nil?
-          add_parsing_error(base_schema, error_name, :incompatable)
+          add_parsing_error(base_schema, error_name, INCOMPATABLE)
           nil
         end
       end
@@ -32,7 +34,7 @@ module Schema
         if list.is_a?(Array)
           list.each_with_index.map { |data, idx| create_schema(base_schema, data, "#{@schema_name}:#{idx}") }
         elsif !list.nil?
-          add_parsing_error(base_schema, @schema_name, :incompatable)
+          add_parsing_error(base_schema, @schema_name, INCOMPATABLE)
           nil
         end
       end

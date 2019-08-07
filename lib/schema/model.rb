@@ -94,7 +94,7 @@ module Schema
       schema = get_schema(data)
       data.each do |key, value|
         unless schema.key?(key)
-          parsing_errors.add(key, 'unknown_attribute')
+          parsing_errors.add(key, ::Schema::ParsingErrors::UNKNOWN_ATTRIBUTE)
           next
         end
 
@@ -119,7 +119,7 @@ module Schema
     alias to_h to_hash
 
     def parsing_errors
-      @parsing_errors ||= ::Schema::Errors.new
+      @parsing_errors ||= Errors.new
     end
 
     def get_schema(data)

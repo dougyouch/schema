@@ -98,7 +98,7 @@ describe 'dynamic has many' do
     end
 
     it 'parsing_errors unknown item with index' do
-      expect(subject.parsing_errors['items:1']).to eq([:unknown])
+      expect(subject.parsing_errors['items:1']).to eq([Schema::ParsingErrors::UNKNOWN])
     end
   end
 end

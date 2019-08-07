@@ -19,16 +19,16 @@ module Schema
           if INTEGER_REGEX.match?(value)
             Integer(value)
           else
-            parsing_errors.add(field_name, :invalid)
+            parsing_errors.add(field_name, ::Schema::ParsingErrors::INVALID)
             nil
           end
         when Float
-          parsing_errors.add(field_name, :incompatable) if (value % 1) > 0.0
+          parsing_errors.add(field_name, ::Schema::ParsingErrors::INCOMPATABLE) if (value % 1) > 0.0
           value.to_i
         when nil
           nil
         else
-          parsing_errors.add(field_name, :unhandled_type)
+          parsing_errors.add(field_name, ::Schema::ParsingErrors::UNHANDLED_TYPE)
           nil
         end
       end
@@ -39,7 +39,7 @@ module Schema
         when String
           value
         when ::Hash, ::Array
-          parsing_errors.add(field_name, :incompatable)
+          parsing_errors.add(field_name, ::Schema::ParsingErrors::INCOMPATABLE)
           nil
         when nil
           nil
@@ -58,13 +58,13 @@ module Schema
           if FLOAT_REGEX.match?(value)
             Float(value)
           else
-            parsing_errors.add(field_name, :invalid)
+            parsing_errors.add(field_name, ::Schema::ParsingErrors::INVALID)
             nil
           end
         when nil
           nil
         else
-          parsing_errors.add(field_name, :unhandled_type)
+          parsing_errors.add(field_name, ::Schema::ParsingErrors::UNHANDLED_TYPE)
           nil
         end
       end
@@ -79,13 +79,13 @@ module Schema
           begin
             Time.xmlschema(value)
           rescue ArgumentError
-            parsing_errors.add(field_name, :invalid)
+            parsing_errors.add(field_name, ::Schema::ParsingErrors::INVALID)
             nil
           end
         when nil
           nil
         else
-          parsing_errors.add(field_name, :unhandled_type)
+          parsing_errors.add(field_name, ::Schema::ParsingErrors::UNHANDLED_TYPE)
           nil
         end
       end
@@ -100,13 +100,13 @@ module Schema
           begin
             Date.parse(value)
           rescue ArgumentError
-            parsing_errors.add(field_name, :invalid)
+            parsing_errors.add(field_name, ::Schema::ParsingErrors::INVALID)
             nil
           end
         when nil
           nil
         else
-          parsing_errors.add(field_name, :unhandled_type)
+          parsing_errors.add(field_name, ::Schema::ParsingErrors::UNHANDLED_TYPE)
           nil
         end
       end
@@ -122,7 +122,7 @@ module Schema
         when nil
           nil
         else
-          parsing_errors.add(field_name, :unhandled_type)
+          parsing_errors.add(field_name, ::Schema::ParsingErrors::UNHANDLED_TYPE)
           nil
         end
       end

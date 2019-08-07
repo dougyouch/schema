@@ -83,7 +83,7 @@ describe Schema::Associations::DynamicTypes do
       end
 
       it 'parsing_errors unknown item' do
-        expect(subject.parsing_errors[:item]).to eq([:unknown])
+        expect(subject.parsing_errors[:item]).to eq([Schema::ParsingErrors::UNKNOWN])
       end
     end
 
@@ -108,8 +108,8 @@ describe Schema::Associations::DynamicTypes do
       end
 
       it 'parsing_errors unknown_attribute' do
-        expect(subject.parsing_errors[:item]).to eq([:invalid])
-        expect(subject.item.parsing_errors[:foo]).to eq(['unknown_attribute'])
+        expect(subject.parsing_errors[:item]).to eq([Schema::ParsingErrors::INVALID])
+        expect(subject.item.parsing_errors[:foo]).to eq([Schema::ParsingErrors::UNKNOWN_ATTRIBUTE])
       end
     end
 
@@ -134,7 +134,7 @@ describe Schema::Associations::DynamicTypes do
       end
 
       it 'parsing_errors unknown item' do
-        expect(subject.parsing_errors[:item]).to eq([:unknown])
+        expect(subject.parsing_errors[:item]).to eq([Schema::ParsingErrors::UNKNOWN])
       end
 
       describe 'with type_ignorecase flag' do
@@ -201,7 +201,7 @@ describe Schema::Associations::DynamicTypes do
       end
 
       it 'parsing_errors unknown item' do
-        expect(subject.parsing_errors[:item]).to eq([:unknown])
+        expect(subject.parsing_errors[:item]).to eq([Schema::ParsingErrors::UNKNOWN])
       end
     end
   end

@@ -51,7 +51,7 @@ describe Schema::Parsers::Json do
       end
 
       it 'parsing_errors contains incompatable' do
-        expect(subject.parsing_errors[:costs]).to eq([:invalid])
+        expect(subject.parsing_errors[:costs]).to eq([Schema::ParsingErrors::INVALID])
       end
     end
 
@@ -72,7 +72,7 @@ describe Schema::Parsers::Json do
       end
 
       it 'parsing_errors contains incompatable' do
-        expect(subject.parsing_errors[:costs]).to eq([:incompatable])
+        expect(subject.parsing_errors[:costs]).to eq([Schema::ParsingErrors::INCOMPATABLE])
       end
     end
   end

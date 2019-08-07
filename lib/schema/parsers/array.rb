@@ -14,10 +14,10 @@ module Schema
             return data
           end
 
-          parsing_errors.add(field_name, :incompatable)
+          parsing_errors.add(field_name, ::Schema::ParsingErrors::INCOMPATABLE)
           nil
         else
-          parsing_errors.add(field_name, :incompatable)
+          parsing_errors.add(field_name, ::Schema::ParsingErrors::INCOMPATABLE)
           nil
         end
       end
