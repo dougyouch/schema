@@ -7,7 +7,8 @@ module Schema
       def parse_array(field_name, parsing_errors, value)
         case value
         when ::Array
-          value
+          schema_options = self.class.schema[field_name]
+          Array.convert_array_values(self, field_name, parsing_errors, value, schema_options)
         when String
           schema_options = self.class.schema[field_name]
           if (data = Array.parse_string_array(self, field_name, parsing_errors, value, schema_options))
