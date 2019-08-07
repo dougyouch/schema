@@ -4,6 +4,7 @@ autoload :SchemaValidator, 'schema_validator'
 
 # Schema is a series of tools for transforming data into models
 module Schema
+  autoload :ActiveModelValidations, 'schema/active_model_validations'
   autoload :ArrayHeaders, 'schema/array_headers'
   autoload :Arrays, 'schema/arrays'
   autoload :CSVParser, 'schema/csv_parser'

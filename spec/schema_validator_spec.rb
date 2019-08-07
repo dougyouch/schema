@@ -7,7 +7,7 @@ describe SchemaValidator do
     kls = Class.new do
       include Schema::Model
       schema_include Schema::Associations::HasOne
-      schema_include ActiveModel::Validations
+      include Schema::ActiveModelValidations
 
       attribute :name, :string
 
