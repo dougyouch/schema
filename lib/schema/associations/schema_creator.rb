@@ -8,11 +8,9 @@ module Schema
         options = base_schema.class.schema[name]
         @schema_name = name
         @schema_class = base_schema.class.const_get(options[:class_name])
-        @aliases = options[:aliases] || []
-        @type_field = options[:type_field]
-        @external_type_field = options[:external_type_field]
-        @types = options[:types]
-        @ignorecase = !options[:type_ignorecase].nil?
+        @aliases = options.fetch(:aliases, [])
+        @ignorecase = options[:type_ignorecase]
+        configure_dynamic_schema_options(options)
       end
 
       def create_schema(base_schema, data, error_name = nil)
@@ -82,6 +80,12 @@ module Schema
 
       def add_parsing_error(base_schema, error_name, error_msg)
         base_schema.parsing_errors.add(error_name || @schema_name, error_msg)
+      end
+
+      def configure_dynamic_schema_options(options)
+        @type_field = options[:type_field]
+        @external_type_field = options[:external_type_field]
+        @types = options[:types]
       end
     end
   end
