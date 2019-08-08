@@ -12,8 +12,7 @@ Attributes are automatically transformed into there correct type.
 
 #### Example that show cases multiple features
 
-###### CompanySchema
-
+###### spec/examples/company_schema.rb
 ```ruby
 # frozen_string_literal: true
 
@@ -114,9 +113,8 @@ class CompanySchema
 end
 ```
 
-###### Example JSON payload
-
-```json
+###### spec/examples/company_schema.json
+```javascript
 {
   "CompanyName": "Good Burger",
   "IndustryType": "qsr",

@@ -19,3 +19,4 @@ end
 $LOAD_PATH.unshift(File.join(__dir__, '..', 'lib'))
 $LOAD_PATH.unshift(__dir__)
 require 'schema'
+require 'support/readme_updater'
