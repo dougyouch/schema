@@ -16,6 +16,7 @@ module Schema
 
   # Schema::Parsers are used to convert values into the correct data type
   module Parsers
+    autoload :American, 'schema/parsers/american'
     autoload :Array, 'schema/parsers/array'
     autoload :Common, 'schema/parsers/common'
     autoload :Hash, 'schema/parsers/hash'
