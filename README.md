@@ -6,9 +6,11 @@ Fast and easy way to transform data into models for validation and type safety.
 [![Maintainability](https://api.codeclimate.com/v1/badges/c142d46a7a37d4a8c2e5/maintainability)](https://codeclimate.com/github/dougyouch/schema/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/c142d46a7a37d4a8c2e5/test_coverage)](https://codeclimate.com/github/dougyouch/schema/test_coverage)
 
-Hashes can come from JSON.  And each row of a CSV can be transformed into a model as it is parsed.
+Attributes of a model have a name and type.  Any value passed in goes through a parser method.  If the value can not be parsed successfully the error is added to parsing_errors.
 
-Attributes are automatically transformed into there correct type.
+Associations are nested schema models.  Each association can have its own set of attributes.
+
+Dynamic associations are useful when creating custom logic around schema validation.
 
 #### Example that show cases multiple features
 
