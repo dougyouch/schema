@@ -19,6 +19,10 @@ module Schema
           kls
         end
 
+        def default_type(options = {}, &block)
+          add_type(:default, options, &block)
+        end
+
         def dynamic_types
           schema_options[:types]
         end

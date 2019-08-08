@@ -1,6 +1,6 @@
 # schema
 
-Fast and easy way to transform hashes or arrays into models.
+Fast and easy way to transform data into models for validation and type safety.
 
 [![Build Status](https://travis-ci.org/dougyouch/schema.svg?branch=master)](https://travis-ci.org/dougyouch/schema)
 [![Maintainability](https://api.codeclimate.com/v1/badges/c142d46a7a37d4a8c2e5/maintainability)](https://codeclimate.com/github/dougyouch/schema/maintainability)
@@ -47,7 +47,8 @@ class CompanySchema
   # code snippet: str.split(',').map { |v| parse_integer(field_name, parsing_errors, v) }
   attribute :number_list, :array, separator: ',', data_type: :integer
 
-  industry_assoc = has_one(:industry, external_type_field: :industry_type) do
+  # creates a nested dynamic schema based on the industry_type which is part of the main company data
+  industry_schema = has_one(:industry, external_type_field: :industry_type) do
     attribute :name, :string
 
     validates :name, presence: true
@@ -64,6 +65,7 @@ class CompanySchema
     end
   end
 
+  # create multiple dynamic location schemas based on the type field in the location data
   has_many(:locations, type_field: :type) do
     attribute :type, :string
     attribute :address, :string
@@ -86,6 +88,7 @@ class CompanySchema
     end
   end
 
+  # create multiple dynamic employee schemas based on the type field in the employee data
   has_many(:employees, type_field: :type) do
     attribute :type, :integer
     attribute :name, :string
@@ -96,15 +99,16 @@ class CompanySchema
     add_type(2) do # manager
       attribute :rank, :float
     end
-    # if no or invalid type is specified
-    add_type(:default)
+    # if no or an invalid type is specified, create a default employee schema object
+    # useful for communicating errors in an API
+    default_type
 
     # dynamic_type_names returns all the types used, except for :default
     validates :type, inclusion: { in: dynamic_type_names }
   end
 
   validates :name, presence: true
-  validates :industry_type, inclusion: { in: industry_assoc.dynamic_type_names }
+  validates :industry_type, inclusion: { in: industry_schema.dynamic_type_names }
 
   # use the schema validator
   validates :industry, presence: true, schema: true
