@@ -53,4 +53,3 @@ module Schema
     end
   end
 end
-
