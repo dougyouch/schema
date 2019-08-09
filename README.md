@@ -20,24 +20,7 @@ Dynamic associations are useful when creating custom logic around schema validat
 
 # Example that show cases multiple features
 class CompanySchema
-  # changes the class to a schema model, adds the attribute method and includes common types
-  include Schema::Model
-
-  # includes ActiveModel::Validations and changes parsing_errors to ActiveModel::Errors
-  include Schema::ActiveModelValidations
-
-  # schema_include is used to add include(s) to associated schemas,
-  # keeps you from having to re-add same includes for every has_one or has_many
-
-  # adds nested schemas
-  schema_include Schema::Associations::HasOne
-  schema_include Schema::Associations::HasMany
-
-  # adds the array attribute
-  schema_include Schema::Parsers::Array
-
-  # adds the hash attribute
-  schema_include Schema::Parsers::Hash
+  include Schema::All
 
   # add common attributes
   # attributes support additional names through the alias(es) option
