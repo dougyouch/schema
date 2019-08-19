@@ -30,9 +30,7 @@ module Schema
         schema.each do |field_name, field_options|
           next if field_options[:alias_of]
 
-          case field_options[:type]
-          when :has_one,
-               :has_many
+          if field_options[:association]
             fields += get_model_field_names(field_name, field_options, mapped_headers, header_prefix, mapped)
           else
             next if skip_field?(field_name, mapped_headers, mapped)
