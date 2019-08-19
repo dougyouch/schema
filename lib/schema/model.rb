@@ -69,20 +69,22 @@ module Schema
 
       def add_attribute_methods(name, options)
         class_eval(
-          <<~STR, __FILE__, __LINE__ + 1
-            def #{options[:getter]}
-              #{options[:instance_variable]}
-            end
+<<~STR
+  def #{options[:getter]}
+    #{options[:instance_variable]}
+  end
 
-            def #{options[:setter]}(v)
-              #{options[:instance_variable]} = #{options[:parser]}(#{name.inspect}, parsing_errors, v)
-            end
-        STR
+  def #{options[:setter]}(v)
+    #{options[:instance_variable]} = #{options[:parser]}(#{name.inspect}, parsing_errors, v)
+  end
+STR
         )
       end
 
       def add_aliases(name, options)
-        options[:aliases]&.each do |alias_name|
+        return unless options[:aliases]
+
+        options[:aliases].each do |alias_name|
           add_value_to_class_method(:schema, alias_name.to_sym => options.merge(key: alias_name.to_s, alias_of: name))
           alias_method(alias_name, options[:getter])
           alias_method("#{alias_name}=", options[:setter])

@@ -47,7 +47,7 @@ module Schema
         mapped_model = mapped_headers[field_name] || {}
         const_get(field_options[:class_name]).get_field_names(
           mapped_model,
-          header_prefix || field_options[:aliases]&.first,
+          header_prefix || (field_options[:aliases] && field_options[:aliases].first),
           mapped
         )
       end
