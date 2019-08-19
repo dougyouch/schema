@@ -8,7 +8,7 @@ module Schema
     def initialize(csv, schema_class, headers = nil)
       @csv = csv
       @schema_class = schema_class
-      @headers = headers || csv.shift
+      @headers = (headers || csv.shift).map(&:strip)
       @mapped_headers = schema_class.map_headers_to_attributes(@headers)
     end
 
