@@ -20,6 +20,7 @@ Dynamic associations are useful when creating custom logic around schema validat
 
 # Example that show cases multiple features
 class CompanySchema
+  # includes model, associations, parsers and active model validations
   include Schema::All
 
   # add common attributes

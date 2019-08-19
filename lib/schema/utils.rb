@@ -26,6 +26,7 @@ module Schema
 
     def association_options(schema_name, schema_type, options)
       options[:class_name] ||= 'Schema' + classify_name(schema_type.to_s) + classify_name(schema_name.to_s)
+      options[:association] = true
       ::Schema::Model.default_attribute_options(schema_name, schema_type).merge(options)
     end
 

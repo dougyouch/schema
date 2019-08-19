@@ -92,15 +92,8 @@ module Schema
 
     def update_attributes(data)
       schema = get_schema(data)
-      data.each do |key, value|
-        unless schema.key?(key)
-          parsing_errors.add(key, ::Schema::ParsingErrors::UNKNOWN_ATTRIBUTE)
-          next
-        end
-
-        public_send(schema[key][:setter], value)
-      end
-
+      update_model_attributes(schema, data)
+      update_associations(schema, data)
       self
     end
 
@@ -122,6 +115,8 @@ module Schema
       @parsing_errors ||= Errors.new
     end
 
+    private
+
     def get_schema(data)
       data.each_key do |key|
         break unless key.is_a?(Symbol)
@@ -129,6 +124,28 @@ module Schema
         return self.class.schema
       end
       self.class.schema_with_string_keys
+    end
+
+    def update_model_attributes(schema, data)
+      data.each do |key, value|
+        unless schema.key?(key)
+          parsing_errors.add(key, ::Schema::ParsingErrors::UNKNOWN_ATTRIBUTE)
+          next
+        end
+
+        next if schema[key][:association]
+
+        public_send(schema[key][:setter], value)
+      end
+    end
+
+    def update_associations(schema, data)
+      data.each do |key, value|
+        next unless schema.key?(key)
+        next unless schema[key][:association]
+
+        public_send(schema[key][:setter], value)
+      end
     end
   end
 end
