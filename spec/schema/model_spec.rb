@@ -117,4 +117,20 @@ describe Schema::Model do
       end
     end
   end
+
+  context 'not_set?' do
+    subject { model.not_set? }
+
+    it 'not not_set' do
+      expect(subject).to eq(false)
+    end
+
+    describe 'no model data' do
+      let(:model_data) { {} }
+
+      it 'is not_set' do
+        expect(subject).to eq(true)
+      end
+    end
+  end
 end

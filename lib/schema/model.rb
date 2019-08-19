@@ -117,6 +117,12 @@ STR
       @parsing_errors ||= Errors.new
     end
 
+    def not_set?
+      self.class.schema.values.all? do |field_options|
+        !instance_variable_defined?(field_options[:instance_variable])
+      end
+    end
+
     private
 
     def get_schema(data)
