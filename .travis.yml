@@ -1,6 +1,10 @@
 env:
   global:
     - CC_TEST_REPORTER_ID=f06234974aa4c4c52d14cb9ef800df79de52013c38e1d149fd04f2284e722f57
+rvm:
+  - ruby-head
+  - 2.1.9
+  - 1.9.3
 language: ruby
 before_script:
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
