@@ -69,7 +69,7 @@ module Schema
 
       def add_attribute_methods(name, options)
         class_eval(
-<<~STR
+<<-STR, __FILE__, __LINE__ + 1
   def #{options[:getter]}
     #{options[:instance_variable]}
   end

@@ -15,7 +15,7 @@ module Schema
           options = ::Schema::Utils.add_association_class(self, name, :has_one, options)
 
           class_eval(
-<<~STR
+<<-STR, __FILE__, __LINE__ + 1
   def #{options[:getter]}
     #{options[:instance_variable]}
   end
