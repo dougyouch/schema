@@ -5,6 +5,10 @@ rvm:
   - ruby-head
   - 2.1.9
   - 1.9.3
+gemfile:
+  - gemfiles/ruby_head.gemfile
+  - gemfiles/ruby_2.1.9.gemfile
+  - gemfiles/ruby_1.9.3.gemfile
 language: ruby
 before_script:
   - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
