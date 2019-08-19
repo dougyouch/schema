@@ -24,7 +24,7 @@ describe Schema::ArrayHeaders do
         end
       end
 
-      has_many :friends, header_prefix: 'Friends' do
+      has_many :friends, aliases: ['Friends'] do
         attribute :name, :string, aliases: ['Name']
         attribute :status, :string, aliases: ['Status']
 
@@ -103,7 +103,7 @@ describe Schema::ArrayHeaders do
   end
 
   context 'get_mapped_field_names' do
-    it 'returns list of unmapped fields' do
+    it 'returns list of mapped fields' do
       expect(subject.class.get_mapped_field_names(mapped_headers)).to eq(['ID', 'PersonName', 'CompanyName', 'CompanyCity', 'CompanyStateCode', 'FriendsXName', 'FriendsXStatus', 'FriendsXFavoriteGameName'])
     end
   end

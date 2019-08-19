@@ -27,7 +27,7 @@ describe Schema::CSVParser do
         end
       end
 
-      has_many :friends, header_prefix: 'Friends' do
+      has_many :friends, alias: 'Friends' do
         attribute :name, :string, aliases: ['Name']
         attribute :status, :string, aliases: ['Status']
 

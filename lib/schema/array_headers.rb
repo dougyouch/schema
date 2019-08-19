@@ -28,12 +28,14 @@ module Schema
       def get_field_names(mapped_headers, header_prefix = nil, mapped = true)
         fields = []
         schema.each do |field_name, field_options|
+          next if field_options[:alias_of]
+
           case field_options[:type]
           when :has_one,
                :has_many
             fields += get_model_field_names(field_name, field_options, mapped_headers, header_prefix, mapped)
           else
-            next if skip_field?(field_name, field_options, mapped_headers, mapped)
+            next if skip_field?(field_name, mapped_headers, mapped)
 
             fields << generate_field_name(field_name, field_options, header_prefix)
           end
@@ -47,15 +49,12 @@ module Schema
         mapped_model = mapped_headers[field_name] || {}
         const_get(field_options[:class_name]).get_field_names(
           mapped_model,
-          header_prefix || field_options[:header_prefix],
+          header_prefix || field_options[:aliases]&.first,
           mapped
         )
       end
 
-      def skip_field?(field_name, field_options, mapped_headers, mapped)
-        # skip alias fields
-        return true if field_options[:alias_of]
-
+      def skip_field?(field_name, mapped_headers, mapped)
         if mapped
           mapped_headers[field_name].nil?
         else
@@ -88,12 +87,14 @@ module Schema
       def map_headers_to_has_many_associations(headers, mapped_headers)
         schema.each do |field_name, field_options|
           next unless field_options[:type] == :has_many
-          next unless field_options[:header_prefix]
 
-          mapped_model = get_mapped_model(field_options, headers, field_options[:header_prefix])
-          next if mapped_model.empty?
+          get_header_prefixes(field_name, field_options).each do |header_prefix|
+            mapped_model = get_mapped_model(field_options, headers, header_prefix)
+            next if mapped_model.empty?
 
-          mapped_headers[field_name] = mapped_model
+            mapped_headers[field_name] = mapped_model
+            break
+          end
         end
         mapped_headers
       end
@@ -120,6 +121,12 @@ module Schema
           indexes << index
         end
         indexes
+      end
+
+      def get_header_prefixes(field_name, field_options)
+        names = [field_name.to_s]
+        names += field_options[:aliases] if field_options[:aliases]
+        names
       end
     end
   end
