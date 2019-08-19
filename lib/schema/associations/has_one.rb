@@ -32,6 +32,7 @@ module Schema
 
           kls = const_get(options[:class_name])
           kls.class_eval(&block) if block
+          add_aliases(name, options)
           kls
         end
         # rubocop:enable Naming/PredicateName

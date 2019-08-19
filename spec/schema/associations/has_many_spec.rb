@@ -8,7 +8,7 @@ describe Schema::Associations::HasMany do
       schema_include Schema::Associations::HasMany
       attribute :name, :string
 
-      has_many :items do
+      has_many :items, aliases: [:my_items] do
         attribute :id, :integer
         attribute :name, :string
         attribute :cost, :float
@@ -83,6 +83,33 @@ describe Schema::Associations::HasMany do
         expect(model.items.first.id).to eq(nil)
         expect(model.items.first.name).to eq(model_data[:items].first[:name])
         expect(has_parsing_errors).to eq(true)
+      end
+    end
+
+    describe 'aliases' do
+      let(:model_data) do
+        {
+          name: SecureRandom.uuid,
+          my_items: [
+            {
+              id: rand(1_000_000),
+              name: SecureRandom.hex(10),
+              cost: (rand(1_000).to_f + rand).round(2)
+            },
+            {
+              id: rand(1_000_000),
+              name: SecureRandom.hex(10),
+              cost: (rand(1_000).to_f + rand).round(2)
+            }
+          ]
+        }
+      end
+
+      it 'sets the associated object' do
+        expect(model.items.size).to eq(2)
+        expect(model.items.first.id).to eq(model_data[:my_items].first[:id])
+        expect(model.items.last.id).to eq(model_data[:my_items].last[:id])
+        expect(has_parsing_errors).to eq(false)
       end
     end
   end

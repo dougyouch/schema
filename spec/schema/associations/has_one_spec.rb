@@ -8,7 +8,7 @@ describe Schema::Associations::HasOne do
       schema_include Schema::Associations::HasOne
       attribute :name, :string
 
-      has_one :item do
+      has_one :item, alias: :my_item do
         attribute :id, :integer
         attribute :name, :string
         attribute :cost, :float
@@ -71,6 +71,24 @@ describe Schema::Associations::HasOne do
         expect(model.item.id).to eq(nil)
         expect(model.item.name).to eq(model_data[:item][:name])
         expect(has_parsing_errors).to eq(true)
+      end
+    end
+
+    describe 'aliases' do
+      let(:model_data) do
+        {
+          name: SecureRandom.uuid,
+          my_item: {
+            id: rand(1_000_000),
+            name: SecureRandom.hex(10),
+            cost: (rand(1_000).to_f + rand).round(2)
+          }
+        }
+      end
+
+      it 'sets the associated object' do
+        expect(model.item.id).to eq(model_data[:my_item][:id])
+        expect(has_parsing_errors).to eq(false)
       end
     end
   end
