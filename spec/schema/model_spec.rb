@@ -8,7 +8,7 @@ describe Schema::Model do
 
       attribute :id, :integer, alias: :identifier
       attribute :name, :string, aliases: [:my_name]
-      attribute :cost, :float
+      attribute :cost, :float, default: 0.0
     end
     Object.const_set(model_class_name, kls)
     Object.const_get(model_class_name)
@@ -30,6 +30,20 @@ describe Schema::Model do
       it 'adds the attriburte to the schema' do
         subject
         expect(model_class.schema.has_key?(attribute_name)).to eq(true)
+      end
+    end
+
+    context 'options' do
+      describe 'default' do
+        let(:model_data) { {} }
+
+        it 'no default value is nil' do
+          expect(model.id).to eq(nil)
+        end
+
+        it 'default value' do
+          expect(model.cost).to eq(0.0)
+        end
       end
     end
   end

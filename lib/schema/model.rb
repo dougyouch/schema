@@ -18,7 +18,8 @@ module Schema
         type: type,
         getter: name.to_s.freeze,
         setter: "#{name}=",
-        instance_variable: "@#{name}"
+        instance_variable: "@#{name}",
+        default_method: "#{name}_default"
       }
     end
 
@@ -53,6 +54,7 @@ module Schema
 
         add_value_to_class_method(:schema, name => options)
         add_attribute_methods(name, options)
+        ::Schema::Utils.add_method_default(self, options) if options.has_key?(:default)
         add_aliases(name, options)
       end
 
