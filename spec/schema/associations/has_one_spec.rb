@@ -13,6 +13,11 @@ describe Schema::Associations::HasOne do
         attribute :name, :string
         attribute :cost, :float
       end
+
+      has_one :user, default: true do
+        attribute :id, :integer
+        attribute :name, :string
+      end
     end
     Object.const_set(model_class_name, kls)
     Object.const_get(model_class_name)
@@ -89,6 +94,18 @@ describe Schema::Associations::HasOne do
       it 'sets the associated object' do
         expect(model.item.id).to eq(model_data[:my_item][:id])
         expect(has_parsing_errors).to eq(false)
+      end
+    end
+
+    describe 'default' do
+      let(:model_data) { {} }
+
+      it 'no default the association is nil' do
+        expect(model.item.nil?).to eq(true)
+      end
+
+      it 'with default an empty association is created' do
+        expect(model.user.nil?).to eq(false)
       end
     end
   end

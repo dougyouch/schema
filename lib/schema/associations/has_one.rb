@@ -32,6 +32,10 @@ STR
 
           kls = const_get(options[:class_name])
           kls.class_eval(&block) if block
+          if options[:default]
+            options[:default_code] = options[:class_name] + '.new'
+            ::Schema::Utils.add_association_default_methods(self, options)
+          end
           add_aliases(name, options)
           kls
         end

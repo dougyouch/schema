@@ -54,7 +54,7 @@ module Schema
 
         add_value_to_class_method(:schema, name => options)
         add_attribute_methods(name, options)
-        ::Schema::Utils.add_method_default(self, options) if options.has_key?(:default)
+        ::Schema::Utils.add_attribute_default_methods(self, options) if options.has_key?(:default)
         add_aliases(name, options)
       end
 

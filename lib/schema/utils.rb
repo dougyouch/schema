@@ -55,11 +55,11 @@ module Schema
       kls.send(:include, ::Schema::Associations::DynamicTypes)
     end
 
-    def add_method_default(kls, options)
+    def add_attribute_default_methods(kls, options)
       kls.class_eval(
  <<-STR, __FILE__, __LINE__ + 1
   def #{options[:default_method]}
-    #{options[:default_const] || options[:default].inspect}
+    #{options[:default].inspect}
   end
 
   def #{options[:getter]}
@@ -68,6 +68,20 @@ module Schema
     else
       #{options[:instance_variable]}
     end
+  end
+STR
+      )
+    end
+
+    def add_association_default_methods(kls, options)
+      kls.class_eval(
+ <<-STR, __FILE__, __LINE__ + 1
+  def #{options[:default_method]}
+    #{options[:default_code]}
+  end
+
+  def #{options[:getter]}
+    #{options[:instance_variable]} ||= #{options[:default_method]}
   end
 STR
       )
