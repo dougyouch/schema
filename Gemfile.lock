@@ -1,24 +1,22 @@
 GEM
   remote: http://rubygems.org/
   specs:
-    activemodel (4.2.11.1)
-      activesupport (= 4.2.11.1)
-      builder (~> 3.1)
-    activesupport (4.2.11.1)
-      i18n (~> 0.7)
+    activemodel (5.2.3)
+      activesupport (= 5.2.3)
+    activesupport (5.2.3)
+      concurrent-ruby (~> 1.0, >= 1.0.2)
+      i18n (>= 0.7, < 2)
       minitest (~> 5.1)
-      thread_safe (~> 0.3, >= 0.3.4)
       tzinfo (~> 1.1)
     appraisal (2.2.0)
       bundler
       rake
       thor (>= 0.14.0)
     ast (2.4.0)
-    builder (3.2.3)
     concurrent-ruby (1.1.5)
     diff-lcs (1.3)
     docile (1.3.2)
-    i18n (0.9.5)
+    i18n (1.6.0)
       concurrent-ruby (~> 1.0)
     inheritance-helper (0.1.0)
     jaro_winkler (1.5.3)
@@ -65,7 +63,7 @@ PLATFORMS
   ruby
 
 DEPENDENCIES
-  activemodel (~> 4)
+  activemodel (~> 5)
   appraisal
   inheritance-helper
   rake
