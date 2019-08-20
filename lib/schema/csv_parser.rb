@@ -15,6 +15,7 @@ module Schema
     def missing_fields(required_fields)
       required_fields - get_mapped_headers(@mapped_headers)
     end
+    alias missing_headers missing_fields
 
     def shift
       return unless (row = @csv.shift)
