@@ -1,14 +1,13 @@
 GEM
   remote: http://rubygems.org/
   specs:
-    activemodel (6.0.0)
-      activesupport (= 6.0.0)
-    activesupport (6.0.0)
+    activemodel (5.2.3)
+      activesupport (= 5.2.3)
+    activesupport (5.2.3)
       concurrent-ruby (~> 1.0, >= 1.0.2)
       i18n (>= 0.7, < 2)
       minitest (~> 5.1)
       tzinfo (~> 1.1)
-      zeitwerk (~> 2.1, >= 2.1.8)
     appraisal (2.2.0)
       bundler
       rake
@@ -59,13 +58,12 @@ GEM
     tzinfo (1.2.5)
       thread_safe (~> 0.1)
     unicode-display_width (1.6.0)
-    zeitwerk (2.1.9)
 
 PLATFORMS
   ruby
 
 DEPENDENCIES
-  activemodel
+  activemodel (~> 5)
   appraisal
   inheritance-helper
   rake
