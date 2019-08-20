@@ -7,7 +7,7 @@ module Schema
   module Model
     def self.included(base)
       base.extend InheritanceHelper::Methods
-      base.include Schema::Parsers::Common
+      base.send(:include, Schema::Parsers::Common)
       base.extend ClassMethods
     end
 

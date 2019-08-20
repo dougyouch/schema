@@ -6,7 +6,7 @@ module Schema
   # Schema::All includes model, associations, parsers and active model validations
   module All
     def self.included(base)
-      base.include ::Schema::Model
+      base.send(:include, ::Schema::Model)
 
       # associations
       base.schema_include ::Schema::Associations::HasOne
@@ -19,7 +19,7 @@ module Schema
       base.schema_include ::Schema::Parsers::Json
 
       # active model validations
-      base.include ::Schema::ActiveModelValidations
+      base.send(:include, ::Schema::ActiveModelValidations)
     end
   end
 end

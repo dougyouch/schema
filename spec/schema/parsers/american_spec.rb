@@ -45,7 +45,7 @@ describe Schema::Parsers::American do
     end
 
     describe 'string value' do
-      let(:time) { Time.xmlschema(Time.now.xmlschema) }
+      let(:time) { Time.new(2019, 8, 12, 9, 4, 43) }
       let(:value) { time.strftime('%m/%d/%Y %H:%M:%S') }
 
       it 'has no errors' do

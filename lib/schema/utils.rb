@@ -18,7 +18,7 @@ module Schema
     end
 
     def include_schema_modules(kls, schema_config)
-      kls.include ::Schema::Model
+      kls.send(:include, ::Schema::Model)
       schema_config[:schema_includes].each do |mod|
         kls.schema_include(mod)
       end
@@ -44,7 +44,7 @@ module Schema
     end
 
     def add_association_defaults(kls, base_schema_class, schema_name)
-      kls.include ::Schema::Associations::Base
+      kls.send(:include, ::Schema::Associations::Base)
       kls.base_schema_class = base_schema_class
       kls.schema_name = schema_name
     end
@@ -52,7 +52,7 @@ module Schema
     def add_association_dynamic_types(kls, options)
       return if !options[:type_field] && !options[:external_type_field]
 
-      kls.include ::Schema::Associations::DynamicTypes
+      kls.send(:include, ::Schema::Associations::DynamicTypes)
     end
   end
 end

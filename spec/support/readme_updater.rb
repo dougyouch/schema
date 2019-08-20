@@ -8,7 +8,7 @@ class ReadmeUpdater
 
   def update_code_snippet(file, language)
     content = File.read(@readme_file)
-    section_start = <<~STR
+    section_start = <<-STR
       ###### #{file}
       ```#{language}
     STR

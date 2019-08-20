@@ -16,7 +16,7 @@ module Schema
         when Integer
           value
         when String
-          if INTEGER_REGEX.match?(value)
+          if INTEGER_REGEX.match(value)
             Integer(value)
           else
             parsing_errors.add(field_name, ::Schema::ParsingErrors::INVALID)
@@ -55,7 +55,7 @@ module Schema
         when Integer
           value.to_f
         when String
-          if FLOAT_REGEX.match?(value)
+          if FLOAT_REGEX.match(value)
             Float(value)
           else
             parsing_errors.add(field_name, ::Schema::ParsingErrors::INVALID)
@@ -118,7 +118,7 @@ module Schema
         when Integer, Float
           value != 0
         when String
-          BOOLEAN_REGEX.match?(value)
+          BOOLEAN_REGEX.match(value)
         when nil
           nil
         else
