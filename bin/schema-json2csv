@@ -1,0 +1,7 @@
+#!/usr/bin/env ruby
+
+require 'schema-model'
+require 'csv'
+require 'json'
+require 'optparse'
+
