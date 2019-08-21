@@ -22,7 +22,7 @@ describe Schema::Arrays do
         end
       end
 
-      has_many :friends do
+      has_many :friends, size: 3 do
         attribute :name, :string
         attribute :status, :string
 
@@ -88,5 +88,119 @@ describe Schema::Arrays do
     expect(model.friends[1].name).to eq('Frank')
     expect(model.friends[1].status).to eq('Poor')
     expect(model.friends[1].game.name).to eq('Swords')
+  end
+
+  context '#to_empty_array' do
+    subject { model_class.to_empty_array }
+    let(:expected_array) do
+      [
+        nil, # :id
+        nil, # :name
+        nil, # :unknown
+        [ # company
+          nil, # :name
+          [ # location
+            nil, # :city
+            nil  #: state
+          ]
+        ],
+        [ # 3 sets of friends
+          [ # friend 1
+            nil, # :name
+            nil, # :status
+            [ # game
+              nil # :name
+            ]
+          ],
+          [nil, nil, [nil]], # friend 2
+          [nil, nil, [nil]]  # friend 3
+        ]
+      ]
+    end
+
+    it 'returns empty arrays for all attributes' do
+      expect(subject).to eq(expected_array)
+    end
+  end
+
+  context '#to_a' do
+    subject { model.to_a }
+    let(:expected_array) do
+      [
+        4, # :id
+        "Joe Smith", # :name
+        nil, # :unknown
+        [ # company
+          "Paper INC", # :name
+          [ # location
+            "Nowhere", # :city
+            "UU" # :state
+          ]
+        ],
+        [ # 3 sets of friends
+          [ # friend 1
+            "Jimmy", # :name
+            "Good",  # :status
+            [ # game
+              "Pirates" # :name
+            ]
+          ],
+          ["Frank", "Poor", ["Swords"]], # friend 2
+          [nil, nil, [nil]] # friend 3
+        ]
+      ]
+    end
+
+    it 'returns schema data as an array' do
+      expect(subject).to eq(expected_array)
+    end
+
+    describe 'without association data' do
+      let(:model_data) do
+        [
+          '4',
+          nil,
+          'Joe Smith',
+          nil,
+          nil,
+          nil,
+          nil,
+          nil,
+          nil,
+          nil,
+          nil,
+          nil
+        ]
+      end
+      let(:expected_array) do
+        [
+          4, # :id
+          'Joe Smith', # :name
+          nil, # :unknown
+          [ # company
+            nil, # :name
+            [ # location
+              nil, # :city
+              nil  #: state
+            ]
+          ],
+          [ # 3 sets of friends
+            [ # friend 1
+              nil, # :name
+              nil, # :status
+              [ # game
+                nil # :name
+              ]
+            ],
+            [nil, nil, [nil]], # friend 2
+            [nil, nil, [nil]]  # friend 3
+          ]
+        ]
+      end
+
+      it 'returns empty arrays for all attributes' do
+        expect(subject).to eq(expected_array)
+      end
+    end
   end
 end
