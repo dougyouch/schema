@@ -5,3 +5,73 @@ require 'csv'
 require 'json'
 require 'optparse'
 
+options = {
+  json_file: nil,
+  require_file: nil,
+  csv_file: nil,
+  schema_class_name: nil
+}
+
+OptionParser.new do |opts|
+  opts.banner = "Usage: " + File.basename(__FILE__)
+
+  opts.on('--json JSON_FILE', 'JSON data') do |v|
+    options[:json_file] = v
+  end
+
+  opts.on('-r', '--require FILE', 'File with schema model') do |v|
+    options[:require_file] = v
+  end
+
+  opts.on('--csv CSV_FILE', 'File to output csv data') do |v|
+    options[:csv_file] = v
+  end
+
+  opts.on('--schema SCHEMA_CLASS_NAME', 'Name of the schema to apply to the json data') do |v|
+    options[:schema_class_name] = v
+  end
+end.parse!
+
+raise('no filed required') unless options[:require_file]
+raise('no schema specified') unless options[:schema_class_name]
+
+$LOAD_PATH << '.'
+raise("file #{options[:require_file]} not found") unless require(options[:require_file])
+
+raise("schema #{options[:schema_class_name]} not found") unless Object.const_defined?(options[:schema_class_name])
+
+schema_class = Object.const_get(options[:schema_class_name])
+
+json_data =
+  if options[:json_file]
+    raise("json file #{options[:json_file]} not found") unless File.exist?(options[:json_file])
+    File.read(options[:json_file])
+  elsif ARGV.last == '-'
+    ARGF.read
+  else
+    raise('no json data specified')
+  end
+
+schema = schema_class.from_hash(JSON.parse(json_data))
+
+io =
+  if file = options[:csv_file]
+    if File.exist?(file)
+      File.open(options[:csv_file], 'ab')
+    else
+      headers = CSV.generate do |csv|
+        csv << schema_class.to_headers
+      end
+      f = File.open(options[:csv_file], 'wb')
+      f.print headers
+      f
+    end
+  else
+    $stdout
+  end
+
+str = CSV.generate do |csv|
+  csv << schema.to_a.flatten
+end
+
+io.print str
