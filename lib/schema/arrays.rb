@@ -30,6 +30,26 @@ module Schema
         end
         data
       end
+
+      def to_headers(prefix = nil)
+        headers = []
+        schema.each do |_, field_options|
+          next if field_options[:alias_of]
+
+          headers <<
+            case field_options[:type]
+            when :has_one
+              const_get(field_options[:class_name]).to_headers(prefix.to_s + field_options[:key] + '.')
+            when :has_many
+              field_options[:size].times.map do |i|
+                const_get(field_options[:class_name]).to_headers(prefix.to_s + field_options[:key] + "[#{i +1}].")
+              end
+            else
+              prefix.to_s + field_options[:key]
+            end
+        end
+        headers.flatten
+      end
     end
 
     def to_a

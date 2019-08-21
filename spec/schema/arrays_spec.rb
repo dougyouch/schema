@@ -90,7 +90,7 @@ describe Schema::Arrays do
     expect(model.friends[1].game.name).to eq('Swords')
   end
 
-  context '#to_empty_array' do
+  context '.to_empty_array' do
     subject { model_class.to_empty_array }
     let(:expected_array) do
       [
@@ -201,6 +201,33 @@ describe Schema::Arrays do
       it 'returns empty arrays for all attributes' do
         expect(subject).to eq(expected_array)
       end
+    end
+  end
+
+  context '.to_headers' do
+    subject { model_class.to_headers }
+    let(:expected_array) do
+      [
+        "id",
+        "name",
+        "unknown",
+        "company.name",
+        "company.location.city",
+        "company.location.state",
+        "friends[1].name",
+        "friends[1].status",
+        "friends[1].game.name",
+        "friends[2].name",
+        "friends[2].status",
+        "friends[2].game.name",
+        "friends[3].name",
+        "friends[3].status",
+        "friends[3].game.name"
+      ]
+    end
+
+    it 'returns headers as a flat array' do
+      expect(subject).to eq(expected_array)
     end
   end
 end
