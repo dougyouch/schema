@@ -41,6 +41,7 @@ raise("file #{options[:require_file]} not found") unless require(options[:requir
 raise("schema #{options[:schema_class_name]} not found") unless Object.const_defined?(options[:schema_class_name])
 
 schema_class = Object.const_get(options[:schema_class_name])
+schema_class.schema_include Schema::Arrays
 
 json_data =
   if options[:json_file]
