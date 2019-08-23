@@ -7,7 +7,6 @@ describe Schema::Arrays do
       include Schema::Model
       schema_include Schema::Associations::HasOne
       schema_include Schema::Associations::HasMany
-      schema_include Schema::Arrays
 
       attribute :id, :integer
       attribute :name, :string
@@ -30,6 +29,8 @@ describe Schema::Arrays do
           attribute :name, :string
         end
       end
+
+      schema_include Schema::Arrays
     end
 
     Object.const_set(model_class_name, kls)
