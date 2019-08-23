@@ -2,7 +2,7 @@
 
 Gem::Specification.new do |s|
   s.name        = 'schema-model'
-  s.version     = '0.5.3'
+  s.version     = '0.5.4'
   s.licenses    = ['MIT']
   s.summary     = 'Schema Model'
   s.description = 'Easy way to create models from payloads'

@@ -52,7 +52,13 @@ json_data =
     raise('no json data specified')
   end
 
-schema = schema_class.from_hash(JSON.parse(json_data))
+def output_csv(schema, io)
+  str = CSV.generate do |csv|
+    csv << schema.to_a.flatten
+  end
+
+  io.print str
+end
 
 io =
   if file = options[:csv_file]
@@ -70,8 +76,9 @@ io =
     $stdout
   end
 
-str = CSV.generate do |csv|
-  csv << schema.to_a.flatten
-end
+json_data = JSON.parse(json_data)
+json_data = [json_data] unless json_data.is_a?(Array)
 
-io.print str
+json_data.each do |data|
+  output_csv(schema_class.from_hash(data), io)
+end
