@@ -12,6 +12,67 @@ module Schema
       def from_array(array, mapped_headers)
         new.update_attributes_with_array(array, mapped_headers)
       end
+
+      def to_empty_array
+        data = []
+        schema.each do |_, field_options|
+          next if field_options[:alias_of]
+
+          data <<
+            case field_options[:type]
+            when :has_one
+              const_get(field_options[:class_name]).to_empty_array
+            when :has_many
+              field_options[:size].times.map { const_get(field_options[:class_name]).to_empty_array }
+            else
+              nil
+            end
+        end
+        data
+      end
+
+      def to_headers(prefix = nil)
+        headers = []
+        schema.each do |_, field_options|
+          next if field_options[:alias_of]
+
+          headers <<
+            case field_options[:type]
+            when :has_one
+              const_get(field_options[:class_name]).to_headers(prefix.to_s + field_options[:key] + '.')
+            when :has_many
+              field_options[:size].times.map do |i|
+                const_get(field_options[:class_name]).to_headers(prefix.to_s + field_options[:key] + "[#{i +1}].")
+              end
+            else
+              prefix.to_s + field_options[:key]
+            end
+        end
+        headers.flatten
+      end
+    end
+
+    def to_a
+      data = []
+      self.class.schema.each do |_, field_options|
+        next if field_options[:alias_of]
+
+        value = public_send(field_options[:getter])
+        data <<
+          case field_options[:type]
+          when :has_one
+            value ? value.to_a : self.class.const_get(field_options[:class_name]).to_empty_array
+          when :has_many
+            values = value || []
+            field_options[:size].times.map do |idx|
+              value = values[idx]
+              value ? value.to_a : self.class.const_get(field_options[:class_name]).to_empty_array
+            end
+          else
+            value
+          end
+      end
+      data
     end
 
     def update_attributes_with_array(array, mapped_headers, offset = nil)

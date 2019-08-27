@@ -67,6 +67,11 @@ module Schema
         config[:schema_includes] = config[:schema_includes] + [mod]
         redefine_class_method(:schema_config, config.freeze)
         include mod
+        schema.values.each do |field_options|
+          next unless field_options[:association]
+
+          const_get(field_options[:class_name]).schema_include(mod)
+        end
       end
 
       def add_attribute_methods(name, options)
