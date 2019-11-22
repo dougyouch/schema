@@ -115,5 +115,13 @@ describe Schema::CSVParser do
     it 'expects ZipCode to be missing' do
       expect(subject).to eq(['ZipCode'])
     end
+
+    describe 'empty csv file' do
+      let(:csv_io) { StringIO.new('') }
+
+      it 'blows up' do
+        expect(subject).to eq(['ID', 'CompanyName', 'PersonName', 'CompanyStateCode', 'CompanyCity', 'Friends1Name', 'Friends1Status', 'Friends2Name', 'Friends2Status', 'Friends1FavoriteGameName', 'Friends2FavoriteGameName', 'Friends3FavoriteGameName', 'ZipCode'])
+      end
+    end
   end
 end
