@@ -18,6 +18,11 @@ describe Schema::Associations::HasMany do
         attribute :id, :integer
         attribute :name, :string
       end
+
+      has_many :buildings, as: :hash do
+        attribute :name, :string
+        attribute :code, :string
+      end
     end
     Object.const_set(model_class_name, kls)
     Object.const_get(model_class_name)
@@ -127,6 +132,38 @@ describe Schema::Associations::HasMany do
 
       it 'with default an empty association is created' do
         expect(model.users.nil?).to eq(false)
+      end
+    end
+
+    describe 'as hash' do
+      let(:model_data) do
+        {
+          buildings: {
+            '1c' => {
+              name: 'Building 1C',
+              code: '51'
+            },
+            '33' => {
+              name: 'Store Front',
+              code: '021'
+            }
+          }
+        }
+      end
+
+      subject { model.buildings }
+
+      it { expect(subject.size).to eq(2) }
+      it { expect(subject.is_a?(Hash)).to eq(false) }
+      it { expect(subject.map(&:name)).to eq(['Building 1C', 'Store Front']) }
+      it { expect(subject.map(&:code)).to eq(['51', '021']) }
+
+      context 'building_as_hash' do
+        subject { model.buildings_as_hash }
+
+        it { expect(subject.size).to eq(2) }
+        it { expect(subject.is_a?(Hash)).to eq(true) }
+        it { expect(subject.keys).to eq(['1c', '33']) }
       end
     end
   end

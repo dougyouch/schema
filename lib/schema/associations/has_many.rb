@@ -14,12 +14,8 @@ module Schema
         def has_many(name, options = {}, &block)
           options = ::Schema::Utils.add_association_class(self, name, :has_many, options)
 
-          class_eval(
-<<-STR, __FILE__, __LINE__ + 1
-  def #{options[:getter]}
-    #{options[:instance_variable]}
-  end
-
+          code =
+<<-STR
   def #{name}_schema_creator
     @#{name}_schema_creator ||= ::Schema::Associations::SchemaCreator.new(self, #{name.inspect})
   end
@@ -28,8 +24,27 @@ module Schema
     #{options[:instance_variable]} = #{name}_schema_creator.create_schemas(self, v)
   end
 STR
-          )
 
+          code +=
+            if options[:as] == :hash
+<<-STR
+  def #{options[:getter]}
+    #{options[:instance_variable]} ?  #{options[:instance_variable]}.values : nil
+  end
+
+  def #{options[:getter]}_as_hash
+    #{options[:instance_variable]}
+  end
+STR
+            else
+<<-STR
+  def #{options[:getter]}
+    #{options[:instance_variable]}
+  end
+STR
+            end
+
+          class_eval(code, __FILE__, __LINE__ + 1)
           kls = const_get(options[:class_name])
           kls.class_eval(&block) if block
           if options[:default]
