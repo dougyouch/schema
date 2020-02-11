@@ -19,7 +19,8 @@ describe Schema::Associations::HasMany do
         attribute :name, :string
       end
 
-      has_many :buildings, as: :hash do
+      has_many :buildings, from: :hash, hash_key_field: :id2 do
+        attribute :id2, :string
         attribute :name, :string
         attribute :code, :string
       end
@@ -135,7 +136,7 @@ describe Schema::Associations::HasMany do
       end
     end
 
-    describe 'as hash' do
+    describe 'from hash' do
       let(:model_data) do
         {
           buildings: {
@@ -154,17 +155,8 @@ describe Schema::Associations::HasMany do
       subject { model.buildings }
 
       it { expect(subject.size).to eq(2) }
-      it { expect(subject.is_a?(Hash)).to eq(false) }
       it { expect(subject.map(&:name)).to eq(['Building 1C', 'Store Front']) }
       it { expect(subject.map(&:code)).to eq(['51', '021']) }
-
-      context 'building_as_hash' do
-        subject { model.buildings_as_hash }
-
-        it { expect(subject.size).to eq(2) }
-        it { expect(subject.is_a?(Hash)).to eq(true) }
-        it { expect(subject.keys).to eq(['1c', '33']) }
-      end
     end
   end
 end

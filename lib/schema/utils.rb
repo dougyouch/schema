@@ -28,6 +28,7 @@ module Schema
       options[:class_name] ||= 'Schema' + classify_name(schema_type.to_s) + classify_name(schema_name.to_s)
       options[:association] = true
       options[:aliases] = [options[:alias]] if options.key?(:alias)
+      options[:hash_key_field] ||= :id if options[:from] == :hash
       ::Schema::Model.default_attribute_options(schema_name, schema_type).merge(options)
     end
 

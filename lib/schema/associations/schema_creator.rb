@@ -12,7 +12,8 @@ module Schema
         @schema_class = base_schema.class.const_get(options[:class_name])
         @aliases = options.fetch(:aliases, [])
         @ignorecase = options[:type_ignorecase]
-        @is_list = options[:as] != :hash
+        @is_list = options[:from] != :hash
+        @hash_key_field = options[:hash_key_field]
         configure_dynamic_schema_options(options)
       end
 
@@ -35,12 +36,11 @@ module Schema
         if is_list? && list.is_a?(Array)
           list.each_with_index.map { |data, idx| create_schema(base_schema, data, "#{@schema_name}:#{idx}") }
         elsif !is_list? && list.is_a?(Hash)
-          hsh = {}
-          list.each do |key, data|
+          list.map do |(key, data)|
             schema = create_schema(base_schema, data, "#{@schema_name}:#{key}")
-            hsh[key] = schema
+            schema.send(schema.class.schema[@hash_key_field][:setter], key)
+            schema
           end
-          hsh
         elsif !list.nil?
           add_parsing_error(base_schema, @schema_name, INCOMPATABLE)
           nil
