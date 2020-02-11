@@ -8,10 +8,7 @@ class ReadmeUpdater
 
   def update_code_snippet(file, language)
     content = File.read(@readme_file)
-    section_start = <<-STR
-      ###### #{file}
-      ```#{language}
-    STR
+    section_start = "###### #{file}\n```#{language}\n"
     section_end = "```\n"
 
     regex = Regexp.new(Regexp.escape(section_start) + '.*?' + Regexp.escape(section_end), Regexp::MULTILINE)

@@ -31,5 +31,15 @@
       "start_date": "2018-05-10",
       "manager_name": "Queen Bee"
     }
-  ]
+  ],
+  "admins": {
+    "captain": {
+      "email": "captain@example.com",
+      "name": "Captain Kurk"
+    },
+    "joe": {
+      "email": "joe.smith@example.com",
+      "name": "Joe Smith"
+    }
+  }
 }

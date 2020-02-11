@@ -93,6 +93,15 @@ class CompanySchema
     validates :type, inclusion: { in: dynamic_type_names }
   end
 
+  has_many(:admins, from: :hash, hash_key_field: :username) do
+    attribute :username, :string
+    attribute :email, :string
+    attribute :name, :string
+
+    validates :username, presence: true
+    validates :email, presence: true
+  end
+
   validates :name, presence: true
   validates :industry_type, inclusion: { in: industry_schema.dynamic_type_names }
 
@@ -100,6 +109,7 @@ class CompanySchema
   validates :industry, presence: true, schema: true
   validates :locations, presence: true, schema: true
   validates :employees, presence: true, schema: true
+  validates :admins, presence: true, schema: true
 end
 ```
 
@@ -138,6 +148,16 @@ end
       "start_date": "2018-05-10",
       "manager_name": "Queen Bee"
     }
-  ]
+  ],
+  "admins": {
+    "captain": {
+      "email": "captain@example.com",
+      "name": "Captain Kurk"
+    },
+    "joe": {
+      "email": "joe.smith@example.com",
+      "name": "Joe Smith"
+    }
+  }
 }
 ```
