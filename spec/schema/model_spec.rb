@@ -80,7 +80,9 @@ describe Schema::Model do
 
   context 'as_json' do
     let(:include_nils) { false }
-    subject { model.as_json(include_nils: include_nils) }
+    let(:select_filter) { nil }
+    let(:reject_filter) { nil }
+    subject { model.as_json(include_nils: include_nils, select_filter: select_filter, reject_filter: reject_filter) }
 
     it 'returns a hash' do
       expect(subject).to eq(model_data)
@@ -107,6 +109,18 @@ describe Schema::Model do
           expect(subject).to eq(model_data)
         end
       end
+    end
+
+    describe 'select_filter' do
+      let(:select_filter) { Proc.new { |field_name, value, field_options| field_name == :id } }
+
+      it { expect(subject.keys).to eq([:id]) }
+    end
+
+    describe 'reject_filter' do
+      let(:reject_filter) { Proc.new { |field_name, value, field_options| field_name == :id } }
+
+      it { expect(subject.keys).to eq([:name, :cost]) }
     end
   end
 

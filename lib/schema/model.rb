@@ -110,7 +110,11 @@ STR
       self.class.schema.each_with_object({}) do |(field_name, field_options), memo|
         unless field_options[:alias_of]
           value = public_send(field_options[:getter])
-          memo[field_name] = value if !value.nil? || opts[:include_nils]
+          next if value.nil? && !opts[:include_nils]
+          next if opts[:select_filter] && !opts[:select_filter].call(field_name, value, field_options)
+          next if opts[:reject_filter] && opts[:reject_filter].call(field_name, value, field_options)
+
+          memo[field_name] = value
         end
       end
     end
