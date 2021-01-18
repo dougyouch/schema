@@ -2,7 +2,7 @@ env:
   global:
     - CC_TEST_REPORTER_ID=f06234974aa4c4c52d14cb9ef800df79de52013c38e1d149fd04f2284e722f57
 rvm:
-  - 2.6.3
+  - 2.7.2
   - 2.1.9
 gemfile: gemfiles/travis.gemfile
 language: ruby
