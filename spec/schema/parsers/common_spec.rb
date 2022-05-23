@@ -79,6 +79,15 @@ describe Schema::Parsers::Common do
           expect(has_parsing_errors).to eq(true)
         end
       end
+
+      describe 'float value with a .0' do
+        let(:value) { '19191.0' }
+
+        it 'has no errors' do
+          expect(subject).to eq(value.to_i)
+          expect(has_parsing_errors).to eq(false)
+        end
+      end
     end
 
     describe 'float value' do
