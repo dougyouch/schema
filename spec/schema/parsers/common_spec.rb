@@ -234,6 +234,33 @@ describe Schema::Parsers::Common do
         end
       end
 
+      describe 'negative' do
+        let(:value) { '-5.1' }
+
+        it 'has no errors' do
+          expect(subject).to eq(-5.1)
+          expect(has_parsing_errors).to eq(false)
+        end
+      end
+
+      describe 'positive' do
+        let(:value) { '+5.1' }
+
+        it 'has no errors' do
+          expect(subject).to eq(5.1)
+          expect(has_parsing_errors).to eq(false)
+        end
+      end
+
+      describe 'exponential' do
+        let(:value) { '5.181e-6' }
+
+        it 'has no errors' do
+          expect(subject).to eq(5.181e-06)
+          expect(has_parsing_errors).to eq(false)
+        end
+      end
+
       describe 'starts with zero' do
         let(:value) { rand.to_s }
 

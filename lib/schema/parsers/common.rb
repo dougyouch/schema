@@ -7,7 +7,7 @@ module Schema
     # Schema::Parsers::Common are parser methods for basic types
     module Common
       INTEGER_REGEX = /^[-+]?(?:[1-9]\d*|0)(?:\.0+)?$/.freeze
-      FLOAT_REGEX = /^(?:[1-9]\d*|0)(?:\.\d+)?$/.freeze
+      FLOAT_REGEX = /^[-+]?(?:[1-9]\d*|0)(?:\.\d+)?(e-\d+)?$/.freeze
       BOOLEAN_REGEX = /^(?:1|t|true|on|y|yes)$/i.freeze
 
       # rubocop:disable Metrics/CyclomaticComplexity
