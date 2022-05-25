@@ -62,6 +62,24 @@ describe Schema::Parsers::Common do
         end
       end
 
+      describe 'negative' do
+        let(:value) { '-5' }
+
+        it 'has no errors' do
+          expect(subject).to eq(-5)
+          expect(has_parsing_errors).to eq(false)
+        end
+      end
+
+      describe 'positive' do
+        let(:value) { '+5' }
+
+        it 'has no errors' do
+          expect(subject).to eq(5)
+          expect(has_parsing_errors).to eq(false)
+        end
+      end
+
       describe 'not a float' do
         let(:value) { 'not_a_float' }
 
