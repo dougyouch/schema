@@ -261,6 +261,15 @@ describe Schema::Parsers::Common do
         end
       end
 
+      describe 'positive exponential' do
+        let(:value) { '5.181E6' }
+
+        it 'has no errors' do
+          expect(subject).to eq(5181000.0)
+          expect(has_parsing_errors).to eq(false)
+        end
+      end
+
       describe 'starts with zero' do
         let(:value) { rand.to_s }
 
