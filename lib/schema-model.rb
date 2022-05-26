@@ -4,6 +4,19 @@ autoload :SchemaValidator, 'schema_validator'
 
 # Schema is a series of tools for transforming data into models
 module Schema
+  class SchemaException < StandardError
+    attr_reader :schema,
+                :errors
+
+    def initialize(msg, schema, errors)
+      super(msg)
+      @schema = schema
+      @errors = errors
+    end
+  end
+  class ParsingException < SchemaException; end
+  class ValidationException < SchemaException; end
+
   autoload :ActiveModelValidations, 'schema/active_model_validations'
   autoload :All, 'schema/all'
   autoload :ArrayHeaders, 'schema/array_headers'
