@@ -20,7 +20,7 @@ module Schema
       def create_schema(base_schema, data, error_name = nil)
         if data.is_a?(Hash)
           unless (schema_class = get_schema_class(base_schema, data))
-            add_parsing_error(base_schema, error_name, UNKNOWN)
+            add_parsing_error(base_schema, error_name, UNKNOWN) if base_schema.class.capture_unknown_attributes?
             return nil
           end
           schema = schema_class.from_hash(data)

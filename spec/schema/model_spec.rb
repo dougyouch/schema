@@ -1,6 +1,7 @@
 require 'spec_helper'
 
 describe Schema::Model do
+  let(:capture_unknown_attributes) { true }
   let(:model_class_name) { 'ModelClass' + SecureRandom.hex(10) }
   let(:model_class) do
     kls = Class.new do
@@ -10,6 +11,7 @@ describe Schema::Model do
       attribute :name, :string, aliases: [:my_name]
       attribute :cost, :float, default: 0.0
     end
+    kls.capture_unknown_attributes = capture_unknown_attributes
     Object.const_set(model_class_name, kls)
     Object.const_get(model_class_name)
   end
@@ -159,6 +161,27 @@ describe Schema::Model do
       it 'is not_set' do
         expect(subject).to eq(true)
       end
+    end
+  end
+
+  context 'unknown attributes' do
+    subject { model.parsing_errors.empty? }
+
+    let(:model_data) do
+      {
+        unknown: true,
+        unknown_item: {
+          missing_attribute: true
+        }
+      }
+    end
+
+    it { expect(subject).to eq(false) }
+
+    describe 'disable unknown attributes check' do
+      let(:capture_unknown_attributes) { false }
+
+      it { expect(subject).to eq(true) }
     end
   end
 end

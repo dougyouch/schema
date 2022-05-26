@@ -25,6 +25,10 @@ module Schema
 
     # no-doc
     module ClassMethods
+      def self.include(base)
+        base.capture_unknown_attributes = true
+      end
+
       def schema
         {}.freeze
       end
@@ -40,8 +44,19 @@ module Schema
 
       def schema_config
         {
-          schema_includes: []
+          schema_includes: [],
+          capture_unknown_attributes: true
         }.freeze
+      end
+
+      def capture_unknown_attributes=(v)
+        config = schema_config.dup
+        config[:capture_unknown_attributes] = v
+        redefine_class_method(:schema_config, config.freeze)
+      end
+
+      def capture_unknown_attributes?
+        schema_config[:capture_unknown_attributes]
       end
 
       def attribute(name, type, options = {})
@@ -148,7 +163,7 @@ STR
     def update_model_attributes(schema, data)
       data.each do |key, value|
         unless schema.key?(key)
-          parsing_errors.add(key, ::Schema::ParsingErrors::UNKNOWN_ATTRIBUTE)
+          parsing_errors.add(key, ::Schema::ParsingErrors::UNKNOWN_ATTRIBUTE) if self.class.capture_unknown_attributes?
           next
         end
 
