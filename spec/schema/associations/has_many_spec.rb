@@ -158,5 +158,17 @@ describe Schema::Associations::HasMany do
       it { expect(subject.map(&:name)).to eq(['Building 1C', 'Store Front']) }
       it { expect(subject.map(&:code)).to eq(['51', '021']) }
     end
+
+    describe 'append_to' do
+      let(:model_data) { {} }
+
+      before do
+        model.append_to_users(id: 1, name: 'Foo Bar')
+      end
+
+      it 'appended the user' do
+        expect(model.as_json).to eq({users:[{id: 1, name: 'Foo Bar'}]})
+      end
+    end
   end
 end

@@ -129,7 +129,11 @@ STR
           next if opts[:select_filter] && !opts[:select_filter].call(field_name, value, field_options)
           next if opts[:reject_filter] && opts[:reject_filter].call(field_name, value, field_options)
 
-          memo[field_name] = value.respond_to?(:as_json) ? value.as_json(opts) : value
+          if value.is_a?(Array)
+            memo[field_name] = value.map { |e| e.as_json(opts) }
+          else
+            memo[field_name] = value.respond_to?(:as_json) ? value.as_json(opts) : value
+          end
         end
       end
     end

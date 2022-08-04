@@ -27,6 +27,11 @@ module Schema
   def #{options[:setter]}(v)
     #{options[:instance_variable]} = #{name}_schema_creator.create_schemas(self, v)
   end
+
+  def append_to_#{options[:getter]}(v)
+    #{options[:instance_variable]} ||= []
+    #{options[:instance_variable]} << #{name}_schema_creator.create_schema(self, v)
+  end
 STR
           )
 
