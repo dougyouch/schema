@@ -6,6 +6,7 @@ gem 'inheritance-helper'
 
 group :development do
   gem 'activemodel'
+  gem 'csv'
   gem 'rake'
   gem 'rubocop'
 end
