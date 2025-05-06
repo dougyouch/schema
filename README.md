@@ -1,163 +1,160 @@
-# schema
+# Schema
 
-Fast and easy way to transform data into models for validation and type safety.
+A powerful Ruby gem for data transformation, validation, and type safety. Schema provides a flexible and intuitive way to define data models with support for complex nested structures, dynamic associations, and robust validation.
 
 [![Build Status](https://travis-ci.org/dougyouch/schema.svg?branch=master)](https://travis-ci.org/dougyouch/schema)
 [![Maintainability](https://api.codeclimate.com/v1/badges/c142d46a7a37d4a8c2e5/maintainability)](https://codeclimate.com/github/dougyouch/schema/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/c142d46a7a37d4a8c2e5/test_coverage)](https://codeclimate.com/github/dougyouch/schema/test_coverage)
 
-Attributes of a model have a name and type.  Any value passed in goes through a parser method.  If the value can not be parsed successfully the error is added to parsing_errors.
+## Features
 
-Associations are nested schema models.  Each association can have its own set of attributes.
+- **Type Safety**: Strong typing with automatic parsing and validation
+- **Flexible Attributes**: Support for aliases and custom data types
+- **Nested Models**: Complex data structures with nested associations
+- **Dynamic Associations**: Runtime type-based model creation
+- **ActiveModel Integration**: Seamless integration with ActiveModel validations
+- **Error Handling**: Comprehensive error collection and reporting
+- **CSV Support**: Built-in CSV parsing capabilities
 
-Dynamic associations are useful when creating custom logic around schema validation.
+## Installation
 
-#### Example that show cases multiple features
+Add this line to your application's Gemfile:
 
-###### spec/examples/company_schema.rb
 ```ruby
-# frozen_string_literal: true
+gem 'schema-model'
+```
 
-# Example that show cases multiple features
-class CompanySchema
-  # includes model, associations, parsers and active model validations
+And then execute:
+
+```bash
+$ bundle install
+```
+
+## Quick Start
+
+Here's a simple example to get you started:
+
+```ruby
+class UserSchema
   include Schema::All
 
-  # add common attributes
-  # attributes support additional names through the alias(es) option
-  attribute :name, :string, alias: 'CompanyName'
-  attribute :industry_type, :string, aliases: %w[IndustryType industry]
-
-  # will take a string split on the separator and use the parse_<data_type> method on every element
-  # basically take a list of comma separated numbers and create an array of integers
-  # code snippet: str.split(',').map { |v| parse_integer(field_name, parsing_errors, v) }
-  attribute :number_list, :array, separator: ',', data_type: :integer
-
-  # creates a nested dynamic schema based on the industry_type which is part of the main company data
-  industry_schema = has_one(:industry, external_type_field: :industry_type) do
-    attribute :name, :string
-
-    validates :name, presence: true
-
-    add_type('tech') do
-      attribute :custom_description, :string
-    end
-
-    add_type('qsr') do
-      attribute :number_of_locations, :integer
-
-      # custom validation
-      validates :number_of_locations, presence: true
-    end
-  end
-
-  # create multiple dynamic location schemas based on the type field in the location data
-  has_many(:locations, type_field: :type) do
-    attribute :type, :string
-    attribute :address, :string
-    attribute :city, :string
-    attribute :state, :string
-    attribute :zip, :string
-
-    add_type('headquarters') do
-      attribute :main_floor, :integer
-
-      validates :city, presence: true
-      validates :main_floor, presence: true
-    end
-
-    add_type('store_front') do
-      attribute :main_entrance, :string
-
-      validates :address, presence: true
-      validates :main_entrance, presence: true
-    end
-  end
-
-  # create multiple dynamic employee schemas based on the type field in the employee data
-  has_many(:employees, type_field: :type) do
-    attribute :type, :integer
-    attribute :name, :string
-    attribute :start_date, :date
-    add_type(1) do # worker
-      attribute :manager_name, :string
-    end
-    add_type(2) do # manager
-      attribute :rank, :float
-    end
-    # if no or an invalid type is specified, create a default employee schema object
-    # useful for communicating errors in an API
-    default_type
-
-    # dynamic_type_names returns all the types used, except for :default
-    validates :type, inclusion: { in: dynamic_type_names }
-  end
-
-  has_many(:admins, from: :hash, hash_key_field: :username) do
-    attribute :username, :string
-    attribute :email, :string
-    attribute :name, :string
-
-    validates :username, presence: true
-    validates :email, presence: true
-  end
+  attribute :name, :string
+  attribute :age, :integer
+  attribute :email, :string
+  attribute :tags, :array, separator: ',', data_type: :string
 
   validates :name, presence: true
-  validates :industry_type, inclusion: { in: industry_schema.dynamic_type_names }
+  validates :email, presence: true, format: { with: URI::MailTo::EMAIL_REGEXP }
+end
 
-  # use the schema validator
-  validates :industry, presence: true, schema: true
-  validates :locations, presence: true, schema: true
-  validates :employees, presence: true, schema: true
-  validates :admins, presence: true, schema: true
+# Usage
+user_data = {
+  name: 'John Doe',
+  age: '30',
+  email: 'john@example.com',
+  tags: 'ruby,rails,developer'
+}
+
+user = UserSchema.new(user_data)
+if user.valid?
+  puts "User created: #{user.name}"
+else
+  puts "Validation errors: #{user.errors.full_messages}"
 end
 ```
 
-###### spec/examples/company_schema.json
-```javascript
-{
-  "CompanyName": "Good Burger",
-  "IndustryType": "qsr",
-  "industry": {
-    "name": "Food & Beverage",
-    "number_of_locations": 2
-  },
-  "locations": [
-    {
-      "type": "headquarters",
-      "city": "Boston",
-      "main_floor": 5
-    },
-    {
-      "type": "store_front",
-      "address": "1st Ave",
-      "zip": "02211",
-      "main_entrance": "side door"
-    }
-  ],
-  "employees": [
-    {
-      "type": 2,
-      "name": "Queen Bee",
-      "start_date": "2016-01-09",
-      "rank": "0.9"
-    },
-    {
-      "type": 1,
-      "name": "Worker Bee",
-      "start_date": "2018-05-10",
-      "manager_name": "Queen Bee"
-    }
-  ],
-  "admins": {
-    "captain": {
-      "email": "captain@example.com",
-      "name": "Captain Kurk"
-    },
-    "joe": {
-      "email": "joe.smith@example.com",
-      "name": "Joe Smith"
-    }
-  }
-}
+## Core Concepts
+
+### Attributes
+
+Attributes define the structure of your data model. Each attribute has:
+- A name
+- A type
+- Optional aliases
+- Custom parsing rules
+
+```ruby
+attribute :name, :string, alias: 'FullName'
+attribute :age, :integer
+attribute :tags, :array, separator: ',', data_type: :string
 ```
+
+### Associations
+
+Schema supports various types of associations:
+
+1. **Has One**: Single nested model
+2. **Has Many**: Multiple nested models
+3. **Dynamic Associations**: Type-based model creation
+
+```ruby
+has_one(:profile) do
+  attribute :bio, :string
+  attribute :website, :string
+end
+
+has_many(:posts) do
+  attribute :title, :string
+  attribute :content, :string
+end
+```
+
+### Dynamic Types
+
+Create different model structures based on a type field:
+
+```ruby
+has_many(:vehicles, type_field: :type) do
+  attribute :type, :string
+  attribute :color, :string
+
+  add_type('car') do
+    attribute :doors, :integer
+  end
+
+  add_type('truck') do
+    attribute :bed_length, :float
+  end
+end
+```
+
+## Advanced Features
+
+### Custom Parsers
+
+Define custom parsing logic for your attributes:
+
+```ruby
+attribute :custom_field, :custom_type do
+  def parse_custom_type(field_name, errors, value)
+    # Custom parsing logic
+  end
+end
+```
+
+### CSV Integration
+
+Parse CSV data directly into your models:
+
+```ruby
+class UserCSVSchema
+  include Schema::CSVParser
+  
+  attribute :name, :string
+  attribute :email, :string
+end
+
+users = UserCSVSchema.parse_csv(csv_data)
+```
+
+## Contributing
+
+1. Fork the repository
+2. Create your feature branch (`git checkout -b my-new-feature`)
+3. Commit your changes (`git commit -am 'Add some feature'`)
+4. Push to the branch (`git push origin my-new-feature`)
+5. Create a new Pull Request
+
+## License
+
+The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
