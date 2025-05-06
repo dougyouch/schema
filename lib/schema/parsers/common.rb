@@ -48,6 +48,21 @@ module Schema
         end
       end
 
+      # if the string is empty return nil
+      def parse_string_or_nil(field_name, parsing_errors, value)
+        case value
+        when String
+          value.empty? ? nil : value
+        when ::Hash, ::Array
+          parsing_errors.add(field_name, ::Schema::ParsingErrors::INCOMPATABLE)
+          nil
+        when nil
+          nil
+        else
+          String(value)
+        end
+      end
+
       def parse_float(field_name, parsing_errors, value)
         case value
         when Float
@@ -118,7 +133,7 @@ module Schema
         when Integer, Float
           value != 0
         when String
-          BOOLEAN_REGEX.match(value)
+          BOOLEAN_REGEX.match?(value)
         when nil
           nil
         else

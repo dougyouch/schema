@@ -1,0 +1,39 @@
+# Cursor Rules Configuration
+
+# Ignore common development and system files
+ignore {
+    ".git/"
+    ".DS_Store"
+    "*.log"
+    "tmp/"
+    "node_modules/"
+    "coverage/"
+}
+
+# Define common code block markers
+markers {
+    start "# START"
+    end "# END"
+}
+
+# Define language-specific comment styles
+comments {
+    ruby "#"
+    javascript "//"
+    python "#"
+    html "<!--"
+    css "/*"
+}
+
+# Define safe edit boundaries
+boundaries {
+    function_start "^(def|function|class) "
+    block_start "^(if|while|for|begin|module) "
+}
+
+# Define merge conflict markers to avoid
+conflicts {
+    start "<<<<<<< "
+    middle "======="
+    end ">>>>>>> "
+} 
