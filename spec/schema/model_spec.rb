@@ -22,7 +22,8 @@ describe Schema::Model do
       cost: (rand(1_000).to_f + rand).round(2)
     }
   end
-  let(:model) { model_class.from_hash(model_data) }
+  let(:skip_fields) { [] }
+  let(:model) { model_class.from_hash(model_data, skip_fields) }
 
   context 'attribute' do
     describe 'adds setter/getter methods to the class' do
@@ -48,6 +49,14 @@ describe Schema::Model do
         end
       end
     end
+
+    context 'skip_fields' do
+      let(:skip_fields) { [:id] }
+
+      it 'skips id field' do
+        expect(model.id).to eq(nil)
+      end
+    end
   end
 
   context 'setter/getter' do
@@ -65,7 +74,7 @@ describe Schema::Model do
   context 'from_hash' do
     let(:value) { rand(1_000_000).to_s }
 
-    subject { model_class.from_hash id: value }
+    subject { model_class.from_hash({id: value}, skip_fields) }
 
     it 'transformed and assigned the value' do
       expect(subject.id).to eq(value.to_i)
