@@ -34,7 +34,7 @@ module Schema
 
       def create_schemas(base_schema, list, skip_fields = [])
         if is_list? && list.is_a?(Array)
-          list.each_with_index.map { |data, idx| create_schema(base_schema, data, "#{@schema_name}:#{idx}") }
+          list.each_with_index.map { |data, idx| create_schema(base_schema, data, "#{@schema_name}:#{idx}", skip_fields) }
         elsif !is_list? && list.is_a?(Hash)
           list.map do |(key, data)|
             schema = create_schema(base_schema, data, "#{@schema_name}:#{key}", skip_fields)

@@ -45,7 +45,8 @@ describe Schema::Associations::HasMany do
       ]
     }
   end
-  let(:model) { model_class.from_hash(model_data) }
+  let(:skip_fields) { [] }
+  let(:model) { model_class.from_hash(model_data, skip_fields) }
   let(:parsing_errors) { model.parsing_errors }
   let(:has_parsing_errors) { ! parsing_errors.empty? }
 
@@ -168,6 +169,14 @@ describe Schema::Associations::HasMany do
 
       it 'appended the user' do
         expect(model.as_json).to eq({users:[{id: 1, name: 'Foo Bar'}]})
+      end
+    end
+
+    describe 'skip_fields' do
+      let(:skip_fields) { [items: [:id]] }
+
+      it 'sets item id to nil' do
+        expect(model.items.map(&:id)).to eq([nil, nil])
       end
     end
   end

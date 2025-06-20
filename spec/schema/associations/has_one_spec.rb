@@ -32,7 +32,8 @@ describe Schema::Associations::HasOne do
       }
     }
   end
-  let(:model) { model_class.from_hash(model_data) }
+  let(:skip_fields) { [] }
+  let(:model) { model_class.from_hash(model_data, skip_fields) }
   let(:parsing_errors) { model.parsing_errors }
   let(:has_parsing_errors) { ! parsing_errors.empty? }
 
@@ -106,6 +107,14 @@ describe Schema::Associations::HasOne do
 
       it 'with default an empty association is created' do
         expect(model.user.nil?).to eq(false)
+      end
+    end
+
+    describe 'skip_fields' do
+      let(:skip_fields) { [item: [:id]] }
+
+      it 'set item id to nil' do
+        expect(model.item.id).to eq(nil)
       end
     end
   end
