@@ -73,8 +73,8 @@ module Schema
         add_aliases(name, options)
       end
 
-      def from_hash(data, source_object = nil, model_filter = [])
-        new.update_attributes(data, source_object, model_filter)
+      def from_hash(data = nil, skip_fields = [])
+        new.update_attributes(data, skip_fields)
       end
 
       def schema_include(mod)
@@ -114,10 +114,10 @@ STR
       end
     end
 
-    def update_attributes(data, source_object = nil, model_filter = [])
+    def update_attributes(data = nil, skip_fields = [])
       schema = get_schema(data)
-      update_model_attributes(schema, data, source_object, model_filter)
-      update_associations(schema, data, source_object, model_filter)
+      update_model_attributes(schema, data, skip_fields)
+      update_associations(schema, data, skip_fields)
       self
     end
 
@@ -164,7 +164,7 @@ STR
       self.class.schema_with_string_keys
     end
 
-    def update_model_attributes(schema, data, source_object, model_filter)
+    def update_model_attributes(schema, data, skip_fields)
       data.each do |key, value|
         unless schema.key?(key)
           parsing_errors.add(key, ::Schema::ParsingErrors::UNKNOWN_ATTRIBUTE) if self.class.capture_unknown_attributes?
@@ -172,25 +172,18 @@ STR
         end
 
         next if schema[key][:association]
+        next if skip_fields.include?(key)
 
-        public_send(schema[key][:setter], get_value(key, value, source_object, model_filter))
+        public_send(schema[key][:setter], value)
       end
     end
 
-    def update_associations(schema, data, source_object, model_filter)
+    def update_associations(schema, data, skip_fields)
       data.each do |key, value|
         next unless schema.key?(key)
         next unless schema[key][:association]
 
-        public_send(schema[key][:setter], get_value(key, value, source_object, model_filter))
-      end
-    end
-
-    def get_value(key, value, source_object, model_filter)
-      if model_filter.include?(key)
-        model_filter.get_value(self, key, value, source_object)
-      else
-        value
+        public_send(schema[key][:setter], value)
       end
     end
   end
