@@ -17,13 +17,13 @@ module Schema
         configure_dynamic_schema_options(options)
       end
 
-      def create_schema(base_schema, data, error_name = nil)
+      def create_schema(base_schema, data, error_name = nil, skip_fields = [])
         if data.is_a?(Hash)
           unless (schema_class = get_schema_class(base_schema, data))
             add_parsing_error(base_schema, error_name, UNKNOWN) if base_schema.class.capture_unknown_attributes?
             return nil
           end
-          schema = schema_class.from_hash(data)
+          schema = schema_class.from_hash(data, skip_fields)
           add_parsing_error(base_schema, error_name, INVALID) unless schema.parsing_errors.empty?
           schema
         elsif !data.nil?
@@ -32,12 +32,12 @@ module Schema
         end
       end
 
-      def create_schemas(base_schema, list)
+      def create_schemas(base_schema, list, skip_fields = [])
         if is_list? && list.is_a?(Array)
           list.each_with_index.map { |data, idx| create_schema(base_schema, data, "#{@schema_name}:#{idx}") }
         elsif !is_list? && list.is_a?(Hash)
           list.map do |(key, data)|
-            schema = create_schema(base_schema, data, "#{@schema_name}:#{key}")
+            schema = create_schema(base_schema, data, "#{@schema_name}:#{key}", skip_fields)
             schema.send(schema.class.schema[@hash_key_field][:setter], key)
             schema
           end

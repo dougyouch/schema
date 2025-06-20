@@ -183,7 +183,9 @@ STR
         next unless schema.key?(key)
         next unless schema[key][:association]
 
-        public_send(schema[key][:setter], value)
+        association_skip_fields = skip_fields.detect { |f| f.is_a?(Hash) && f.include?(key) }
+        association_skip_fields = association_skip_fields ? association_skip_fields[key] : []
+        public_send(schema[key][:setter], value, association_skip_fields)
       end
     end
   end

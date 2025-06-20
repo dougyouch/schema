@@ -24,8 +24,8 @@ module Schema
     @#{name}_schema_creator ||= ::Schema::Associations::SchemaCreator.new(self, #{name.inspect})
   end
 
-  def #{options[:setter]}(v)
-    #{options[:instance_variable]} = #{name}_schema_creator.create_schema(self, v)
+  def #{options[:setter]}(v, skip_fields = [])
+    #{options[:instance_variable]} = #{name}_schema_creator.create_schema(self, v, nil, skip_fields)
   end
 STR
           )
