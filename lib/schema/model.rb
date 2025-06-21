@@ -139,8 +139,8 @@ STR
 
     def update_attributes(data = nil, skip_fields = [])
       schema = get_schema(data)
-      update_model_attributes(schema, data, skip_fields)
-      update_associations(schema, data, skip_fields)
+      update_schema_attributes(schema, data, skip_fields)
+      update_schema_associations(schema, data, skip_fields)
       self
     end
 
@@ -185,7 +185,7 @@ STR
       self.class.schema_with_string_keys
     end
 
-    def update_model_attributes(schema, data, skip_fields)
+    def update_schema_attributes(schema, data, skip_fields)
       data.each do |key, value|
         unless schema.key?(key)
           parsing_errors.add(key, ::Schema::ParsingErrors::UNKNOWN_ATTRIBUTE) if self.class.capture_unknown_attributes?
@@ -199,7 +199,7 @@ STR
       end
     end
 
-    def update_associations(schema, data, skip_fields)
+    def update_schema_associations(schema, data, skip_fields)
       data.each do |key, value|
         next unless schema.key?(key)
         next unless schema[key][:association]
