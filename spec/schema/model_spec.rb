@@ -77,6 +77,19 @@ describe Schema::Model do
       it 'id was not set' do
         expect(model.id_was_set?).to eq(false)
       end
+
+      describe 'unset attributes' do
+        before(:each) do
+          model.name_unset!
+          model.cost_unset!
+        end
+
+        it 'all attributes are not set' do
+          expect(model.id_was_set?).to eq(false)
+          expect(model.name_was_set?).to eq(false)
+          expect(model.cost_was_set?).to eq(false)
+        end
+      end
     end
   end
 

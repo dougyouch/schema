@@ -18,6 +18,8 @@ module Schema
         type: type,
         getter: name.to_s.freeze,
         setter: "#{name}=",
+        was_set: "#{name}_was_set?",
+        unset: "#{name}_unset!",
         instance_variable: "@#{name}",
         default_method: "#{name}_default"
       }
@@ -100,8 +102,12 @@ module Schema
     #{options[:instance_variable]} = #{options[:parser]}(#{name.inspect}, parsing_errors, v)
   end
 
-  def #{options[:getter]}_was_set?
+  def #{options[:was_set]}
     instance_variable_defined?(:#{options[:instance_variable]})
+  end
+
+  def #{options[:unset]}
+    remove_instance_variable(:#{options[:instance_variable]})
   end
 STR
         )
