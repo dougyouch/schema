@@ -55,7 +55,7 @@ user_data = {
   tags: 'ruby,rails,developer'
 }
 
-user = UserSchema.new(user_data)
+user = UserSchema.from_hash(user_data)
 if user.valid?
   puts "User created: #{user.name}"
 else
@@ -147,6 +147,35 @@ end
 users = UserCSVSchema.parse_csv(csv_data)
 ```
 
+## Using `skip_fields` to Protect Internal Fields
+
+When instantiating a schema with `from_hash`, you can use the `skip_fields` argument to prevent certain fields (such as `id`, `created_at`, `updated_at`) from being set by user input. This is especially useful for fields managed by the database or internal logic, ensuring end users cannot override these values.
+
+**Example:**
+
+```ruby
+user_data = {
+  id: 123, # Should be managed by DB
+  name: 'John Doe',
+  email: 'john@example.com',
+  created_at: '2024-06-01T12:00:00Z', # Should be managed by DB
+  updated_at: '2024-06-01T12:00:00Z'  # Should be managed by DB
+}
+
+# Skip DB-managed fields
+user = UserSchema.from_hash(user_data, [:id, :created_at, :updated_at])
+
+puts user.id          # => nil (not set from user input)
+puts user.created_at  # => nil (not set from user input)
+puts user.updated_at  # => nil (not set from user input)
+puts user.name        # => 'John Doe'
+```
+
+**Benefit:**
+- Prevents end users from setting or changing internal DB values.
+- Ensures only safe, intended fields are settable from external input.
+- Helps maintain data integrity and security in your application.
+
 ## Contributing
 
 1. Fork the repository
@@ -158,3 +187,4 @@ users = UserCSVSchema.parse_csv(csv_data)
 ## License
 
 The gem is available as open source under the terms of the [MIT License](https://opensource.org/licenses/MIT).
+
