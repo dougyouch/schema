@@ -169,8 +169,8 @@ STR
     end
 
     def not_set?
-      self.class.schema.values.all? do |field_options|
-        !instance_variable_defined?(field_options[:instance_variable])
+      self.class.each_attribute.all? do |_, field_options|
+        !public_send(field_options[:was_set])
       end
     end
 
