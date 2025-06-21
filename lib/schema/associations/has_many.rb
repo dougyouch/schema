@@ -32,6 +32,14 @@ module Schema
     #{options[:instance_variable]} ||= []
     #{options[:instance_variable]} << #{name}_schema_creator.create_schema(self, v, nil, skip_fields)
   end
+
+  def #{options[:was_set]}
+    instance_variable_defined?(:#{options[:instance_variable]})
+  end
+
+  def #{options[:unset]}
+    remove_instance_variable(:#{options[:instance_variable]})
+  end
 STR
           )
 

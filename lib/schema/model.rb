@@ -120,6 +120,19 @@ STR
           add_value_to_class_method(:schema, alias_name.to_sym => options.merge(key: alias_name.to_s, alias_of: name))
           alias_method(alias_name, options[:getter])
           alias_method("#{alias_name}=", options[:setter])
+          alias_method("#{alias_name}_was_set?", options[:was_set])
+          alias_method("#{alias_name}_unset!", options[:unset])
+        end
+      end
+
+      # skip over aliases
+      def each_attribute
+        return to_enum(:each_attribute) unless block_given?
+
+        schema.each do |field_name, field_options|
+          next if field_options[:alias_of]
+
+          yield field_name, field_options
         end
       end
     end
@@ -132,18 +145,16 @@ STR
     end
 
     def as_json(opts = {})
-      self.class.schema.each_with_object({}) do |(field_name, field_options), memo|
-        unless field_options[:alias_of]
-          value = public_send(field_options[:getter])
-          next if value.nil? && !opts[:include_nils]
-          next if opts[:select_filter] && !opts[:select_filter].call(field_name, value, field_options)
-          next if opts[:reject_filter] && opts[:reject_filter].call(field_name, value, field_options)
+      self.class.each_attribute.each_with_object({}) do |(field_name, field_options), memo|
+        value = public_send(field_options[:getter])
+        next if value.nil? && !opts[:include_nils]
+        next if opts[:select_filter] && !opts[:select_filter].call(field_name, value, field_options)
+        next if opts[:reject_filter] && opts[:reject_filter].call(field_name, value, field_options)
 
-          if value.is_a?(Array)
-            memo[field_name] = value.map { |e| e.as_json(opts) }
-          else
-            memo[field_name] = value.respond_to?(:as_json) ? value.as_json(opts) : value
-          end
+        if value.is_a?(Array)
+          memo[field_name] = value.map { |e| e.as_json(opts) }
+        else
+          memo[field_name] = value.respond_to?(:as_json) ? value.as_json(opts) : value
         end
       end
     end
