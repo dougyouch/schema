@@ -57,6 +57,27 @@ describe Schema::Model do
         expect(model.id).to eq(nil)
       end
     end
+
+    context 'was_set?' do
+      let(:model_data) do
+        {
+          name: SecureRandom.hex(10),
+          cost: nil
+        }
+      end
+
+      it 'name was set' do
+        expect(model.name_was_set?).to eq(true)
+      end
+
+      it 'cost was set even though it is nil' do
+        expect(model.cost_was_set?).to eq(true)
+      end
+
+      it 'id was not set' do
+        expect(model.id_was_set?).to eq(false)
+      end
+    end
   end
 
   context 'setter/getter' do

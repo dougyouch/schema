@@ -99,6 +99,10 @@ module Schema
   def #{options[:setter]}(v)
     #{options[:instance_variable]} = #{options[:parser]}(#{name.inspect}, parsing_errors, v)
   end
+
+  def #{options[:getter]}_was_set?
+    instance_variable_defined?(:#{options[:instance_variable]})
+  end
 STR
         )
       end
