@@ -84,7 +84,12 @@ describe Schema::Assign do
       end
     end
   end
-  let(:model) { model_class.new }
+  let(:model) do
+    model_class.new.tap do |model|
+      model.tags.new(2, 'tag2')
+      model.tags.new(3, 'tag3')
+    end
+  end
   let(:include_filter) { nil }
   let(:exclude_filter) { nil }
 
@@ -99,8 +104,6 @@ describe Schema::Assign do
     end
 
     before(:each) do
-      model.tags.new(2, 'tag2')
-      model.tags.new(3, 'tag3')
       subject
     end
 
@@ -125,6 +128,38 @@ describe Schema::Assign do
 
       it { expect(model.tags[2].id).to eq(nil) }
       it { expect(model.tags[2].tag).to eq('new tag') }
+    end
+
+    describe '.was_set_filter' do
+      let(:include_filter) { Schema::Assign.was_set_filter }
+
+      let(:schema_data) do
+        {
+          name: name
+        }
+      end
+
+      let(:model) do
+        model_class.new.tap do |model|
+          model.id = 891
+          model.name = 'Change Me'
+          model.cost = 10.0
+        end
+      end
+
+      it { expect(model.id).to eq(891) }
+      it { expect(model.cost).to eq(10.0) }
+      it { expect(model.name).to eq(name) }
+
+      describe 'exclude_filter' do
+        let(:include_filter) { nil }
+        let(:exclude_filter) { Schema::Assign.was_set_filter }
+
+
+        it { expect(model.id).to eq(nil) }
+        it { expect(model.cost).to eq(0.0) } # default
+        it { expect(model.name).to eq('Change Me') }
+      end
     end
   end
 end

@@ -19,8 +19,8 @@ module Schema
 
         value = schema.public_send(field_options[:getter])
 
-        next if include_filter && !include_filter.call(schema, field_name, value, field_options)
-        next if exclude_filter && exclude_filter.call(schema, field_name, value, field_options)
+        next if include_filter && !include_filter.call(schema, model, field_name, value, field_options)
+        next if exclude_filter && exclude_filter.call(schema, model, field_name, value, field_options)
 
         model.public_send(field_options[:setter], value)
       end
@@ -83,6 +83,12 @@ module Schema
           include_filter: include_filter,
           exclude_filter: exclude_filter
         )
+      end
+    end
+
+    def self.was_set_filter
+      proc do |schema, model, field_name, value, field_options|
+        schema.public_send(field_options[:was_set])
       end
     end
   end
