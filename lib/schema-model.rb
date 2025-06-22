@@ -16,11 +16,13 @@ module Schema
   end
   class ParsingException < SchemaException; end
   class ValidationException < SchemaException; end
+  class UnknownAssociationTypeException < StandardError; end
 
   autoload :ActiveModelValidations, 'schema/active_model_validations'
   autoload :All, 'schema/all'
   autoload :ArrayHeaders, 'schema/array_headers'
   autoload :Arrays, 'schema/arrays'
+  autoload :Assign, 'schema/assign'
   autoload :CSVParser, 'schema/csv_parser'
   autoload :Errors, 'schema/errors'
   autoload :CSVParser, 'schema/csv_parser'
