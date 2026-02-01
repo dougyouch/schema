@@ -2,10 +2,11 @@
 
 Gem::Specification.new do |s|
   s.name        = 'schema-model'
-  s.version     = '0.6.12'
+  s.version     = '0.7.0'
   s.licenses    = ['MIT']
-  s.summary     = 'Schema Model'
-  s.description = 'Easy way to create models from payloads'
+  s.summary     = 'Data transformation, validation, and type safety for Ruby'
+  s.description = 'A flexible DSL for defining strongly-typed data models with automatic parsing, ' \
+                  'nested associations, dynamic types, and ActiveModel validations'
   s.authors     = ['Doug Youch']
   s.email       = 'dougyouch@gmail.com'
   s.homepage    = 'https://github.com/dougyouch/schema'
