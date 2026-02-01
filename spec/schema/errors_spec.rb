@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe Schema::Errors do
@@ -50,7 +52,7 @@ describe Schema::Errors do
       end
 
       it 'returns an array of errors' do
-        expect(errors[:name]).to eq([:invalid, :incompatable])
+        expect(errors[:name]).to eq(%i[invalid incompatable])
       end
     end
   end

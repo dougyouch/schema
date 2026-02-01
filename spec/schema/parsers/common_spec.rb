@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe Schema::Parsers::Common do
-  let(:model_class_name) { 'ModelClass' + SecureRandom.hex(10) }
+  let(:model_class_name) { "ModelClass#{SecureRandom.hex(10)}" }
   let(:model_class) do
     kls = Struct.new(
       :id,
@@ -14,7 +16,7 @@ describe Schema::Parsers::Common do
       include Schema::Parsers::Common
 
       def parsing_errors
-        @parsing_errors ||= ::Schema::Errors.new
+        @parsing_errors ||= Schema::Errors.new
       end
     end
     Object.const_set(model_class_name, kls)
@@ -28,7 +30,7 @@ describe Schema::Parsers::Common do
   let(:model_active) { true }
   let(:model) { model_class.new(model_id, model_name, model_cost, model_time, model_date, model_active) }
   let(:parsing_errors) { model.parsing_errors }
-  let(:has_parsing_errors) { ! parsing_errors.empty? }
+  let(:has_parsing_errors) { !parsing_errors.empty? }
 
   context 'parse_integer' do
     let(:field_name) { :id }
@@ -90,7 +92,7 @@ describe Schema::Parsers::Common do
       end
 
       describe 'float string starting with 0' do
-        let(:value) { '0' + rand(1_000_000).to_s }
+        let(:value) { "0#{rand(1_000_000)}" }
 
         it 'has errors' do
           expect(subject).to eq(nil)
@@ -126,7 +128,7 @@ describe Schema::Parsers::Common do
       end
 
       describe 'none integer types' do
-        let(:value) { {id: 4} }
+        let(:value) { { id: 4 } }
 
         it 'has errors' do
           expect(subject).to eq(nil)
@@ -136,7 +138,7 @@ describe Schema::Parsers::Common do
     end
 
     describe 'invalid type' do
-      let(:value) { {a: 1} }
+      let(:value) { { a: 1 } }
 
       it 'has errors' do
         expect(subject).to eq(nil)
@@ -177,7 +179,7 @@ describe Schema::Parsers::Common do
     end
 
     describe 'hash value' do
-      let(:value) { {a: 1} }
+      let(:value) { { a: 1 } }
 
       it 'has errors' do
         expect(subject).to eq(nil)
@@ -265,7 +267,7 @@ describe Schema::Parsers::Common do
         let(:value) { '5.181E6' }
 
         it 'has no errors' do
-          expect(subject).to eq(5181000.0)
+          expect(subject).to eq(5_181_000.0)
           expect(has_parsing_errors).to eq(false)
         end
       end
@@ -289,7 +291,7 @@ describe Schema::Parsers::Common do
       end
 
       describe 'float string starting with 0' do
-        let(:value) { '0' + rand(1_000_000).to_s }
+        let(:value) { "0#{rand(1_000_000)}" }
 
         it 'has errors' do
           expect(subject).to eq(nil)
@@ -308,7 +310,7 @@ describe Schema::Parsers::Common do
     end
 
     describe 'invalid type' do
-      let(:value) { {a: 1} }
+      let(:value) { { a: 1 } }
 
       it 'has errors' do
         expect(subject).to eq(nil)
@@ -368,7 +370,7 @@ describe Schema::Parsers::Common do
     end
 
     describe 'invalid type' do
-      let(:value) { {a: 1} }
+      let(:value) { { a: 1 } }
 
       it 'has errors' do
         expect(subject).to eq(nil)
@@ -429,7 +431,7 @@ describe Schema::Parsers::Common do
     end
 
     describe 'invalid type' do
-      let(:value) { {a: 1} }
+      let(:value) { { a: 1 } }
 
       it 'has errors' do
         expect(subject).to eq(nil)
@@ -471,7 +473,7 @@ describe Schema::Parsers::Common do
     end
 
     describe 'integer value' do
-      let(:value) { rand(1_000_000) + 1 }
+      let(:value) { rand(1..1_000_000) }
 
       it 'has no errors' do
         expect(subject).to eq(true)
@@ -489,7 +491,7 @@ describe Schema::Parsers::Common do
     end
 
     describe 'float value' do
-      let(:value) { (rand(1_000_000) + 1).to_f + rand}
+      let(:value) { rand(1..1_000_000).to_f + rand }
 
       it 'has no errors' do
         expect(subject).to eq(true)
@@ -509,13 +511,13 @@ describe Schema::Parsers::Common do
     describe 'string value' do
       describe 'truthy values' do
         let(:truthy_examples) do
-          [
-            'T',
-            'True',
-            'y',
-            'yEs',
-            '1',
-            'ON'
+          %w[
+            T
+            True
+            y
+            yEs
+            1
+            ON
           ]
         end
 
@@ -546,7 +548,7 @@ describe Schema::Parsers::Common do
     end
 
     describe 'invalid type' do
-      let(:value) { {a: 1} }
+      let(:value) { { a: 1 } }
 
       it 'has errors' do
         expect(subject).to eq(nil)

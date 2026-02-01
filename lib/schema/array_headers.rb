@@ -47,7 +47,7 @@ module Schema
         mapped_model = mapped_headers[field_name] || {}
         const_get(field_options[:class_name]).get_field_names(
           mapped_model,
-          header_prefix || (field_options[:aliases] && field_options[:aliases].first),
+          header_prefix || field_options[:aliases]&.first,
           mapped
         )
       end
@@ -62,7 +62,7 @@ module Schema
 
       def generate_field_name(field_name, field_options, header_prefix)
         field_name = field_options[:aliases].first if field_options[:aliases]
-        field_name = header_prefix + 'X' + field_name.to_s if header_prefix
+        field_name = "#{header_prefix}X#{field_name}" if header_prefix
         field_name.to_s
       end
 

@@ -15,7 +15,7 @@ module Schema
 
       def to_empty_array
         data = []
-        schema.each do |_, field_options|
+        schema.each_value do |field_options|
           next if field_options[:alias_of]
 
           data <<
@@ -24,8 +24,6 @@ module Schema
               const_get(field_options[:class_name]).to_empty_array
             when :has_many
               field_options[:size].times.map { const_get(field_options[:class_name]).to_empty_array }
-            else
-              nil
             end
         end
         data
@@ -33,16 +31,16 @@ module Schema
 
       def to_headers(prefix = nil)
         headers = []
-        schema.each do |_, field_options|
+        schema.each_value do |field_options|
           next if field_options[:alias_of]
 
           headers <<
             case field_options[:type]
             when :has_one
-              const_get(field_options[:class_name]).to_headers(prefix.to_s + field_options[:key] + '.')
+              const_get(field_options[:class_name]).to_headers("#{prefix}#{field_options[:key]}.")
             when :has_many
               field_options[:size].times.map do |i|
-                const_get(field_options[:class_name]).to_headers(prefix.to_s + field_options[:key] + "[#{i +1}].")
+                const_get(field_options[:class_name]).to_headers(prefix.to_s + field_options[:key] + "[#{i + 1}].")
               end
             else
               prefix.to_s + field_options[:key]
@@ -54,7 +52,7 @@ module Schema
 
     def to_a
       data = []
-      self.class.schema.each do |_, field_options|
+      self.class.schema.each_value do |field_options|
         next if field_options[:alias_of]
 
         value = public_send(field_options[:getter])
@@ -76,7 +74,7 @@ module Schema
     end
 
     def update_attributes_with_array(array, mapped_headers, offset = nil)
-      self.class.schema.each do |_, field_options|
+      self.class.schema.each_value do |field_options|
         next unless (mapped_field = mapped_headers[field_options[:name]])
 
         if offset
@@ -103,7 +101,7 @@ module Schema
     end
 
     def update_nested_has_one_associations_from_array(array, mapped_headers, current_offset = nil)
-      self.class.schema.each do |_, field_options|
+      self.class.schema.each_value do |field_options|
         next unless field_options[:type] == :has_one
         next unless (mapped_model = mapped_headers[field_options[:name]])
 
@@ -115,7 +113,7 @@ module Schema
     end
 
     def update_nested_has_many_associations_from_array(array, mapped_headers)
-      self.class.schema.each do |_, field_options|
+      self.class.schema.each_value do |field_options|
         next unless field_options[:type] == :has_many
         next unless (mapped_model = mapped_headers[field_options[:name]])
 
@@ -136,7 +134,7 @@ module Schema
 
     def largest_number_of_indexes_from_map(mapped_model)
       size = 0
-      mapped_model.each do |_, info|
+      mapped_model.each_value do |info|
         if info[:indexes]
           size = info[:indexes].size if info[:indexes] && info[:indexes].size > size
         else

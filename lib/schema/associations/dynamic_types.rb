@@ -19,8 +19,8 @@ module Schema
           kls
         end
 
-        def default_type(options = {}, &block)
-          add_type(:default, options, &block)
+        def default_type(options = {}, &)
+          add_type(:default, options, &)
         end
 
         def dynamic_types
@@ -34,9 +34,7 @@ module Schema
         private
 
         def schema_dynamic_type_class_name(type)
-          ::Schema::Utils.classify_name(schema_name.to_s) +
-            'AssociationType' +
-            ::Schema::Utils.classify_name(type.to_s)
+          "#{::Schema::Utils.classify_name(schema_name.to_s)}AssociationType#{::Schema::Utils.classify_name(type.to_s)}"
         end
 
         def schema_add_dynamic_type(type, class_name)

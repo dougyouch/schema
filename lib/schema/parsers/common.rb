@@ -6,11 +6,10 @@ module Schema
   module Parsers
     # Schema::Parsers::Common are parser methods for basic types
     module Common
-      INTEGER_REGEX = /^[-+]?(?:[1-9]\d*|0)(?:\.0+)?$/.freeze
-      FLOAT_REGEX = /^[-+]?(?:[1-9]\d*|0)(?:\.\d+)?([Ee]-?\d+)?$/.freeze
-      BOOLEAN_REGEX = /^(?:1|t|true|on|y|yes)$/i.freeze
+      INTEGER_REGEX = /^[-+]?(?:[1-9]\d*|0)(?:\.0+)?$/
+      FLOAT_REGEX = /^[-+]?(?:[1-9]\d*|0)(?:\.\d+)?([Ee]-?\d+)?$/
+      BOOLEAN_REGEX = /^(?:1|t|true|on|y|yes)$/i
 
-      # rubocop:disable Metrics/CyclomaticComplexity
       def parse_integer(field_name, parsing_errors, value)
         case value
         when Integer
@@ -32,7 +31,6 @@ module Schema
           nil
         end
       end
-      # rubocop:enable Metrics/CyclomaticComplexity
 
       def parse_string(field_name, parsing_errors, value)
         case value

@@ -69,7 +69,7 @@ module Schema
 
         add_value_to_class_method(:schema, name => options)
         add_attribute_methods(name, options)
-        ::Schema::Utils.add_attribute_default_methods(self, options) if options.has_key?(:default)
+        ::Schema::Utils.add_attribute_default_methods(self, options) if options.key?(:default)
         add_aliases(name, options)
       end
 
@@ -82,7 +82,8 @@ module Schema
         config[:schema_includes] = config[:schema_includes] + [mod]
         redefine_class_method(:schema_config, config.freeze)
         include mod
-        schema.values.each do |field_options|
+
+        schema.each_value do |field_options|
           next unless field_options[:association]
 
           const_get(field_options[:class_name]).schema_include(mod)
@@ -91,7 +92,7 @@ module Schema
 
       def add_attribute_methods(name, options)
         class_eval(
-<<-STR, __FILE__, __LINE__ + 1
+          <<-STR, __FILE__, __LINE__ + 1
   def #{options[:getter]}
     #{options[:instance_variable]}
   end
@@ -103,7 +104,7 @@ module Schema
   def #{options[:getter]}_was_set?
     instance_variable_defined?(:#{options[:instance_variable]})
   end
-STR
+          STR
         )
       end
 
@@ -127,18 +128,18 @@ STR
 
     def as_json(opts = {})
       self.class.schema.each_with_object({}) do |(field_name, field_options), memo|
-        unless field_options[:alias_of]
-          value = public_send(field_options[:getter])
-          next if value.nil? && !opts[:include_nils]
-          next if opts[:select_filter] && !opts[:select_filter].call(field_name, value, field_options)
-          next if opts[:reject_filter] && opts[:reject_filter].call(field_name, value, field_options)
+        next if field_options[:alias_of]
 
-          if value.is_a?(Array)
-            memo[field_name] = value.map { |e| e.as_json(opts) }
-          else
-            memo[field_name] = value.respond_to?(:as_json) ? value.as_json(opts) : value
-          end
-        end
+        value = public_send(field_options[:getter])
+        next if value.nil? && !opts[:include_nils]
+        next if opts[:select_filter] && !opts[:select_filter].call(field_name, value, field_options)
+        next if opts[:reject_filter]&.call(field_name, value, field_options)
+
+        memo[field_name] = if value.is_a?(Array)
+                             value.map { |e| e.as_json(opts) }
+                           else
+                             value.respond_to?(:as_json) ? value.as_json(opts) : value
+                           end
       end
     end
 
@@ -160,12 +161,10 @@ STR
     private
 
     def get_schema(data)
-      data.each_key do |key|
-        break unless key.is_a?(Symbol)
+      first_key = data.each_key.first
+      return self.class.schema_with_string_keys unless first_key.is_a?(Symbol)
 
-        return self.class.schema
-      end
-      self.class.schema_with_string_keys
+      self.class.schema
     end
 
     def update_model_attributes(schema, data, skip_fields)

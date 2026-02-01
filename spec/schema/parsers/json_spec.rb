@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 require 'json'
 
 describe Schema::Parsers::Json do
-  let(:model_class_name) { 'ModelClass' + SecureRandom.hex(10) }
+  let(:model_class_name) { "ModelClass#{SecureRandom.hex(10)}" }
   let(:model_class) do
     kls = Class.new do
       include Schema::Model
@@ -18,11 +20,11 @@ describe Schema::Parsers::Json do
 
   context 'parse_hash' do
     describe 'valid payload' do
-      let(:costs) { {tv: 1, channels: 4}.to_json }
+      let(:costs) { { tv: 1, channels: 4 }.to_json }
       let(:payload) do
         {
           id: rand(1_000_000),
-          name: 'Name ' + SecureRandom.hex(8),
+          name: "Name #{SecureRandom.hex(8)}",
           costs: costs
         }
       end
@@ -35,11 +37,14 @@ describe Schema::Parsers::Json do
     end
 
     describe 'invalid payload' do
-      let(:costs) { str = {tv: 1, channels: 4}.to_json; str[1, str.size] }
+      let(:costs) do
+        str = { tv: 1, channels: 4 }.to_json
+        str[1, str.size]
+      end
       let(:payload) do
         {
           id: rand(1_000_000),
-          name: 'Name ' + SecureRandom.hex(8),
+          name: "Name #{SecureRandom.hex(8)}",
           costs: costs
         }
       end
@@ -60,7 +65,7 @@ describe Schema::Parsers::Json do
       let(:payload) do
         {
           id: rand(1_000_000),
-          name: 'Name ' + SecureRandom.hex(8),
+          name: "Name #{SecureRandom.hex(8)}",
           costs: costs
         }
       end

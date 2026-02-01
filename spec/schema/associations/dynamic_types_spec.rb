@@ -1,12 +1,15 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe Schema::Associations::DynamicTypes do
-  let(:model_class_name) { 'ModelClass' + SecureRandom.hex(10) }
+  let(:model_class_name) { "ModelClass#{SecureRandom.hex(10)}" }
   let(:model_class) do
     kls = Class.new
     kls = Object.const_set(model_class_name, kls)
     kls.class_eval do
       include Schema::Model
+
       schema_include Schema::Associations::HasOne
       attribute :name, :string
       attribute :type, :string
@@ -32,23 +35,23 @@ describe Schema::Associations::DynamicTypes do
 
   context '.dynamic_type_names' do
     it 'item has 2 types' do
-      expect(item_class.dynamic_type_names).to eq(['foo', 'bar'])
+      expect(item_class.dynamic_type_names).to eq(%w[foo bar])
     end
   end
 
   context '#add_type' do
     it 'item has 2 types' do
-      expect(model_class.schema[:item][:types].keys).to eq(['foo', 'bar'])
+      expect(model_class.schema[:item][:types].keys).to eq(%w[foo bar])
     end
 
     describe 'valid type' do
-      let(:foo_value) { 'value of foo ' + SecureRandom.hex(8) }
+      let(:foo_value) { "value of foo #{SecureRandom.hex(8)}" }
       let(:payload) do
         {
-          name: 'Name ' + SecureRandom.hex(8),
+          name: "Name #{SecureRandom.hex(8)}",
           item: {
             id: rand(1_000_000),
-            name: 'ItemName ' + SecureRandom.hex(8),
+            name: "ItemName #{SecureRandom.hex(8)}",
             type: 'foo',
             foo: foo_value
           }
@@ -63,13 +66,13 @@ describe Schema::Associations::DynamicTypes do
     end
 
     describe 'invalid type' do
-      let(:foo_value) { 'value of foo ' + SecureRandom.hex(8) }
+      let(:foo_value) { "value of foo #{SecureRandom.hex(8)}" }
       let(:payload) do
         {
-          name: 'Name ' + SecureRandom.hex(8),
+          name: "Name #{SecureRandom.hex(8)}",
           item: {
             id: rand(1_000_000),
-            name: 'ItemName ' + SecureRandom.hex(8),
+            name: "ItemName #{SecureRandom.hex(8)}",
             type: 'foo2',
             foo: foo_value
           }
@@ -88,13 +91,13 @@ describe Schema::Associations::DynamicTypes do
     end
 
     describe 'valid type unknown fields' do
-      let(:foo_value) { 'value of foo ' + SecureRandom.hex(8) }
+      let(:foo_value) { "value of foo #{SecureRandom.hex(8)}" }
       let(:payload) do
         {
-          name: 'Name ' + SecureRandom.hex(8),
+          name: "Name #{SecureRandom.hex(8)}",
           item: {
             id: rand(1_000_000),
-            name: 'ItemName ' + SecureRandom.hex(8),
+            name: "ItemName #{SecureRandom.hex(8)}",
             type: 'bar',
             foo: foo_value
           }
@@ -114,13 +117,13 @@ describe Schema::Associations::DynamicTypes do
     end
 
     describe 'valid type upcased' do
-      let(:foo_value) { 'value of foo ' + SecureRandom.hex(8) }
+      let(:foo_value) { "value of foo #{SecureRandom.hex(8)}" }
       let(:payload) do
         {
-          name: 'Name ' + SecureRandom.hex(8),
+          name: "Name #{SecureRandom.hex(8)}",
           item: {
             id: rand(1_000_000),
-            name: 'ItemName ' + SecureRandom.hex(8),
+            name: "ItemName #{SecureRandom.hex(8)}",
             type: 'FOO',
             foo: foo_value
           }
@@ -160,14 +163,14 @@ describe Schema::Associations::DynamicTypes do
     end
 
     describe 'valid type' do
-      let(:foo_value) { 'value of foo ' + SecureRandom.hex(8) }
+      let(:foo_value) { "value of foo #{SecureRandom.hex(8)}" }
       let(:payload) do
         {
-          name: 'Name ' + SecureRandom.hex(8),
+          name: "Name #{SecureRandom.hex(8)}",
           type: 'foo',
           item: {
             id: rand(1_000_000),
-            name: 'ItemName ' + SecureRandom.hex(8),
+            name: "ItemName #{SecureRandom.hex(8)}",
             foo: foo_value
           }
         }
@@ -181,14 +184,14 @@ describe Schema::Associations::DynamicTypes do
     end
 
     describe 'invalid type' do
-      let(:foo_value) { 'value of foo ' + SecureRandom.hex(8) }
+      let(:foo_value) { "value of foo #{SecureRandom.hex(8)}" }
       let(:payload) do
         {
-          name: 'Name ' + SecureRandom.hex(8),
+          name: "Name #{SecureRandom.hex(8)}",
           type: 'invalid',
           item: {
             id: rand(1_000_000),
-            name: 'ItemName ' + SecureRandom.hex(8),
+            name: "ItemName #{SecureRandom.hex(8)}",
             foo: foo_value
           }
         }

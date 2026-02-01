@@ -1,12 +1,15 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 require 'csv'
 require 'stringio'
 
 describe Schema::CSVParser do
-  let(:model_class_name) { 'ModelClass' + SecureRandom.hex(10) }
+  let(:model_class_name) { "ModelClass#{SecureRandom.hex(10)}" }
   let(:model_class) do
     kls = Class.new do
       include Schema::Model
+
       schema_include Schema::Associations::HasOne
       schema_include Schema::Associations::HasMany
       schema_include Schema::ArrayHeaders
@@ -42,20 +45,20 @@ describe Schema::CSVParser do
     Object.const_get(model_class_name)
   end
   let(:model_data_headers) do
-    [
-      'ID',
-      'CompanyName',
-      'PersonName',
-      'CompanyStateCode',
-      'CompanyCity',
-      'Friends1Name',
-      'Friends1Status',
-      'Friends2Name',
-      'Friends2Status',
-      'NotUsed',
-      'Friends1FavoriteGameName',
-      'Friends2FavoriteGameName',
-      'Friends3FavoriteGameName'
+    %w[
+      ID
+      CompanyName
+      PersonName
+      CompanyStateCode
+      CompanyCity
+      Friends1Name
+      Friends1Status
+      Friends2Name
+      Friends2Status
+      NotUsed
+      Friends1FavoriteGameName
+      Friends2FavoriteGameName
+      Friends3FavoriteGameName
     ]
   end
   let(:required_data_headers) do
@@ -120,7 +123,7 @@ describe Schema::CSVParser do
       let(:csv_io) { StringIO.new('') }
 
       it 'blows up' do
-        expect(subject).to eq(['ID', 'CompanyName', 'PersonName', 'CompanyStateCode', 'CompanyCity', 'Friends1Name', 'Friends1Status', 'Friends2Name', 'Friends2Status', 'Friends1FavoriteGameName', 'Friends2FavoriteGameName', 'Friends3FavoriteGameName', 'ZipCode'])
+        expect(subject).to eq(%w[ID CompanyName PersonName CompanyStateCode CompanyCity Friends1Name Friends1Status Friends2Name Friends2Status Friends1FavoriteGameName Friends2FavoriteGameName Friends3FavoriteGameName ZipCode])
       end
     end
   end

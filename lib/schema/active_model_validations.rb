@@ -11,13 +11,13 @@ module Schema
     end
 
     def valid_model!
-      unless valid?
-        raise ValidationException.new(
-                "invalid values for attributes #{errors.map(&:attribute).join(', ')}",
-                self,
-                errors
-              )
-      end
+      return if valid?
+
+      raise ValidationException.new(
+        "invalid values for attributes #{errors.map(&:attribute).join(', ')}",
+        self,
+        errors
+      )
     end
 
     def valid!
@@ -36,13 +36,13 @@ module Schema
       end
 
       def parsed!
-        unless parsed?
-          raise ParsingException.new(
-                  "schema parsing failed for attributes #{parsing_errors.errors.map(&:attribute).join(', ')}",
-                  self,
-                  parsing_errors
-                )
-        end
+        return if parsed?
+
+        raise ParsingException.new(
+          "schema parsing failed for attributes #{parsing_errors.errors.map(&:attribute).join(', ')}",
+          self,
+          parsing_errors
+        )
       end
     end
   end

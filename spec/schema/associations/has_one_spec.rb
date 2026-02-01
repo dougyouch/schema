@@ -1,10 +1,13 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe Schema::Associations::HasOne do
-  let(:model_class_name) { 'ModelClass' + SecureRandom.hex(10) }
+  let(:model_class_name) { "ModelClass#{SecureRandom.hex(10)}" }
   let(:model_class) do
     kls = Class.new do
       include Schema::Model
+
       schema_include Schema::Associations::HasOne
       attribute :name, :string
 
@@ -35,7 +38,7 @@ describe Schema::Associations::HasOne do
   let(:skip_fields) { [] }
   let(:model) { model_class.from_hash(model_data, skip_fields) }
   let(:parsing_errors) { model.parsing_errors }
-  let(:has_parsing_errors) { ! parsing_errors.empty? }
+  let(:has_parsing_errors) { !parsing_errors.empty? }
 
   context 'has_one' do
     it 'sets the associated object' do
@@ -44,7 +47,7 @@ describe Schema::Associations::HasOne do
     end
 
     describe 'incorrect model data' do
-      let(:model_data) { {item: 'not valid'} }
+      let(:model_data) { { item: 'not valid' } }
 
       it 'association is nil' do
         expect(model.item).to eq(nil)
@@ -53,7 +56,7 @@ describe Schema::Associations::HasOne do
     end
 
     describe 'nil model data' do
-      let(:model_data) { {item: nil} }
+      let(:model_data) { { item: nil } }
 
       it 'association is nil' do
         expect(model.item).to eq(nil)

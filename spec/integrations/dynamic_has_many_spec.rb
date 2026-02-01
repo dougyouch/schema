@@ -1,12 +1,15 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe 'dynamic has many' do
-  let(:model_class_name) { 'ModelClass' + SecureRandom.hex(10) }
+  let(:model_class_name) { "ModelClass#{SecureRandom.hex(10)}" }
   let(:model_class) do
     kls = Class.new
     kls = Object.const_set(model_class_name, kls)
     kls.class_eval do
       include Schema::Model
+
       schema_include Schema::Associations::HasMany
       attribute :name, :string
 
@@ -27,23 +30,22 @@ describe 'dynamic has many' do
     Object.const_get(model_class_name)
   end
 
-
   describe 'valid types' do
-    let(:foo_value) { 'value of foo ' + SecureRandom.hex(8) }
-    let(:bar_value) { 'value of bar ' + SecureRandom.hex(8) }
+    let(:foo_value) { "value of foo #{SecureRandom.hex(8)}" }
+    let(:bar_value) { "value of bar #{SecureRandom.hex(8)}" }
     let(:payload) do
       {
-        name: 'Name ' + SecureRandom.hex(8),
+        name: "Name #{SecureRandom.hex(8)}",
         items: [
           {
             id: rand(1_000_000),
-            name: 'ItemName ' + SecureRandom.hex(8),
+            name: "ItemName #{SecureRandom.hex(8)}",
             type: 'bar',
             bar: bar_value
           },
           {
             id: rand(1_000_000),
-            name: 'ItemName ' + SecureRandom.hex(8),
+            name: "ItemName #{SecureRandom.hex(8)}",
             type: 'foo',
             foo: foo_value
           }
@@ -60,28 +62,28 @@ describe 'dynamic has many' do
   end
 
   describe 'invalid type' do
-    let(:foo_value) { 'value of foo ' + SecureRandom.hex(8) }
-    let(:bar_value) { 'value of bar ' + SecureRandom.hex(8) }
+    let(:foo_value) { "value of foo #{SecureRandom.hex(8)}" }
+    let(:bar_value) { "value of bar #{SecureRandom.hex(8)}" }
     let(:payload) do
       {
-        name: 'Name ' + SecureRandom.hex(8),
+        name: "Name #{SecureRandom.hex(8)}",
         items: [
           {
             id: rand(1_000_000),
-            name: 'ItemName ' + SecureRandom.hex(8),
+            name: "ItemName #{SecureRandom.hex(8)}",
             type: 'bar',
             bar: bar_value
           },
           {
             id: rand(1_000_000),
-            name: 'ItemName ' + SecureRandom.hex(8),
+            name: "ItemName #{SecureRandom.hex(8)}",
             type: 'invalid',
             bar: 'bar not set',
             foo: 'foo not set'
           },
           {
             id: rand(1_000_000),
-            name: 'ItemName ' + SecureRandom.hex(8),
+            name: "ItemName #{SecureRandom.hex(8)}",
             type: 'foo',
             foo: foo_value
           }

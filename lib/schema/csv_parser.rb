@@ -32,7 +32,7 @@ module Schema
 
     def get_mapped_headers(mapped_headers)
       indexed_headers = []
-      mapped_headers.each do |_, info|
+      mapped_headers.each_value do |info|
         if (index = info[:index])
           indexed_headers << @headers[index]
         elsif (indexes = info[:indexes])

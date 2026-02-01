@@ -1,11 +1,73 @@
-Naming/FileName:
-  Enabled: false
-Metrics/LineLength:
-  Max: 120
-Metrics/ModuleLength:
-  Max: 120
-Metrics/MethodLength:
-  Max: 20
 AllCops:
+  TargetRubyVersion: 3.2
+  NewCops: enable
+  SuggestExtensions: false
   Exclude:
-    - 'spec/**/*_spec.rb'
+    - 'bin/**/*'
+    - 'vendor/**/*'
+    - 'coverage/**/*'
+
+# Relaxed metrics for existing codebase
+Metrics/MethodLength:
+  Max: 35
+
+Metrics/AbcSize:
+  Max: 40
+
+Metrics/ClassLength:
+  Max: 200
+
+Metrics/ModuleLength:
+  Max: 200
+
+Metrics/CyclomaticComplexity:
+  Max: 15
+
+Metrics/PerceivedComplexity:
+  Max: 15
+
+Metrics/BlockLength:
+  Exclude:
+    - 'spec/**/*'
+    - '*.gemspec'
+
+# Style preferences
+Style/Documentation:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  EnforcedStyle: always
+
+Layout/LineLength:
+  Max: 130
+  Exclude:
+    - 'spec/**/*'
+
+# File naming - allow hyphenated gem name
+Naming/FileName:
+  Exclude:
+    - 'lib/schema-model.rb'
+
+# Gemspec settings
+Gemspec/RequiredRubyVersion:
+  Enabled: false
+
+# DSL methods following ActiveRecord conventions (has_one, has_many)
+Naming/PredicatePrefix:
+  Exclude:
+    - 'lib/schema/associations/has_one.rb'
+    - 'lib/schema/associations/has_many.rb'
+    - 'lib/schema/associations/schema_creator.rb'
+
+# Dynamic eval is used for metaprogramming in this DSL gem
+Style/DocumentDynamicEvalDefinition:
+  Enabled: false
+
+# Short parameter names acceptable in simple setters
+Naming/MethodParameterName:
+  AllowedNames:
+    - v
+
+# Boolean parameters acceptable in internal methods
+Style/OptionalBooleanParameter:
+  Enabled: false

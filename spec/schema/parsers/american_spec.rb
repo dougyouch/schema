@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe Schema::Parsers::American do
-  let(:model_class_name) { 'ModelClass' + SecureRandom.hex(10) }
+  let(:model_class_name) { "ModelClass#{SecureRandom.hex(10)}" }
   let(:model_class) do
     kls = Struct.new(
       :time,
@@ -10,7 +12,7 @@ describe Schema::Parsers::American do
       include Schema::Parsers::American
 
       def parsing_errors
-        @parsing_errors ||= ::Schema::Errors.new
+        @parsing_errors ||= Schema::Errors.new
       end
     end
     Object.const_set(model_class_name, kls)
@@ -20,7 +22,7 @@ describe Schema::Parsers::American do
   let(:model_date) { model_time.to_date }
   let(:model) { model_class.new(model_time, model_date) }
   let(:parsing_errors) { model.parsing_errors }
-  let(:has_parsing_errors) { ! parsing_errors.empty? }
+  let(:has_parsing_errors) { !parsing_errors.empty? }
 
   context 'parse_american_time' do
     let(:field_name) { :time }
@@ -64,7 +66,7 @@ describe Schema::Parsers::American do
     end
 
     describe 'invalid type' do
-      let(:value) { {a: 1} }
+      let(:value) { { a: 1 } }
 
       it 'has errors' do
         expect(subject).to eq(nil)
@@ -125,7 +127,7 @@ describe Schema::Parsers::American do
     end
 
     describe 'invalid type' do
-      let(:value) { {a: 1} }
+      let(:value) { { a: 1 } }
 
       it 'has errors' do
         expect(subject).to eq(nil)

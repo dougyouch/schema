@@ -14,6 +14,7 @@ module Schema
       @errors = errors
     end
   end
+
   class ParsingException < SchemaException; end
   class ValidationException < SchemaException; end
 

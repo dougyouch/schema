@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe Schema::Model do
   let(:capture_unknown_attributes) { true }
-  let(:model_class_name) { 'ModelClass' + SecureRandom.hex(10) }
+  let(:model_class_name) { "ModelClass#{SecureRandom.hex(10)}" }
   let(:model_class) do
     kls = Class.new do
       include Schema::Model
@@ -32,7 +34,7 @@ describe Schema::Model do
 
       it 'adds the attriburte to the schema' do
         subject
-        expect(model_class.schema.has_key?(attribute_name)).to eq(true)
+        expect(model_class.schema.key?(attribute_name)).to eq(true)
       end
     end
 
@@ -95,7 +97,7 @@ describe Schema::Model do
   context 'from_hash' do
     let(:value) { rand(1_000_000).to_s }
 
-    subject { model_class.from_hash({id: value}, skip_fields) }
+    subject { model_class.from_hash({ id: value }, skip_fields) }
 
     it 'transformed and assigned the value' do
       expect(subject.id).to eq(value.to_i)
@@ -144,15 +146,15 @@ describe Schema::Model do
     end
 
     describe 'select_filter' do
-      let(:select_filter) { Proc.new { |field_name, value, field_options| field_name == :id } }
+      let(:select_filter) { proc { |field_name, _value, _field_options| field_name == :id } }
 
       it { expect(subject.keys).to eq([:id]) }
     end
 
     describe 'reject_filter' do
-      let(:reject_filter) { Proc.new { |field_name, value, field_options| field_name == :id } }
+      let(:reject_filter) { proc { |field_name, _value, _field_options| field_name == :id } }
 
-      it { expect(subject.keys).to eq([:name, :cost]) }
+      it { expect(subject.keys).to eq(%i[name cost]) }
     end
   end
 

@@ -1,10 +1,13 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe Schema::Arrays do
-  let(:model_class_name) { 'ModelClass' + SecureRandom.hex(10) }
+  let(:model_class_name) { "ModelClass#{SecureRandom.hex(10)}" }
   let(:model_class) do
     kls = Class.new do
       include Schema::Model
+
       schema_include Schema::Associations::HasOne
       schema_include Schema::Associations::HasMany
 
@@ -38,20 +41,20 @@ describe Schema::Arrays do
   end
   let(:mapped_headers) do
     {
-      id: {index: 0},
-      name: {index: 2},
+      id: { index: 0 },
+      name: { index: 2 },
       company: {
-        name: {index: 1},
+        name: { index: 1 },
         location: {
-          city: {index: 4},
-          state: {index: 3}
+          city: { index: 4 },
+          state: { index: 3 }
         }
       },
       friends: {
-        name: {indexes: [5, 7]},
-        status: {indexes: [6, 8]},
+        name: { indexes: [5, 7] },
+        status: { indexes: [6, 8] },
         game: {
-          name: {indexes: [10, 11]}
+          name: { indexes: [10, 11] }
         }
       }
     }
@@ -102,7 +105,7 @@ describe Schema::Arrays do
           nil, # :name
           [ # location
             nil, # :city
-            nil  #: state
+            nil  # : state
           ]
         ],
         [ # 3 sets of friends
@@ -129,24 +132,24 @@ describe Schema::Arrays do
     let(:expected_array) do
       [
         4, # :id
-        "Joe Smith", # :name
+        'Joe Smith', # :name
         nil, # :unknown
         [ # company
-          "Paper INC", # :name
+          'Paper INC', # :name
           [ # location
-            "Nowhere", # :city
-            "UU" # :state
+            'Nowhere', # :city
+            'UU' # :state
           ]
         ],
         [ # 3 sets of friends
           [ # friend 1
-            "Jimmy", # :name
-            "Good",  # :status
+            'Jimmy', # :name
+            'Good',  # :status
             [ # game
-              "Pirates" # :name
+              'Pirates' # :name
             ]
           ],
-          ["Frank", "Poor", ["Swords"]], # friend 2
+          ['Frank', 'Poor', ['Swords']], # friend 2
           [nil, nil, [nil]] # friend 3
         ]
       ]
@@ -182,7 +185,7 @@ describe Schema::Arrays do
             nil, # :name
             [ # location
               nil, # :city
-              nil  #: state
+              nil  # : state
             ]
           ],
           [ # 3 sets of friends
@@ -209,21 +212,21 @@ describe Schema::Arrays do
     subject { model_class.to_headers }
     let(:expected_array) do
       [
-        "id",
-        "name",
-        "unknown",
-        "company.name",
-        "company.location.city",
-        "company.location.state",
-        "friends[1].name",
-        "friends[1].status",
-        "friends[1].game.name",
-        "friends[2].name",
-        "friends[2].status",
-        "friends[2].game.name",
-        "friends[3].name",
-        "friends[3].status",
-        "friends[3].game.name"
+        'id',
+        'name',
+        'unknown',
+        'company.name',
+        'company.location.city',
+        'company.location.state',
+        'friends[1].name',
+        'friends[1].status',
+        'friends[1].game.name',
+        'friends[2].name',
+        'friends[2].status',
+        'friends[2].game.name',
+        'friends[3].name',
+        'friends[3].status',
+        'friends[3].game.name'
       ]
     end
 

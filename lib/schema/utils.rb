@@ -25,7 +25,7 @@ module Schema
     end
 
     def association_options(schema_name, schema_type, options)
-      options[:class_name] ||= 'Schema' + classify_name(schema_type.to_s) + classify_name(schema_name.to_s)
+      options[:class_name] ||= "Schema#{classify_name(schema_type.to_s)}#{classify_name(schema_name.to_s)}"
       options[:association] = true
       options[:aliases] = [options[:alias]] if options.key?(:alias)
       options[:hash_key_field] ||= :id if options[:from] == :hash
@@ -58,7 +58,7 @@ module Schema
 
     def add_attribute_default_methods(kls, options)
       kls.class_eval(
- <<-STR, __FILE__, __LINE__ + 1
+        <<-STR, __FILE__, __LINE__ + 1
   def #{options[:default_method]}
     #{options[:default].inspect}
   end
@@ -70,13 +70,13 @@ module Schema
       #{options[:instance_variable]}
     end
   end
-STR
+        STR
       )
     end
 
     def add_association_default_methods(kls, options)
       kls.class_eval(
- <<-STR, __FILE__, __LINE__ + 1
+        <<-STR, __FILE__, __LINE__ + 1
   def #{options[:default_method]}
     #{options[:default_code]}
   end
@@ -84,7 +84,7 @@ STR
   def #{options[:getter]}
     #{options[:instance_variable]} ||= #{options[:default_method]}
   end
-STR
+        STR
       )
     end
   end

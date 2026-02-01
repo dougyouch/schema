@@ -17,6 +17,6 @@ rescue Bundler::BundlerError => e
 end
 
 $LOAD_PATH.unshift(File.join(__FILE__, '../..', 'lib'))
-$LOAD_PATH.unshift(File.expand_path('..', __FILE__))
+$LOAD_PATH.unshift(File.expand_path(__dir__))
 require 'schema-model'
 require 'support/readme_updater'

@@ -1,11 +1,14 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 require 'active_model'
 
 describe SchemaValidator do
-  let(:model_class_name) { 'ModelClass' + SecureRandom.hex(10) }
+  let(:model_class_name) { "ModelClass#{SecureRandom.hex(10)}" }
   let(:model_class) do
     kls = Class.new do
       include Schema::Model
+
       schema_include Schema::Associations::HasOne
       include Schema::ActiveModelValidations
 
@@ -31,10 +34,10 @@ describe SchemaValidator do
   describe 'valid payload no errors' do
     let(:payload) do
       {
-        name: 'Name ' + SecureRandom.hex(8),
+        name: "Name #{SecureRandom.hex(8)}",
         item: {
           id: rand(1_000_000),
-          name: 'ItemName ' + SecureRandom.hex(8),
+          name: "ItemName #{SecureRandom.hex(8)}",
           cost: 900.5
         }
       }
@@ -58,10 +61,10 @@ describe SchemaValidator do
   describe 'invalid payload' do
     let(:payload) do
       {
-        name: 'Name ' + SecureRandom.hex(8),
+        name: "Name #{SecureRandom.hex(8)}",
         item: {
           id: rand(1_000_000),
-          name: 'ItemName ' + SecureRandom.hex(8)
+          name: "ItemName #{SecureRandom.hex(8)}"
         }
       }
     end

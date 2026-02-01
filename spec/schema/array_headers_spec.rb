@@ -1,10 +1,13 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe Schema::ArrayHeaders do
-  let(:model_class_name) { 'ModelClass' + SecureRandom.hex(10) }
+  let(:model_class_name) { "ModelClass#{SecureRandom.hex(10)}" }
   let(:model_class) do
     kls = Class.new do
       include Schema::Model
+
       schema_include Schema::Associations::HasOne
       schema_include Schema::Associations::HasMany
       schema_include Schema::ArrayHeaders
@@ -41,20 +44,20 @@ describe Schema::ArrayHeaders do
     Object.const_get(model_class_name)
   end
   let(:model_data_headers) do
-    [
-      'ID',
-      'CompanyName',
-      'PersonName',
-      'CompanyStateCode',
-      'CompanyCity',
-      'Friends1Name',
-      'Friends1Status',
-      'Friends2Name',
-      'Friends2Status',
-      'NotUsed',
-      'Friends1FavoriteGameName',
-      'Friends2FavoriteGameName',
-      'Friends3FavoriteGameName'
+    %w[
+      ID
+      CompanyName
+      PersonName
+      CompanyStateCode
+      CompanyCity
+      Friends1Name
+      Friends1Status
+      Friends2Name
+      Friends2Status
+      NotUsed
+      Friends1FavoriteGameName
+      Friends2FavoriteGameName
+      Friends3FavoriteGameName
     ]
   end
   let(:model_data) do
@@ -98,13 +101,13 @@ describe Schema::ArrayHeaders do
 
   context 'get_unmapped_field_names' do
     it 'returns list of unmapped fields' do
-      expect(subject.class.get_unmapped_field_names(mapped_headers)).to eq(['unknown', 'CompanyCountry', 'FriendsXHighScore'])
+      expect(subject.class.get_unmapped_field_names(mapped_headers)).to eq(%w[unknown CompanyCountry FriendsXHighScore])
     end
   end
 
   context 'get_mapped_field_names' do
     it 'returns list of mapped fields' do
-      expect(subject.class.get_mapped_field_names(mapped_headers)).to eq(['ID', 'PersonName', 'CompanyName', 'CompanyCity', 'CompanyStateCode', 'FriendsXName', 'FriendsXStatus', 'FriendsXFavoriteGameName'])
+      expect(subject.class.get_mapped_field_names(mapped_headers)).to eq(%w[ID PersonName CompanyName CompanyCity CompanyStateCode FriendsXName FriendsXStatus FriendsXFavoriteGameName])
     end
   end
 end

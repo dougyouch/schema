@@ -1,7 +1,9 @@
+# frozen_string_literal: true
+
 require 'spec_helper'
 
 describe Schema::Parsers::Hash do
-  let(:model_class_name) { 'ModelClass' + SecureRandom.hex(10) }
+  let(:model_class_name) { "ModelClass#{SecureRandom.hex(10)}" }
   let(:model_class) do
     kls = Class.new do
       include Schema::Model
@@ -17,11 +19,11 @@ describe Schema::Parsers::Hash do
 
   context 'parse_hash' do
     describe 'valid payload' do
-      let(:costs) { {tv: 1, channels: 4} }
+      let(:costs) { { tv: 1, channels: 4 } }
       let(:payload) do
         {
           id: rand(1_000_000),
-          name: 'Name ' + SecureRandom.hex(8),
+          name: "Name #{SecureRandom.hex(8)}",
           costs: costs
         }
       end
@@ -38,7 +40,7 @@ describe Schema::Parsers::Hash do
       let(:payload) do
         {
           id: rand(1_000_000),
-          name: 'Name ' + SecureRandom.hex(8),
+          name: "Name #{SecureRandom.hex(8)}",
           costs: costs
         }
       end
