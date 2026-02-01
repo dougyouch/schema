@@ -3,11 +3,6 @@
 require 'spec_helper'
 require 'examples/company_schema'
 
-ReadmeUpdater.new.tap do |updater|
-  updater.update_code_snippet('spec/examples/company_schema.rb', 'ruby')
-  updater.update_code_snippet('spec/examples/company_schema.json', 'javascript')
-end
-
 describe 'CompanySchema example' do
   let(:payload) do
     JSON.parse(File.read('spec/examples/company_schema.json'))
