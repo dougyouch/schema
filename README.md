@@ -2,9 +2,8 @@
 
 A powerful Ruby gem for data transformation, validation, and type safety. Schema provides a flexible and intuitive way to define data models with support for complex nested structures, dynamic associations, and robust validation.
 
-[![Build Status](https://travis-ci.org/dougyouch/schema.svg?branch=master)](https://travis-ci.org/dougyouch/schema)
-[![Maintainability](https://api.codeclimate.com/v1/badges/c142d46a7a37d4a8c2e5/maintainability)](https://codeclimate.com/github/dougyouch/schema/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/c142d46a7a37d4a8c2e5/test_coverage)](https://codeclimate.com/github/dougyouch/schema/test_coverage)
+[![CI](https://github.com/dougyouch/schema/actions/workflows/ci.yml/badge.svg)](https://github.com/dougyouch/schema/actions/workflows/ci.yml)
+[![codecov](https://codecov.io/gh/dougyouch/schema/graph/badge.svg)](https://codecov.io/gh/dougyouch/schema)
 
 ## Features
 
