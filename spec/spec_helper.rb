@@ -5,9 +5,24 @@ require 'bundler'
 require 'json'
 require 'securerandom'
 require 'simplecov'
+require 'simplecov-cobertura'
 
 SimpleCov.start do
   enable_coverage :branch
+
+  add_filter '/spec/'
+
+  add_group 'Core', 'lib/schema'
+  add_group 'Parsers', 'lib/schema/parsers'
+  add_group 'Associations', 'lib/schema/associations'
+
+  track_files 'lib/**/*.rb'
+
+  if ENV['CI']
+    formatter SimpleCov::Formatter::CoberturaFormatter
+  else
+    formatter SimpleCov::Formatter::HTMLFormatter
+  end
 end
 
 begin
