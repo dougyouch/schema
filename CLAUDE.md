@@ -9,13 +9,19 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 bundle install
 
 # Run all tests
-bundle exec rake spec
+bundle exec rspec
 
 # Run a single test file
 bundle exec rspec spec/schema/model_spec.rb
 
 # Run a specific test by line number
 bundle exec rspec spec/schema/model_spec.rb:42
+
+# Run linter
+bundle exec rubocop
+
+# Auto-fix linter issues
+bundle exec rubocop -A
 ```
 
 ## Architecture
@@ -24,23 +30,32 @@ This is a Ruby gem (`schema-model`) for data transformation, validation, and typ
 
 ### Core Module Structure
 
-- **Schema::Model** (`lib/schema/model.rb`) - The foundation module that provides `attribute` definitions, `from_hash` class method, and attribute accessors. Includes `update_attributes` for populating models from data.
+- **Schema::Model** (`lib/schema/model.rb`) - Foundation module providing `attribute` definitions, `from_hash` class method, and attribute accessors.
 
-- **Schema::All** (`lib/schema/all.rb`) - Convenience module that bundles Model + all Associations + all Parsers + ActiveModel validations. This is the typical include for schema classes.
+- **Schema::All** (`lib/schema/all.rb`) - Convenience module bundling Model + Associations + Parsers + ActiveModel validations. This is the typical include.
 
-- **Schema::Parsers::Common** (`lib/schema/parsers/common.rb`) - Base parsers for fundamental types: `parse_integer`, `parse_string`, `parse_float`, `parse_time`, `parse_date`, `parse_boolean`. Additional parsers in `Parsers::American`, `Parsers::Array`, `Parsers::Hash`, `Parsers::Json`.
+- **Schema::Parsers** - Type parsers in `lib/schema/parsers/`:
+  - `Common` - integer, string, float, time, date, boolean
+  - `American` - american_date, american_time (MM/DD/YYYY format)
+  - `Array` - array with optional separator and data_type
+  - `Hash` - hash/dictionary values
+  - `Json` - JSON string parsing
 
-- **Schema::Associations** - `HasOne` and `HasMany` modules for nested schema relationships. `DynamicTypes` enables polymorphic associations via `type_field` and `add_type`.
+- **Schema::Associations** - `HasOne` and `HasMany` for nested relationships. `DynamicTypes` enables polymorphic associations via `type_field`/`add_type`.
+
+- **Schema::Arrays** (`lib/schema/arrays.rb`) - Convert models to/from flat arrays for CSV support.
+
+- **Schema::ArrayHeaders** (`lib/schema/array_headers.rb`) - Map CSV headers to schema attributes.
 
 ### Key Patterns
 
-**Attribute Definition**: Each `attribute` call generates a getter, setter, and `<name>_was_set?` predicate. The setter automatically invokes the type-specific parser (e.g., `parse_integer`).
+**Attribute Definition**: Each `attribute` call generates getter, setter, and `<name>_was_set?` predicate. Setter invokes type-specific parser.
 
-**Parsing Errors**: Stored in `parsing_errors` (a `Schema::Errors` instance). Parsers add errors for invalid/incompatible values rather than raising exceptions.
+**Parsing Errors**: Stored in `parsing_errors`. Parsers add errors for invalid values rather than raising exceptions. With ActiveModelValidations, use `parsed?`/`parsed!`.
 
 **Schema Inheritance**: Uses `inheritance-helper` gem. Schema definitions accumulate via `add_value_to_class_method(:schema, ...)`.
 
-**Dynamic Types**: For polymorphic has_many associations, use `type_field` option with `add_type` blocks to define type-specific attributes.
+**Dynamic Types**: For polymorphic associations, use `type_field` option with `add_type` blocks. Supports `external_type_field`, `type_ignorecase`, and `default_type`.
 
 ## Code Commits
 
@@ -57,4 +72,3 @@ Format using angular formatting:
 When modifying the codebase, keep documentation in sync:
 - **ARCHITECTURE.md** - Update when adding/removing classes, changing component relationships, or altering data flow patterns
 - **README.md** - Update when adding new features, changing public APIs, or modifying usage examples
-- **Code comments** - Update inline documentation when changing method signatures or behavior
