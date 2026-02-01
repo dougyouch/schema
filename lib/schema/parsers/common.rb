@@ -22,7 +22,7 @@ module Schema
             nil
           end
         when Float
-          parsing_errors.add(field_name, ::Schema::ParsingErrors::INCOMPATABLE) if (value % 1) > 0.0
+          parsing_errors.add(field_name, ::Schema::ParsingErrors::INCOMPATIBLE) if (value % 1) > 0.0
           value.to_i
         when nil
           nil
@@ -37,7 +37,7 @@ module Schema
         when String
           value
         when ::Hash, ::Array
-          parsing_errors.add(field_name, ::Schema::ParsingErrors::INCOMPATABLE)
+          parsing_errors.add(field_name, ::Schema::ParsingErrors::INCOMPATIBLE)
           nil
         when nil
           nil
@@ -52,7 +52,7 @@ module Schema
         when String
           value.empty? ? nil : value
         when ::Hash, ::Array
-          parsing_errors.add(field_name, ::Schema::ParsingErrors::INCOMPATABLE)
+          parsing_errors.add(field_name, ::Schema::ParsingErrors::INCOMPATIBLE)
           nil
         when nil
           nil

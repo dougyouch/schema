@@ -27,7 +27,7 @@ module Schema
           add_parsing_error(base_schema, error_name, INVALID) unless schema.parsing_errors.empty?
           schema
         elsif !data.nil?
-          add_parsing_error(base_schema, error_name, INCOMPATABLE)
+          add_parsing_error(base_schema, error_name, INCOMPATIBLE)
           nil
         end
       end
@@ -42,7 +42,7 @@ module Schema
             schema
           end
         elsif !list.nil?
-          add_parsing_error(base_schema, @schema_name, INCOMPATABLE)
+          add_parsing_error(base_schema, @schema_name, INCOMPATIBLE)
           nil
         end
       end

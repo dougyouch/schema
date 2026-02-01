@@ -51,8 +51,8 @@ describe Schema::Parsers::Array do
         expect(subject.costs).to eq(nil)
       end
 
-      it 'parsing_errors contains incompatable' do
-        expect(subject.parsing_errors[:costs]).to eq([Schema::ParsingErrors::INCOMPATABLE])
+      it 'parsing_errors contains incompatible' do
+        expect(subject.parsing_errors[:costs]).to eq([Schema::ParsingErrors::INCOMPATIBLE])
       end
     end
 
@@ -72,8 +72,8 @@ describe Schema::Parsers::Array do
         expect(subject.costs).to eq(nil)
       end
 
-      it 'parsing_errors contains incompatable' do
-        expect(subject.parsing_errors[:costs]).to eq([Schema::ParsingErrors::INCOMPATABLE])
+      it 'parsing_errors contains incompatible' do
+        expect(subject.parsing_errors[:costs]).to eq([Schema::ParsingErrors::INCOMPATIBLE])
       end
 
       describe 'separator option' do

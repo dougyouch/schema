@@ -4,7 +4,7 @@ module Schema
   # Schema::ParsingErrors is a collection of parsing error messages
   module ParsingErrors
     INVALID = 'invalid'
-    INCOMPATABLE = 'incompatable'
+    INCOMPATIBLE = 'incompatible'
     UNKNOWN = 'unknown'
     UNKNOWN_ATTRIBUTE = 'unknown_attribute'
     UNHANDLED_TYPE = 'unhandled_type'

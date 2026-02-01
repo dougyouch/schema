@@ -161,6 +161,8 @@ module Schema
     private
 
     def get_schema(data)
+      return self.class.schema_with_string_keys unless data.is_a?(Hash)
+
       first_key = data.each_key.first
       return self.class.schema_with_string_keys unless first_key.is_a?(Symbol)
 

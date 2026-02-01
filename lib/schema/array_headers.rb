@@ -41,6 +41,8 @@ module Schema
         fields
       end
 
+      MAX_ARRAY_INDEX = 10_000
+
       private
 
       def get_model_field_names(field_name, field_options, mapped_headers, header_prefix, mapped)
@@ -114,9 +116,9 @@ module Schema
         cnt = field_options[:starting_index] || 1
         indexes = []
         # finding all headers that look like Company1Name through CompanyXName
-        while (index = headers.index(header_prefix + cnt.to_s + field_options[:key]))
-          cnt += 1
+        while cnt <= MAX_ARRAY_INDEX && (index = headers.index(header_prefix + cnt.to_s + field_options[:key]))
           indexes << index
+          cnt += 1
         end
         indexes
       end

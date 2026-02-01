@@ -55,12 +55,12 @@ describe Schema::Parsers::Json do
         expect(subject.costs).to eq(nil)
       end
 
-      it 'parsing_errors contains incompatable' do
+      it 'parsing_errors contains incompatible' do
         expect(subject.parsing_errors[:costs]).to eq([Schema::ParsingErrors::INVALID])
       end
     end
 
-    describe 'incompatable payload' do
+    describe 'incompatible payload' do
       let(:costs) { 1_000_000 }
       let(:payload) do
         {
@@ -76,8 +76,8 @@ describe Schema::Parsers::Json do
         expect(subject.costs).to eq(nil)
       end
 
-      it 'parsing_errors contains incompatable' do
-        expect(subject.parsing_errors[:costs]).to eq([Schema::ParsingErrors::INCOMPATABLE])
+      it 'parsing_errors contains incompatible' do
+        expect(subject.parsing_errors[:costs]).to eq([Schema::ParsingErrors::INCOMPATIBLE])
       end
     end
   end

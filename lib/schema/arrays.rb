@@ -136,8 +136,8 @@ module Schema
       size = 0
       mapped_model.each_value do |info|
         if info[:indexes]
-          size = info[:indexes].size if info[:indexes] && info[:indexes].size > size
-        else
+          size = info[:indexes].size if info[:indexes].size > size
+        elsif info.is_a?(Hash)
           new_size = largest_number_of_indexes_from_map(info)
           size = new_size if new_size > size
         end
