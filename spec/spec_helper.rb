@@ -6,7 +6,9 @@ require 'json'
 require 'securerandom'
 require 'simplecov'
 
-SimpleCov.start
+SimpleCov.start do
+  enable_coverage :branch
+end
 
 begin
   Bundler.require(:default, :development, :spec)
