@@ -10,13 +10,13 @@ require 'simplecov-cobertura'
 SimpleCov.start do
   enable_coverage :branch
 
-  add_filter '/spec/'
+  skip '/spec/'
 
-  add_group 'Core', 'lib/schema'
-  add_group 'Parsers', 'lib/schema/parsers'
-  add_group 'Associations', 'lib/schema/associations'
+  group 'Core', 'lib/schema'
+  group 'Parsers', 'lib/schema/parsers'
+  group 'Associations', 'lib/schema/associations'
 
-  track_files 'lib/**/*.rb'
+  cover 'lib/**/*.rb'
 
   if ENV['CI']
     formatter SimpleCov::Formatter::CoberturaFormatter
