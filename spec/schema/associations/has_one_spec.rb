@@ -114,7 +114,7 @@ describe Schema::Associations::HasOne do
     end
 
     describe 'skip_fields' do
-      let(:skip_fields) { [item: [:id]] }
+      let(:skip_fields) { [{ item: [:id] }] }
 
       it 'set item id to nil' do
         expect(model.item.id).to eq(nil)

@@ -176,7 +176,7 @@ describe Schema::Associations::HasMany do
     end
 
     describe 'skip_fields' do
-      let(:skip_fields) { [items: [:id]] }
+      let(:skip_fields) { [{ items: [:id] }] }
 
       it 'sets item id to nil' do
         expect(model.items.map(&:id)).to eq([nil, nil])
