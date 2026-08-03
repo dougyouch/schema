@@ -16,7 +16,7 @@ jobs:
       - name: Set up Ruby
         uses: ruby/setup-ruby@v1
         with:
-          ruby-version: '3.4'
+          ruby-version: '4.0'
           bundler-cache: true
 
       - name: Run RuboCop
@@ -28,7 +28,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        ruby: ['3.2', '3.3', '3.4']
+        ruby: ['3.2', '3.3', '3.4', '4.0']
 
     steps:
       - uses: actions/checkout@v4
@@ -43,7 +43,7 @@ jobs:
         run: bundle exec rspec
 
       - name: Upload coverage to Codecov
-        if: matrix.ruby == '3.4'
+        if: matrix.ruby == '4.0'
         uses: codecov/codecov-action@v4
         with:
           files: coverage/coverage.xml
