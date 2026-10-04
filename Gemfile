@@ -8,6 +8,7 @@ group :development do
   gem 'activemodel'
   gem 'csv'
   gem 'rubocop'
+  gem 'yard'
 end
 
 group :spec do

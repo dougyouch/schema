@@ -11,11 +11,17 @@ describe 'schema-model.gemspec' do
     )
   end
 
-  it 'links to the source, changelog and issues' do
+  it 'limits inheritance-helper to compatible versions' do
+    dependency = spec.runtime_dependencies.find { |dep| dep.name == 'inheritance-helper' }
+    expect(dependency.requirement.to_s).to eq('~> 0.2')
+  end
+
+  it 'links to the source, changelog, issues and api docs' do
     expect(spec.metadata).to include(
       'source_code_uri' => 'https://github.com/dougyouch/schema',
       'changelog_uri' => 'https://github.com/dougyouch/schema/blob/master/CHANGELOG.md',
-      'bug_tracker_uri' => 'https://github.com/dougyouch/schema/issues'
+      'bug_tracker_uri' => 'https://github.com/dougyouch/schema/issues',
+      'documentation_uri' => 'https://rubydoc.info/gems/schema-model'
     )
   end
 end
