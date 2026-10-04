@@ -99,7 +99,7 @@ end
 
 The `type_field` option tells SchemaCreator which key in the nested data determines the subclass (the type field attribute's aliases are checked too); `external_type_field` reads the type from an attribute on the parent instead. `type_ignorecase: true` compares type names case-insensitively. Each `add_type` creates a subclass of the association class, defined on the parent class as `<Name>AssociationType<Type>`.
 
-`Associations::Base` stores the parent class by name and resolves it with `Object.const_get`, so a parent class must be assigned to a constant before any association that uses dynamic types is declared.
+`Associations::Base` stores the parent class by name and resolves it with `Object.const_get` (so reloaded constants are picked up); a parent that was anonymous when the association was declared is kept by reference instead.
 
 ### Schema::Utils (`lib/schema/utils.rb`)
 
@@ -127,7 +127,7 @@ Parsing errors use these codes from `Schema::ParsingErrors`: `invalid`, `incompa
 
 ### CSV and Arrays
 
-- **`Schema::ArrayHeaders`** (`lib/schema/array_headers.rb`): `map_headers_to_attributes(headers)` returns a nested hash of `{ field: { index: n } }` entries. Has-many fields are matched as `<prefix><n><key>` (prefix is the association name or an alias, `n` counts from 1) and map to `{ indexes: [...] }`.
+- **`Schema::ArrayHeaders`** (`lib/schema/array_headers.rb`): `map_headers_to_attributes(headers)` returns a nested hash of `{ field: { index: n } }` entries. Has-many fields are matched as `<prefix><n><key>` (prefix is the association name or an alias, `n` counts from 1) and map to `{ indexes: [...] }`. Has-one fields are matched by their own key or alias; a column already claimed by the parent or an earlier has-one isn't reused. Associations never map to a column of their own.
 - **`Schema::Arrays`** (`lib/schema/arrays.rb`): `to_headers`, `to_empty_array`, `to_a` and `from_array(array, mapped_headers)`. Has-many associations need a `size:` option for the fixed-width methods.
 - **`Schema::CSVParser`** (`lib/schema/csv_parser.rb`): wraps a `CSV` object, maps its header row once, and yields a model per row (`each`, `shift`, `missing_fields`).
 

@@ -12,6 +12,12 @@ Add this line to your application's Gemfile:
 
 ```ruby
 gem 'schema-model'
+
+# needed for Schema::All and Schema::ActiveModelValidations (already present in Rails apps)
+gem 'activemodel'
+
+# needed for Schema::CSVParser and bin/schema-json2csv on Ruby 3.4+, where csv is no longer a default gem
+gem 'csv'
 ```
 
 And then execute:
@@ -19,6 +25,8 @@ And then execute:
 ```bash
 $ bundle install
 ```
+
+`Schema::Model` on its own has no dependencies beyond `inheritance-helper`.
 
 ## Quick Start
 
@@ -520,6 +528,8 @@ schema-json2csv --require ./my_schema.rb --schema MySchema --json data.json --cs
 # From stdin
 cat data.json | schema-json2csv --require ./my_schema.rb --schema MySchema - --csv output.csv
 ```
+
+The JSON can be one object or an array of objects. Output goes to stdout when `--csv` is omitted. A header row (from `to_headers`) is written to stdout or to a new file; an existing `--csv` file is appended to without repeating it. Has-many associations need a `size:` so every row has the same columns.
 
 ## Contributing
 
