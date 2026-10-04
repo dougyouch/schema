@@ -35,7 +35,7 @@ This is a Ruby gem (`schema-model`) for data transformation, validation, and typ
 - **Schema::All** (`lib/schema/all.rb`) - Convenience module bundling Model + Associations + Parsers + ActiveModel validations. This is the typical include.
 
 - **Schema::Parsers** - Type parsers in `lib/schema/parsers/`:
-  - `Common` - integer, string, float, time, date, boolean
+  - `Common` - integer, string, string_or_nil, float, time, date, boolean (included by `Schema::Model`)
   - `American` - american_date, american_time (MM/DD/YYYY format)
   - `Array` - array with optional separator and data_type
   - `Hash` - hash/dictionary values
@@ -47,11 +47,15 @@ This is a Ruby gem (`schema-model`) for data transformation, validation, and typ
 
 - **Schema::ArrayHeaders** (`lib/schema/array_headers.rb`) - Map CSV headers to schema attributes.
 
+- **Schema::CSVParser** (`lib/schema/csv_parser.rb`) - Class that reads `CSV` rows into models (needs ArrayHeaders + Arrays on the model).
+
+- **SchemaValidator** (`lib/schema_validator.rb`) - ActiveModel validator behind `validates :assoc, schema: true`.
+
 ### Key Patterns
 
 **Attribute Definition**: Each `attribute` call generates getter, setter, and `<name>_was_set?` predicate. Setter invokes type-specific parser.
 
-**Parsing Errors**: Stored in `parsing_errors`. Parsers add errors for invalid values rather than raising exceptions. With ActiveModelValidations, use `parsed?`/`parsed!`.
+**Parsing Errors**: Stored in `parsing_errors`. Parsers add errors for invalid values rather than raising exceptions. With ActiveModelValidations, use `parsed?`/`parsed!`; `valid?` does not check parsing errors.
 
 **Schema Inheritance**: Uses `inheritance-helper` gem. Schema definitions accumulate via `add_value_to_class_method(:schema, ...)`.
 

@@ -17,15 +17,25 @@ Hash Data → from_hash() → Parser Methods → Schema Instance
 ```
 Schema::All (convenience bundle)
     ├── Schema::Model (core attribute system)
+    │     └── Schema::Parsers::Common
     ├── Schema::Associations::HasOne
     ├── Schema::Associations::HasMany
-    ├── Schema::Parsers::Common
     ├── Schema::Parsers::American
     ├── Schema::Parsers::Array
     ├── Schema::Parsers::Hash
     ├── Schema::Parsers::Json
     └── Schema::ActiveModelValidations
+
+Opt-in (via schema_include):
+    ├── Schema::ArrayHeaders (map CSV headers to attributes)
+    └── Schema::Arrays (models to/from flat arrays)
+
+Standalone:
+    ├── Schema::CSVParser (class; reads CSV rows into models)
+    └── SchemaValidator (ActiveModel validator for `schema: true`)
 ```
+
+`schema_include` both includes a module and records it in `schema_config[:schema_includes]`, so it is also included in every nested association class, including ones defined later.
 
 ## Core Components
 
@@ -40,7 +50,9 @@ The foundation module providing:
 
 - **`from_hash(data, skip_fields)`**: Class method that creates instance and calls `update_attributes`
 
-- **`update_attributes(data, skip_fields)`**: Iterates hash keys, matches against schema, invokes setters
+- **`update_attributes(data, skip_fields)`**: Iterates the data's key/value pairs, matches them against the schema, and invokes setters. Plain attributes are set before associations, so an association's `external_type_field` can read a sibling attribute. The schema used for lookups is chosen from the first key: symbol keys use `schema`, anything else (string keys, or key/value pairs that aren't a `Hash`) uses `schema_with_string_keys`.
+
+- **Aliases**: each alias adds a second schema entry with `alias_of:` pointing at the real attribute, plus aliased getter/setter methods. Serialization and array conversion skip entries with `alias_of`.
 
 - **`as_json` / `to_hash`**: Serialization back to hash format
 
@@ -66,10 +78,14 @@ has_one(:profile) { attribute :bio, :string }
 has_many(:posts) { attribute :title, :string }
 ```
 
+Each association gets a generated class (`SchemaHasOne<Name>` / `SchemaHasMany<Name>` by default, or `class_name:`), defined as a constant inside the parent class. `base_class:` subclasses an existing schema instead of creating a fresh model class.
+
 Both use **SchemaCreator** (`schema_creator.rb`) to:
 1. Determine which class to instantiate (static or dynamic)
 2. Call `from_hash` on the nested class
-3. Propagate parsing errors to parent
+3. Propagate parsing errors to parent: `invalid` when the nested model has parsing errors, `incompatible` when the value isn't a hash (or, for has-many, an array), and `unknown` when no dynamic type matches
+
+`has_many ..., from: :hash` accepts a hash keyed by id instead of an array; each key is written to `hash_key_field` (default `:id`) on the nested model.
 
 **DynamicTypes** enables polymorphic associations:
 
@@ -81,7 +97,9 @@ has_many(:items, type_field: :kind) do
 end
 ```
 
-The `type_field` option tells SchemaCreator which data key determines the subclass.
+The `type_field` option tells SchemaCreator which key in the nested data determines the subclass; `external_type_field` reads the type from an attribute on the parent instead. `type_ignorecase: true` compares type names case-insensitively. Each `add_type` creates a subclass of the association class, defined on the parent class as `<Name>AssociationType<Type>`.
+
+`Associations::Base` stores the parent class by name and resolves it with `Object.const_get`, so a parent class must be assigned to a constant before any association that uses dynamic types is declared.
 
 ### Schema::Utils (`lib/schema/utils.rb`)
 
@@ -103,7 +121,15 @@ Parsing errors are distinct from validation errors:
 - **Parsing errors**: Type conversion failures (string "abc" → integer)
 - **Validation errors**: Business rule failures (via `validates` DSL)
 
-Methods `parsed!` and `valid!` raise `ParsingException`/`ValidationException` respectively.
+`parsed!` raises `ParsingException` when there are parsing errors and `valid_model!` raises `ValidationException` when validations fail; `valid!` calls both. `valid?` runs validations only and does not look at parsing errors.
+
+Parsing errors use these codes from `Schema::ParsingErrors`: `invalid`, `incompatible`, `unknown`, `unknown_attribute`, `unhandled_type`.
+
+### CSV and Arrays
+
+- **`Schema::ArrayHeaders`** (`lib/schema/array_headers.rb`): `map_headers_to_attributes(headers)` returns a nested hash of `{ field: { index: n } }` entries. Has-many fields are matched as `<prefix><n><key>` (prefix is the association name or an alias, `n` counts from 1) and map to `{ indexes: [...] }`.
+- **`Schema::Arrays`** (`lib/schema/arrays.rb`): `to_headers`, `to_empty_array`, `to_a` and `from_array(array, mapped_headers)`. Has-many associations need a `size:` option for the fixed-width methods.
+- **`Schema::CSVParser`** (`lib/schema/csv_parser.rb`): wraps a `CSV` object, maps its header row once, and yields a model per row (`each`, `shift`, `missing_fields`).
 
 ### Inheritance Helper Integration
 

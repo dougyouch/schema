@@ -59,7 +59,7 @@ user.tags          # => ["ruby", "rails", "developer"]
 attribute :name, :string              # String values
 attribute :count, :integer            # Integer values (parses "123" to 123)
 attribute :price, :float              # Float values (parses "9.99" to 9.99)
-attribute :active, :boolean           # Boolean (accepts: 1, t, true, on, y, yes)
+attribute :active, :boolean           # true for 1, t, true, on, y, yes (any case); other strings are false; numbers are true unless 0
 attribute :notes, :string_or_nil      # String, but returns nil if empty
 ```
 
@@ -81,6 +81,8 @@ attribute :tags, :array, separator: ',', data_type: :integer  # Parse and conver
 attribute :metadata, :hash                        # Hash/dictionary values
 attribute :config, :json                          # Parse JSON strings
 ```
+
+Unlike the basic types, `:array`, `:hash` and `:json` record an `incompatible` parsing error when given `nil`.
 
 ## Attribute Options
 
@@ -171,9 +173,18 @@ order.items.first.sku    # => "ABC"
 has_one :profile, default: true
 has_many :tags, default: true
 
+# Aliases for the association key
+has_one :profile, alias: :user_profile
+has_many :items, aliases: [:line_items]
+
 # Reuse existing schema class
 has_one :shipping_address, base_class: AddressSchema
 has_one :billing_address, base_class: AddressSchema
+
+# Name the generated class (defaults to SchemaHasOneProfile, SchemaHasManyItems, ...)
+has_one :profile, class_name: 'ProfileSchema' do
+  attribute :bio, :string
+end
 
 # Has many from hash (keyed by field)
 has_many :items, from: :hash, hash_key_field: :id do
@@ -250,6 +261,8 @@ has_many :items, type_field: :type, type_ignorecase: true do
 end
 ```
 
+When the type matches no `add_type` and there is no `default_type`, the association is `nil` and the parent records an `unknown` parsing error.
+
 ## Validation and Error Handling
 
 ### ActiveModel Validations
@@ -270,16 +283,36 @@ end
 
 ### Parsing Errors vs Validation Errors
 
+Parsing errors and validation errors are tracked separately. `valid?` only runs validations, so check `parsed?` too (or call `valid!`, which checks both).
+
 ```ruby
-user = UserSchema.from_hash(name: 'John', age: 'not-a-number')
+user = UserSchema.from_hash(name: 'John', email: 'john@example.com', age: 'not-a-number')
 
 # Parsing errors (type conversion failures)
 user.parsing_errors.empty?  # => false
 user.parsed?                # => false
+user.age                    # => nil
 
 # Validation errors (business rules)
-user.valid?                 # => false (also runs validations)
-user.errors.full_messages   # => ["Age is invalid", ...]
+user.valid?                 # => true (age is nil, which allow_nil permits)
+user.errors.full_messages   # => []
+```
+
+### Validating Nested Schemas
+
+`validates ..., schema: true` (`SchemaValidator`) marks the parent invalid when a nested model, or any model in a has-many list, is invalid:
+
+```ruby
+class OrderSchema
+  include Schema::All
+
+  has_one :customer do
+    attribute :name, :string
+    validates :name, presence: true
+  end
+
+  validates :customer, presence: true, schema: true
+end
 ```
 
 ### Raising Exceptions
@@ -312,12 +345,21 @@ user.parsing_errors[:unknown_field]  # => ["unknown_attribute"]
 UserSchema.capture_unknown_attributes = false
 ```
 
+The setting is per class. Nested association classes keep their own setting, so an unknown key inside a nested hash still makes the parent record an `invalid` error for that association.
+
 ## Serialization
 
 ### to_hash / as_json
 
 ```ruby
-user = UserSchema.from_hash(name: 'John', email: nil)
+class ContactSchema
+  include Schema::All
+
+  attribute :name, :string
+  attribute :email, :string
+end
+
+user = ContactSchema.from_hash(name: 'John', email: nil)
 
 user.to_hash                          # => { name: "John", email: nil }
 user.as_json                          # => { name: "John" } (excludes nils)
@@ -354,11 +396,12 @@ order = OrderSchema.from_hash(data, [:id, { items: [:id] }])
 
 ### Schema::Arrays Module
 
-Convert models to/from flat arrays (useful for CSV/spreadsheet data):
+Convert models to/from flat arrays (useful for CSV/spreadsheet data). `from_array` takes the header mapping built by `Schema::ArrayHeaders`, so include both:
 
 ```ruby
 class UserSchema
   include Schema::All
+  schema_include Schema::ArrayHeaders
   schema_include Schema::Arrays
 
   attribute :name, :string
@@ -378,21 +421,36 @@ mapped = UserSchema.map_headers_to_attributes(headers)
 user = UserSchema.from_array(['Jane', 'jane@example.com'], mapped)
 ```
 
-### Schema::CSVParser Module
-
-Parse CSV data directly into models:
+`to_headers`, `to_empty_array` and `to_a` need a fixed number of columns for each has-many association, so give it a `size`:
 
 ```ruby
+has_many :phones, size: 3 do
+  attribute :number, :string
+end
+
+UserSchema.to_headers  # => [..., "phones[1].number", "phones[2].number", "phones[3].number"]
+```
+
+### Schema::CSVParser
+
+`Schema::CSVParser` is a class that reads rows from a `CSV` object into models. The model needs `Schema::ArrayHeaders` and `Schema::Arrays`. Pass a plain `CSV` (not one created with `headers: true`); the first row is used as the headers unless you pass them in:
+
+```ruby
+require 'csv'
+
 class UserCSVSchema
-  include Schema::Model
-  include Schema::CSVParser
+  include Schema::All
+  schema_include Schema::ArrayHeaders
+  schema_include Schema::Arrays
 
   attribute :name, :string
   attribute :email, :string
 end
 
-csv_data = CSV.parse("name,email\nJohn,john@example.com", headers: true)
-parser = Schema::CSVParser.new(csv_data, UserCSVSchema)
+csv = CSV.new("name,email\nJohn,john@example.com\n")
+parser = Schema::CSVParser.new(csv, UserCSVSchema)
+
+parser.missing_fields(%w[name email phone])  # => ["phone"]
 
 parser.each do |user|
   puts user.name
@@ -416,9 +474,12 @@ headers = ['FullName', 'email', 'unknown_column']
 mapped = UserSchema.map_headers_to_attributes(headers)
 # => { name: { index: 0 }, email: { index: 1 } }
 
-UserSchema.get_mapped_field_names(mapped)    # => ["name", "email"]
+# Field names are reported by their first alias when they have one
+UserSchema.get_mapped_field_names(mapped)    # => ["FullName", "email"]
 UserSchema.get_unmapped_field_names(mapped)  # => []
 ```
+
+Has-many columns are matched by the association name (or its aliases) followed by a 1-based index and the field key, e.g. `Phones1Number`, `Phones2Number` for `has_many :phones, alias: 'Phones'` with `attribute :number, :string, alias: 'Number'`.
 
 ## Extending Schemas
 
