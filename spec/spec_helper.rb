@@ -4,20 +4,24 @@ require 'rubygems'
 require 'bundler'
 require 'json'
 require 'securerandom'
-require 'simplecov'
 
-SimpleCov.start do
-  enable_coverage :branch
-  # fail CI if any line or branch goes uncovered; skipped locally so single spec files can run
-  minimum_coverage line: 100, branch: 100 if ENV['CI']
+# COVERAGE=false runs without SimpleCov (the oldest supported Ruby can't install simplecov 1.x)
+unless ENV['COVERAGE'] == 'false'
+  require 'simplecov'
 
-  cover 'lib/**/*.rb'
-  # loaded by the gemspec before SimpleCov starts, so it would always show as missed
-  skip 'lib/schema/version.rb'
+  SimpleCov.start do
+    enable_coverage :branch
+    # fail CI if any line or branch goes uncovered; skipped locally so single spec files can run
+    minimum_coverage line: 100, branch: 100 if ENV['CI']
 
-  group 'Core', 'lib/schema'
-  group 'Parsers', 'lib/schema/parsers'
-  group 'Associations', 'lib/schema/associations'
+    cover 'lib/**/*.rb'
+    # loaded by the gemspec before SimpleCov starts, so it would always show as missed
+    skip 'lib/schema/version.rb'
+
+    group 'Core', 'lib/schema'
+    group 'Parsers', 'lib/schema/parsers'
+    group 'Associations', 'lib/schema/associations'
+  end
 end
 
 begin
