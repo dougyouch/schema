@@ -4,6 +4,7 @@ autoload :SchemaValidator, 'schema_validator'
 
 # Schema is a series of tools for transforming data into models
 module Schema
+  # Base error for parsed! and valid_model!; carries the model and its errors.
   class SchemaException < StandardError
     attr_reader :schema,
                 :errors
@@ -15,7 +16,9 @@ module Schema
     end
   end
 
+  # Raised by parsed! (and valid!) when the model has parsing errors.
   class ParsingException < SchemaException; end
+  # Raised by valid_model! (and valid!) when the model fails its validations.
   class ValidationException < SchemaException; end
 
   # raised when a value is assigned to an attribute whose type has no parse_<type> method

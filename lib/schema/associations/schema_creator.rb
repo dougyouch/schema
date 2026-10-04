@@ -16,6 +16,8 @@ module Schema
         configure_dynamic_schema_options(options)
       end
 
+      # Builds one nested model, recording parsing errors on base_schema.
+      # @api private
       def create_schema(base_schema, data, error_name = nil, skip_fields = [])
         if data.is_a?(Hash)
           unless (schema_class = get_schema_class(base_schema, data))
@@ -31,6 +33,8 @@ module Schema
         end
       end
 
+      # Builds a has_many list from an array, or from a hash with `from: :hash`.
+      # @api private
       def create_schemas(base_schema, list, skip_fields = [])
         if is_list? && list.is_a?(Array)
           list.each_with_index.map { |data, idx| create_schema(base_schema, data, "#{@schema_name}:#{idx}", skip_fields) }
@@ -46,6 +50,8 @@ module Schema
         end
       end
 
+      # The class to build for data, choosing a dynamic type when configured.
+      # @api private
       def get_schema_class(base_schema, data)
         if dynamic?
           get_dynamic_schema_class(base_schema, data)
@@ -62,6 +68,8 @@ module Schema
         @is_list
       end
 
+      # The dynamic type class matching data's type.
+      # @api private
       def get_dynamic_schema_class(base_schema, data)
         type = get_dynamic_type(base_schema, data)
         type = type.to_s.downcase if @ignorecase
@@ -72,12 +80,16 @@ module Schema
         get_default_dynamic_schema_class(base_schema)
       end
 
+      # The default_type class, if one was declared.
+      # @api private
       def get_default_dynamic_schema_class(base_schema)
         return unless (class_name = @types[:default])
 
         base_schema.class.const_get(class_name)
       end
 
+      # The type value from the nested data or the parent's external type field.
+      # @api private
       def get_dynamic_type(base_schema, data)
         if @type_field
           type_fields.each do |name|
@@ -98,10 +110,14 @@ module Schema
         end
       end
 
+      # Records a parsing error on the parent model.
+      # @api private
       def add_parsing_error(base_schema, error_name, error_msg)
         base_schema.parsing_errors.add(error_name || @schema_name, error_msg)
       end
 
+      # Reads the dynamic type options.
+      # @api private
       def configure_dynamic_schema_options(options)
         @type_field = options[:type_field]
         @external_type_field = options[:external_type_field]

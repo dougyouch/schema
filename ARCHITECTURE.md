@@ -53,7 +53,7 @@ The foundation module providing:
 
 - **`from_hash(data, skip_fields)`**: Class method that creates instance and calls `update_attributes`
 
-- **`update_attributes(data, skip_fields)`**: Iterates the data's key/value pairs, matches them against the schema, and invokes setters. Plain attributes are set before associations, so an association's `external_type_field` can read a sibling attribute. Each key is looked up on its own: symbol keys in `schema`, anything else in `schema_with_string_keys` (rebuilt whenever `schema` changes). `skip_fields` entries match a field by name or alias, as a symbol or string; a `{ association: [...] }` entry passes a nested list down.
+- **`update_attributes(data, skip_fields)`**: Iterates the data's key/value pairs, matches them against the schema, and invokes setters. Plain attributes are set before associations, so an association's `external_type_field` can read a sibling attribute. Data that isn't a hash or a list of `[key, value]` pairs records `incompatible` on `:base`. Each key is looked up on its own: symbol keys in `schema`, anything else in `schema_with_string_keys` (rebuilt whenever `schema` changes). `skip_fields` entries match a field by name or alias, as a symbol or string; a `{ association: [...] }` entry passes a nested list down.
 
 - **Aliases**: each alias adds a second schema entry with `alias_of:` pointing at the real attribute, plus aliased getter/setter methods. Serialization and array conversion skip entries with `alias_of`.
 
@@ -138,7 +138,7 @@ Parsing errors use these codes from `Schema::ParsingErrors`: `invalid`, `incompa
 
 - **`Schema::ArrayHeaders`** (`lib/schema/array_headers.rb`): `map_headers_to_attributes(headers)` returns a nested hash of `{ field: { index: n } }` entries. Has-many fields are matched as `<prefix><n><key>` (prefix is the association name or an alias, `n` counts from 1) and map to `{ indexes: [...] }`. Has-one fields are matched by their own key or alias; a column already claimed by the parent or an earlier has-one isn't reused. Associations never map to a column of their own.
 - **`Schema::Arrays`** (`lib/schema/arrays.rb`): `to_headers`, `to_empty_array`, `to_a` and `from_array(array, mapped_headers)`. Has-many associations need a `size:` option for the fixed-width methods; `to_a` leaves out entries beyond `size`.
-- **`Schema::CSVParser`** (`lib/schema/csv_parser.rb`): wraps a `CSV` object, maps its header row once, and yields a model per row (`each`, `shift`, `missing_fields`).
+- **`Schema::CSVParser`** (`lib/schema/csv_parser.rb`): wraps a `CSV` object, cleans and maps its header row once (stripping whitespace and a UTF-8 byte order mark), and yields a model per row (`each`, `shift`, `missing_fields`).
 
 ### Inheritance Helper Integration
 

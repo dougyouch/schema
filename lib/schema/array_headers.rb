@@ -9,6 +9,10 @@ module Schema
 
     # adds methods to the class
     module ClassMethods
+      # Maps header names to the attributes they fill.
+      # @param headers [Array<String>] the header row
+      # @param header_prefix [String, nil] used internally for has_many columns
+      # @return [Hash] e.g. `{ name: { index: 0 }, phones: { number: { indexes: [1, 2] } } }`
       def map_headers_to_attributes(headers, header_prefix = nil)
         mapped_headers = {}
         map_headers_to_fields(headers, mapped_headers, header_prefix)
@@ -17,14 +21,24 @@ module Schema
         mapped_headers
       end
 
+      # Names of the fields no header was mapped to.
+      # @param mapped_headers [Hash] result of {#map_headers_to_attributes}
+      # @param header_prefix [String, nil] used internally for nested associations
+      # @return [Array<String>]
       def get_unmapped_field_names(mapped_headers, header_prefix = nil)
         get_field_names(mapped_headers, header_prefix, false)
       end
 
+      # Names of the fields the headers were mapped to, as they'd appear in a header row.
+      # @param mapped_headers [Hash] result of {#map_headers_to_attributes}
+      # @param header_prefix [String, nil] used internally for nested associations
+      # @return [Array<String>]
       def get_mapped_field_names(mapped_headers, header_prefix = nil)
         get_field_names(mapped_headers, header_prefix, true)
       end
 
+      # Field names (first alias preferred) that are, or with mapped false are not, in the mapping.
+      # @api private
       def get_field_names(mapped_headers, header_prefix = nil, mapped = true)
         fields = []
         schema.each do |field_name, field_options|
@@ -41,6 +55,7 @@ module Schema
         fields
       end
 
+      # Highest has_many index looked for in headers such as Phones1Number.
       MAX_ARRAY_INDEX = 10_000
 
       private

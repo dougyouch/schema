@@ -13,10 +13,14 @@ module Schema
             "no #{parser} method (schema_include the parser module that defines it)"
     end
 
+    # Turns a name into a constant name.
+    # @api private
     def classify_name(name)
       name.gsub(/[^\da-z_-]/, '').gsub(/(^.|[_|-].)/) { |m| m[-1].upcase }
     end
 
+    # Creates and registers an association's model class.
+    # @api private
     def create_schema_class(base_schema_class, schema_name, options)
       base_schema_class.add_value_to_class_method(:schema, schema_name => options)
       kls = Class.new(options[:base_class] || Object)
@@ -26,6 +30,8 @@ module Schema
       kls
     end
 
+    # Includes Schema::Model and the parent's schema_include modules.
+    # @api private
     def include_schema_modules(kls, schema_config)
       kls.send(:include, ::Schema::Model)
       schema_config[:schema_includes].each do |mod|
@@ -33,6 +39,8 @@ module Schema
       end
     end
 
+    # Builds an association's schema options.
+    # @api private
     def association_options(schema_name, schema_type, options)
       options[:class_name] ||= "Schema#{classify_name(schema_type.to_s)}#{classify_name(schema_name.to_s)}"
       options[:association] = true
@@ -41,6 +49,8 @@ module Schema
       ::Schema::Model.default_attribute_options(schema_name, schema_type).merge(options)
     end
 
+    # Sets up an association's class and options.
+    # @api private
     def add_association_class(base_schema_class, schema_name, schema_type, options)
       options = ::Schema::Utils.association_options(schema_name, schema_type, options)
       kls = ::Schema::Utils.create_schema_class(
@@ -53,12 +63,16 @@ module Schema
       options
     end
 
+    # Links an association class to its parent.
+    # @api private
     def add_association_defaults(kls, base_schema_class, schema_name)
       kls.send(:include, ::Schema::Associations::Base)
       kls.base_schema_class = base_schema_class
       kls.schema_name = schema_name
     end
 
+    # Adds dynamic type support when configured.
+    # @api private
     def add_association_dynamic_types(kls, options)
       return if !options[:type_field] && !options[:external_type_field]
 
@@ -92,6 +106,8 @@ module Schema
       value.dup
     end
 
+    # Defines an attribute's default method and getter.
+    # @api private
     def add_attribute_default_methods(kls, options)
       default = options[:default]
       kls.send(:define_method, options[:default_method]) { ::Schema::Utils.copy_default(default) }

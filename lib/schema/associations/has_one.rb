@@ -10,6 +10,12 @@ module Schema
 
       # no-doc
       module ClassMethods
+        # Declares a nested model, with a getter and a setter.
+        # @param name [Symbol]
+        # @param options [Hash] `alias:`/`aliases:`, `default: true`, `class_name:`, `base_class:`, and
+        #   `type_field:`/`external_type_field:`/`type_ignorecase:` for dynamic types
+        # @yield attribute definitions for the nested model
+        # @return [Class] the nested model class
         def has_one(name, options = {}, &block)
           options = ::Schema::Utils.add_association_class(self, name, :has_one, options)
 

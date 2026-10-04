@@ -6,6 +6,8 @@ module Schema
   module Parsers
     # Schema::Parsers::Json parse the string as json
     module Json
+      # Parses JSON strings.
+      # @return [Object, nil] the parsed JSON
       def parse_json(field_name, parsing_errors, value)
         case value
         when String

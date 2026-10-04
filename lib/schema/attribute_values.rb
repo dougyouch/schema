@@ -18,6 +18,8 @@ module Schema
       set_field_options.to_h { |field_options| [field_options[:name], public_send(field_options[:getter])] }
     end
 
+    # @param other [Object]
+    # @return [Boolean] true for a model of the same class with equal attribute values
     def ==(other)
       other.instance_of?(self.class) && other.attribute_values == attribute_values
     end

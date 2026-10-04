@@ -19,10 +19,12 @@ module Schema
           @base_schema_class_name = kls.name
         end
 
+        # @return [Class] the class that declared this association
         def base_schema_class
           @base_schema_class_name ? Object.const_get(@base_schema_class_name) : @base_schema_class
         end
 
+        # @return [Hash] the association's options in the parent schema
         def schema_options
           base_schema_class.schema[schema_name]
         end

@@ -6,6 +6,8 @@ A powerful Ruby gem for data transformation, validation, and type safety. Schema
 [![Coverage](https://raw.githubusercontent.com/dougyouch/schema/badges/coverage.svg)](https://github.com/dougyouch/schema/actions/workflows/ci.yml)
 [![Branch Coverage](https://raw.githubusercontent.com/dougyouch/schema/badges/branches.svg)](https://github.com/dougyouch/schema/actions/workflows/ci.yml)
 
+[API reference](https://rubydoc.info/gems/schema-model) · [Changelog](CHANGELOG.md) · [Architecture](ARCHITECTURE.md)
+
 ## Installation
 
 Requires Ruby 3.2 or newer. Add this line to your application's Gemfile:
@@ -181,6 +183,16 @@ end
 
 Associations in `set_attribute_values` are schema models; call `as_json` on them if the record expects hashes. For a single attribute, `input.name_was_set?` answers the same question.
 
+For nested input, `as_json(only_set: true)` keeps only the fields that were sent, at every level, so it can be merged into a JSON column without wiping fields the client left out:
+
+```ruby
+# body {"address": {"zip": null}}
+input.as_json(only_set: true)                                  # => { address: { zip: nil } }
+record.data = record.data.deep_merge(input.as_json(only_set: true).deep_stringify_keys)
+```
+
+`JSON.parse` returns an array, string or number for bodies that aren't JSON objects; `from_hash` records an `incompatible` error on `:base` for those instead of raising, so `parsed_and_valid?` handles them like any other bad input.
+
 ## Data Types
 
 ### Basic Types
@@ -190,7 +202,7 @@ attribute :name, :string              # String values
 attribute :count, :integer            # Integer values (parses "123", " 123 " and "0123" to 123)
 attribute :price, :float              # Float values (parses "9.99" to 9.99, also "1e+5")
 attribute :active, :boolean           # see below
-attribute :notes, :string_or_nil      # String, but returns nil if empty
+attribute :notes, :string_or_nil      # String, but nil when empty or whitespace-only
 ```
 
 Booleans accept `1, t, true, on, y, yes` as `true` and `0, f, false, off, n, no` as `false` (any case). Any other string is an `invalid` parsing error, and numbers are `true` unless they're 0.
@@ -533,6 +545,9 @@ user.as_json(include_nils: true)      # => { name: "John", email: nil }
 # Filter fields
 user.as_json(select_filter: ->(name, value, opts) { name == :name })
 user.as_json(reject_filter: ->(name, value, opts) { value.nil? })
+
+# Only the fields present in the input, at every level (nils that were sent are kept)
+user.as_json(only_set: true)          # => { name: "John", email: nil }
 ```
 
 ### Comparing, Inspecting and Copying
@@ -619,11 +634,11 @@ end
 UserSchema.to_headers  # => [..., "phones[1].number", "phones[2].number", "phones[3].number"]
 ```
 
-`to_a` writes at most `size` entries: a model with more entries than that has the extra ones left out of the array, with no error, so pick a `size` large enough for your data.
+Without `size:`, these methods raise an `ArgumentError` naming the association. `to_a` writes at most `size` entries: a model with more entries than that has the extra ones left out of the array, with no error, so pick a `size` large enough for your data.
 
 ### Schema::CSVParser
 
-`Schema::CSVParser` is a class that reads rows from a `CSV` object into models. The model needs `Schema::ArrayHeaders` and `Schema::Arrays`. Pass a plain `CSV` (not one created with `headers: true`); the first row is used as the headers unless you pass them in:
+`Schema::CSVParser` is a class that reads rows from a `CSV` object into models. The model needs `Schema::ArrayHeaders` and `Schema::Arrays`. Pass a plain `CSV` (not one created with `headers: true`); the first row is used as the headers unless you pass them in. Headers are stripped, and the byte order mark Excel puts at the start of UTF-8 files is removed:
 
 ```ruby
 require 'csv'

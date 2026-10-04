@@ -8,9 +8,13 @@ module Schema
     module American
       include StringValue
 
+      # strptime format for :american_date.
       DATE_FORMAT = '%m/%d/%Y'
+      # strptime format for :american_time.
       TIME_FORMAT = '%m/%d/%Y %H:%M:%S'
 
+      # Parses MM/DD/YYYY strings; blank strings are nil.
+      # @return [Date, nil]
       def parse_american_date(field_name, parsing_errors, value)
         case value
         when Date
@@ -27,6 +31,8 @@ module Schema
         end
       end
 
+      # Parses MM/DD/YYYY HH:MM:SS strings; blank strings are nil.
+      # @return [Time, nil]
       def parse_american_time(field_name, parsing_errors, value)
         case value
         when Time

@@ -6,6 +6,7 @@ module Schema
   # Schema::ActiveModelParsingErrors turns parsing error codes into readable messages,
   # e.g. "Age is invalid" instead of "Age invalid". Override them with I18n keys under schema.parsing_errors.
   class ActiveModelParsingErrors < ActiveModel::Errors
+    # Default English message for each parsing error code.
     MESSAGES = {
       ::Schema::ParsingErrors::INVALID => 'is invalid',
       ::Schema::ParsingErrors::INCOMPATIBLE => 'is an incompatible type',

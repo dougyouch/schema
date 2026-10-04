@@ -20,6 +20,10 @@ module Schema
       )
     end
 
+    # Raises unless the model parsed cleanly and passes its validations.
+    # @raise [ParsingException] when there are parsing errors
+    # @raise [ValidationException] when validations fail
+    # @return [void]
     def valid!
       parsed!
       valid_model!
@@ -38,6 +42,7 @@ module Schema
 
     # no-doc
     module OverrideParsingErrors
+      # @return [ActiveModelParsingErrors] parsing errors with readable messages
       def parsing_errors
         @parsing_errors ||= ActiveModelParsingErrors.new(self)
       end

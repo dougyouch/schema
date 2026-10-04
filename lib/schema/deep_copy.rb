@@ -3,6 +3,9 @@
 module Schema
   # Schema::DeepCopy copies a model along with its nested models, collections and parsing errors
   module DeepCopy
+    # Copies the model with its nested models, collections, strings and parsing errors,
+    # so the copy can be changed without touching the original.
+    # @return [Schema::Model]
     def deep_dup
       copy = dup
       copy.copy_attribute_values_from(self)

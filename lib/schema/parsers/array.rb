@@ -4,6 +4,9 @@ module Schema
   module Parsers
     # Schema::Parsers::Array adds the array type to schemas
     module Array
+      # Parses arrays, or strings split on the attribute's `separator:`, converting
+      # elements with its `data_type:`.
+      # @return [Array, nil]
       def parse_array(field_name, parsing_errors, value)
         case value
         when ::Array
@@ -25,12 +28,16 @@ module Schema
         end
       end
 
+      # Splits a string on the attribute's separator.
+      # @api private
       def self.parse_string_array(model, field_name, parsing_errors, value, schema_options)
         return nil unless (separator = schema_options[:separator])
 
         convert_array_values(model, field_name, parsing_errors, value.split(separator), schema_options)
       end
 
+      # Converts elements with the attribute's data_type.
+      # @api private
       def self.convert_array_values(model, field_name, parsing_errors, data, schema_options)
         return data unless (data_type = schema_options[:data_type])
 

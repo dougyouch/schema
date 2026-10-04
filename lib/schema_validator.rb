@@ -2,6 +2,8 @@
 
 # SchemaValidator validates nested schemas: each one must have no parsing errors and pass its validations
 class SchemaValidator < ActiveModel::EachValidator
+  # Called by ActiveModel for `validates :x, schema: true`.
+  # @api private
   def validate_each(record, attribute, value)
     record.errors.add(attribute, options.fetch(:message, :invalid)) unless valid_schema?(value)
   end

@@ -10,6 +10,11 @@ module Schema
 
       # no-doc
       module ClassMethods
+        # Declares a subtype, used when the type field equals type.
+        # @param type [String, Symbol] type field value
+        # @param options [Hash] `class_name:` to name the generated class
+        # @yield attribute definitions for this type
+        # @return [Class] the subtype class
         def add_type(type, options = {}, &block)
           class_name = options[:class_name] || schema_dynamic_type_class_name(type)
           kls = Class.new(self)
@@ -19,14 +24,20 @@ module Schema
           kls
         end
 
+        # Declares the subtype used when no other type matches.
+        # @param options [Hash] see {#add_type}
+        # @yield attribute definitions for this type
+        # @return [Class] the subtype class
         def default_type(options = {}, &)
           add_type(:default, options, &)
         end
 
+        # @return [Hash] type name => class name, including :default
         def dynamic_types
           schema_options[:types]
         end
 
+        # @return [Array] declared type names, without :default
         def dynamic_type_names
           dynamic_types.keys - [:default]
         end
