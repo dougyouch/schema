@@ -25,10 +25,6 @@ module Schema
 
     # no-doc
     module ClassMethods
-      def self.include(base)
-        base.capture_unknown_attributes = true
-      end
-
       def schema
         {}.freeze
       end

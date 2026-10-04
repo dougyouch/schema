@@ -86,7 +86,7 @@ module Schema
             return type if type
           end
           nil
-        elsif @external_type_field
+        else
           base_schema.public_send(@external_type_field)
         end
       end
