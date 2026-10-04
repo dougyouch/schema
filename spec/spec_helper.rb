@@ -5,24 +5,17 @@ require 'bundler'
 require 'json'
 require 'securerandom'
 require 'simplecov'
-require 'simplecov-cobertura'
 
 SimpleCov.start do
   enable_coverage :branch
 
-  skip '/spec/'
+  cover 'lib/**/*.rb'
+  # loaded by the gemspec before SimpleCov starts, so it would always show as missed
+  skip 'lib/schema/version.rb'
 
   group 'Core', 'lib/schema'
   group 'Parsers', 'lib/schema/parsers'
   group 'Associations', 'lib/schema/associations'
-
-  cover 'lib/**/*.rb'
-
-  if ENV['CI']
-    formatter SimpleCov::Formatter::CoberturaFormatter
-  else
-    formatter SimpleCov::Formatter::HTMLFormatter
-  end
 end
 
 begin

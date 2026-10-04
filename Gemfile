@@ -13,5 +13,4 @@ end
 group :spec do
   gem 'rspec'
   gem 'simplecov'
-  gem 'simplecov-cobertura'
 end

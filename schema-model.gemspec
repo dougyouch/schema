@@ -1,8 +1,10 @@
 # frozen_string_literal: true
 
+require_relative 'lib/schema/version'
+
 Gem::Specification.new do |s|
   s.name        = 'schema-model'
-  s.version     = '0.7.0'
+  s.version     = Schema::VERSION
   s.licenses    = ['MIT']
   s.summary     = 'Data transformation, validation, and type safety for Ruby'
   s.description = 'A flexible DSL for defining strongly-typed data models with automatic parsing, ' \
