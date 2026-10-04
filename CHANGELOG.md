@@ -1,5 +1,14 @@
 # Changelog
 
+## [0.7.4](https://github.com/dougyouch/schema/compare/v0.7.3...v0.7.4) (2026-10-04)
+
+
+### Bug Fixes
+
+* **array-headers:** fix nested field names, association columns and column collisions ([f0373e0](https://github.com/dougyouch/schema/commit/f0373e0450e9d474dcde5e02b1db76b9c7bbc7d4))
+* **associations:** support dynamic types in anonymous parent classes ([45d22da](https://github.com/dougyouch/schema/commit/45d22da233ec97703ba3c3bd90a91e577bac5390))
+* **cli:** write csv headers to stdout and lint schema-json2csv ([58ebb13](https://github.com/dougyouch/schema/commit/58ebb138d58cbddca60c2e7214ab980d3c0aae12))
+
 ## [0.7.3](https://github.com/dougyouch/schema/compare/v0.7.2...v0.7.3) (2026-10-04)
 
 
