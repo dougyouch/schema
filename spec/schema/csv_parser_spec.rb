@@ -132,6 +132,23 @@ describe Schema::CSVParser do
       expect(subject).to eq(['ZipCode'])
     end
 
+    describe 'byte order mark before the first header' do
+      let(:csv_io) { StringIO.new("\uFEFF#{model_data_headers.to_csv}#{model_data.to_csv}") }
+
+      it 'still maps the first column' do
+        expect(csv_parser.first.id).to eq(4)
+      end
+    end
+
+    describe 'empty header cell' do
+      let(:csv_io) { StringIO.new("ID,,PersonName\n4,x,Joe\n") }
+
+      it 'skips the column' do
+        model = csv_parser.first
+        expect([model.id, model.name]).to eq([4, 'Joe'])
+      end
+    end
+
     describe 'empty csv file' do
       let(:csv_io) { StringIO.new('') }
 
