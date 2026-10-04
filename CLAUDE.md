@@ -35,7 +35,7 @@ This is a Ruby gem (`schema-model`) for data transformation, validation, and typ
 - **Schema::All** (`lib/schema/all.rb`) - Convenience module bundling Model + Associations + Parsers + ActiveModel validations. This is the typical include.
 
 - **Schema::Parsers** - Type parsers in `lib/schema/parsers/`:
-  - `Common` - integer, string, string_or_nil, float, time, date, boolean (included by `Schema::Model`)
+  - `Common` - integer, string, string_or_nil, float, time, date, boolean (included by `Schema::Model`). Strings are stripped and blank ones parse to nil via `StringValue`.
   - `American` - american_date, american_time (MM/DD/YYYY format)
   - `Array` - array with optional separator and data_type
   - `Hash` - hash/dictionary values
@@ -55,7 +55,7 @@ This is a Ruby gem (`schema-model`) for data transformation, validation, and typ
 
 **Attribute Definition**: Each `attribute` call generates getter, setter, and `<name>_was_set?` predicate. Setter invokes type-specific parser.
 
-**Parsing Errors**: Stored in `parsing_errors`. Parsers add errors for invalid values rather than raising exceptions. With ActiveModelValidations, use `parsed?`/`parsed!`; `valid?` does not check parsing errors.
+**Parsing Errors**: Stored in `parsing_errors` as codes from `Schema::ParsingErrors` (`Schema::Errors`), or as readable messages with ActiveModelValidations (`ActiveModelParsingErrors`). Parsers add errors for invalid values rather than raising exceptions. Use `parsed?`/`parsed!` on any model; `valid?` does not check parsing errors.
 
 **Schema Inheritance**: Uses `inheritance-helper` gem. Schema definitions accumulate via `add_value_to_class_method(:schema, ...)`.
 
@@ -63,7 +63,7 @@ This is a Ruby gem (`schema-model`) for data transformation, validation, and typ
 
 ## CI
 
-`.github/workflows/ci.yml` runs RuboCop and the specs on the `.ruby-version` Ruby. On pushes to `master`, it publishes `coverage.svg` (line) and `branches.svg` (branch) from `script/coverage_badge.rb` to the orphan `badges` branch for the README badges.
+`.github/workflows/ci.yml` runs RuboCop, and the specs on Ruby 3.2 (the gemspec minimum; gems resolved without `Gemfile.lock`, `COVERAGE=false`) and on the `.ruby-version` Ruby (with `Gemfile.lock` and the 100% line/branch coverage gate). On pushes to `master`, it publishes `coverage.svg` (line) and `branches.svg` (branch) from `script/coverage_badge.rb` to the orphan `badges` branch for the README badges.
 
 ## Releases
 

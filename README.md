@@ -8,7 +8,7 @@ A powerful Ruby gem for data transformation, validation, and type safety. Schema
 
 ## Installation
 
-Add this line to your application's Gemfile:
+Requires Ruby 3.2 or newer. Add this line to your application's Gemfile:
 
 ```ruby
 gem 'schema-model'
@@ -65,17 +65,21 @@ user.tags          # => ["ruby", "rails", "developer"]
 
 ```ruby
 attribute :name, :string              # String values
-attribute :count, :integer            # Integer values (parses "123" to 123)
-attribute :price, :float              # Float values (parses "9.99" to 9.99)
-attribute :active, :boolean           # true for 1, t, true, on, y, yes (any case); other strings are false; numbers are true unless 0
+attribute :count, :integer            # Integer values (parses "123", " 123 " and "0123" to 123)
+attribute :price, :float              # Float values (parses "9.99" to 9.99, also "1e+5")
+attribute :active, :boolean           # see below
 attribute :notes, :string_or_nil      # String, but returns nil if empty
 ```
+
+Booleans accept `1, t, true, on, y, yes` as `true` and `0, f, false, off, n, no` as `false` (any case). Any other string is an `invalid` parsing error, and numbers are `true` unless they're 0.
+
+For `:integer`, `:float`, `:boolean`, `:date`, `:time`, `:american_date` and `:american_time`, strings are stripped first and a blank string parses to `nil` without an error, so empty CSV cells don't count as bad input.
 
 ### Date and Time Types
 
 ```ruby
-attribute :created_at, :time          # ISO 8601 format (Time.xmlschema)
-attribute :birth_date, :date          # Date.parse format
+attribute :created_at, :time          # ISO 8601 date and time (Time.xmlschema)
+attribute :birth_date, :date          # ISO 8601 (Date.iso8601), e.g. "2024-01-31"; free text like "May 1" is invalid
 attribute :us_date, :american_date    # MM/DD/YYYY format
 attribute :us_time, :american_time    # MM/DD/YYYY HH:MM:SS format
 ```
@@ -89,6 +93,8 @@ attribute :tags, :array, separator: ',', data_type: :integer  # Parse and conver
 attribute :metadata, :hash                        # Hash/dictionary values
 attribute :config, :json                          # Parse JSON strings
 ```
+
+Each type `:foo` is parsed by a `parse_foo` method, so you can add types by defining that method on the model or in a module you `schema_include`. Setting a value on an attribute whose type has no parser raises `Schema::UnknownTypeError` naming the attribute and the missing method.
 
 ## Attribute Options
 
@@ -293,7 +299,7 @@ end
 
 ### Parsing Errors vs Validation Errors
 
-Parsing errors and validation errors are tracked separately. `valid?` only runs validations, so check `parsed?` too (or call `valid!`, which checks both).
+Parsing errors and validation errors are tracked separately. `valid?` only runs validations, so check `parsed?` too (or call `valid!`, which checks both). `parsed?` and `parsed!` are available on every `Schema::Model`, not only with ActiveModel.
 
 ```ruby
 user = UserSchema.from_hash(name: 'John', email: 'john@example.com', age: 'not-a-number')
@@ -307,6 +313,22 @@ user.age                    # => nil
 user.valid?                 # => true (age is nil, which allow_nil permits)
 user.errors.full_messages   # => []
 ```
+
+With `Schema::All` (or `Schema::ActiveModelValidations`), `parsing_errors` is an `ActiveModel::Errors` with readable messages:
+
+```ruby
+user.parsing_errors.full_messages  # => ["Age is invalid"]
+```
+
+| Code | Message | I18n key |
+|---|---|---|
+| `invalid` | is invalid | `schema.parsing_errors.invalid` |
+| `incompatible` | is an incompatible type | `schema.parsing_errors.incompatible` |
+| `unknown` | has an unknown type | `schema.parsing_errors.unknown` |
+| `unknown_attribute` | is an unknown attribute | `schema.parsing_errors.unknown_attribute` |
+| `unhandled_type` | is an unhandled type | `schema.parsing_errors.unhandled_type` |
+
+A plain `Schema::Model` uses `Schema::Errors`, which stores the codes themselves (`user.parsing_errors[:age] # => ["invalid"]`).
 
 ### Validating Nested Schemas
 
@@ -349,13 +371,13 @@ By default, unknown attributes are captured as parsing errors:
 
 ```ruby
 user = UserSchema.from_hash(name: 'John', unknown_field: 'value')
-user.parsing_errors[:unknown_field]  # => ["unknown_attribute"]
+user.parsing_errors[:unknown_field]  # => ["is an unknown attribute"]
 
 # Disable this behavior
 UserSchema.capture_unknown_attributes = false
 ```
 
-The setting is per class. Nested association classes keep their own setting, so an unknown key inside a nested hash still makes the parent record an `invalid` error for that association.
+The setting also applies to nested association classes, including ones declared after it is set.
 
 ## Serialization
 
@@ -379,6 +401,23 @@ user.as_json(include_nils: true)      # => { name: "John", email: nil }
 user.as_json(select_filter: ->(name, value, opts) { name == :name })
 user.as_json(reject_filter: ->(name, value, opts) { value.nil? })
 ```
+
+### Comparing, Inspecting and Copying
+
+```ruby
+a = ContactSchema.from_hash(name: 'John')
+b = ContactSchema.from_hash('name' => 'John')
+
+a == b               # => true (same class and attribute values, nested models included)
+a.attribute_values   # => { name: "John", email: nil }
+a.inspect            # => #<ContactSchema name: "John"> (only attributes that were set)
+
+copy = a.deep_dup    # copies nested models, arrays, hashes, strings and parsing errors
+copy.name << '!'
+a.name               # => "John"
+```
+
+`dup` is Ruby's shallow copy, so nested models are shared with the original.
 
 ## Protecting Fields with skip_fields
 
@@ -445,6 +484,8 @@ end
 
 UserSchema.to_headers  # => [..., "phones[1].number", "phones[2].number", "phones[3].number"]
 ```
+
+`to_a` writes at most `size` entries: a model with more entries than that has the extra ones left out of the array, with no error, so pick a `size` large enough for your data.
 
 ### Schema::CSVParser
 

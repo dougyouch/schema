@@ -17,7 +17,10 @@ Hash Data → from_hash() → Parser Methods → Schema Instance
 ```
 Schema::All (convenience bundle)
     ├── Schema::Model (core attribute system)
-    │     └── Schema::Parsers::Common
+    │     ├── Schema::Parsers::Common (includes Parsers::StringValue)
+    │     ├── Schema::ParsingStatus (parsed? / parsed!)
+    │     ├── Schema::AttributeValues (attribute_values, ==, inspect)
+    │     └── Schema::DeepCopy (deep_dup)
     ├── Schema::Associations::HasOne
     ├── Schema::Associations::HasMany
     ├── Schema::Parsers::American
@@ -46,13 +49,17 @@ The foundation module providing:
 - **`attribute(name, type, options)`**: Defines schema fields. Each call:
   1. Adds field metadata to the class's `schema` hash via `add_value_to_class_method`
   2. Generates getter, setter, and `<name>_was_set?` methods
-  3. Setter invokes `parse_<type>` method automatically
+  3. Setter invokes `parse_<type>` method automatically. If that method isn't defined when the attribute is declared (it may come from a module included later), the setter checks for it first and raises `Schema::UnknownTypeError` when it's still missing.
 
 - **`from_hash(data, skip_fields)`**: Class method that creates instance and calls `update_attributes`
 
 - **`update_attributes(data, skip_fields)`**: Iterates the data's key/value pairs, matches them against the schema, and invokes setters. Plain attributes are set before associations, so an association's `external_type_field` can read a sibling attribute. Each key is looked up on its own: symbol keys in `schema`, anything else in `schema_with_string_keys` (rebuilt whenever `schema` changes). `skip_fields` entries match a field by name or alias, as a symbol or string; a `{ association: [...] }` entry passes a nested list down.
 
 - **Aliases**: each alias adds a second schema entry with `alias_of:` pointing at the real attribute, plus aliased getter/setter methods. Serialization and array conversion skip entries with `alias_of`.
+
+- **`capture_unknown_attributes=`**: stored in `schema_config` and applied to nested association classes, both existing ones and ones created later (`Utils.create_schema_class` copies the parent's setting).
+
+- **Model helpers** (small modules included by `Schema::Model`): `ParsingStatus` (`parsed?`, `parsed!`), `AttributeValues` (`attribute_values`, `==` by class and values, `inspect` listing set attributes) and `DeepCopy` (`deep_dup`, copying nested models, collections, strings and parsing errors via `Utils.deep_dup_value` / `Utils.parsing_error_pairs`).
 
 - **`as_json` / `to_hash`**: Serialization back to hash format
 
@@ -66,6 +73,8 @@ Each parser:
 1. Accepts `(field_name, parsing_errors, value)`
 2. Returns converted value or nil
 3. Adds to `parsing_errors` on failure (never raises)
+
+String input for integer, float, boolean, date, time and the American formats goes through `Parsers::StringValue#parse_string_value`: it strips the string, returns nil for a blank one, and records `invalid` when the conversion returns nil or raises `ArgumentError`. Booleans are looked up in `BOOLEAN_STRINGS`; dates use `Date.iso8601`.
 
 Additional parsers extend these: `Parsers::American` (date formats), `Parsers::Array`, `Parsers::Hash`, `Parsers::Json`.
 
@@ -115,7 +124,7 @@ Two error storage mechanisms:
 
 1. **Schema::Errors** (`lib/schema/errors.rb`): Simple hash-based storage, used standalone
 
-2. **ActiveModel::Errors**: When `Schema::ActiveModelValidations` is included, `parsing_errors` returns `ActiveModel::Errors` instance
+2. **Schema::ActiveModelParsingErrors** (`lib/schema/active_model_parsing_errors.rb`): When `Schema::ActiveModelValidations` is included, `parsing_errors` returns this `ActiveModel::Errors` subclass, which turns error codes into readable messages (overridable under the `schema.parsing_errors.<code>` I18n keys). Messages are stored as strings because parsing error keys like `items:0` aren't model attributes.
 
 Parsing errors are distinct from validation errors:
 - **Parsing errors**: Type conversion failures (string "abc" → integer)
@@ -128,7 +137,7 @@ Parsing errors use these codes from `Schema::ParsingErrors`: `invalid`, `incompa
 ### CSV and Arrays
 
 - **`Schema::ArrayHeaders`** (`lib/schema/array_headers.rb`): `map_headers_to_attributes(headers)` returns a nested hash of `{ field: { index: n } }` entries. Has-many fields are matched as `<prefix><n><key>` (prefix is the association name or an alias, `n` counts from 1) and map to `{ indexes: [...] }`. Has-one fields are matched by their own key or alias; a column already claimed by the parent or an earlier has-one isn't reused. Associations never map to a column of their own.
-- **`Schema::Arrays`** (`lib/schema/arrays.rb`): `to_headers`, `to_empty_array`, `to_a` and `from_array(array, mapped_headers)`. Has-many associations need a `size:` option for the fixed-width methods.
+- **`Schema::Arrays`** (`lib/schema/arrays.rb`): `to_headers`, `to_empty_array`, `to_a` and `from_array(array, mapped_headers)`. Has-many associations need a `size:` option for the fixed-width methods; `to_a` leaves out entries beyond `size`.
 - **`Schema::CSVParser`** (`lib/schema/csv_parser.rb`): wraps a `CSV` object, maps its header row once, and yields a model per row (`each`, `shift`, `missing_fields`).
 
 ### Inheritance Helper Integration
