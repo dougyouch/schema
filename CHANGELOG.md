@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.7.3](https://github.com/dougyouch/schema/compare/v0.7.2...v0.7.3) (2026-10-04)
+
+
+### Bug Fixes
+
+* **array-headers:** map aliased associations once under their name ([20258e2](https://github.com/dougyouch/schema/commit/20258e22bb59bbfaac088a71dccd773b7ef9255c))
+* **parsers:** accept signed exponents and treat nil as nil for array, hash and json ([d4ac539](https://github.com/dougyouch/schema/commit/d4ac539ceba92354b47504523c18bbe3ed209e09))
+
 ## [0.7.2](https://github.com/dougyouch/schema/compare/v0.7.1...v0.7.2) (2026-10-04)
 
 
