@@ -141,6 +141,22 @@ describe Schema::Model do
     end
   end
 
+  context 'unknown type' do
+    it 'raises a clear error when a value is set' do
+      model_class.attribute :token, :uuid
+      expect { model_class.from_hash(token: 'x') }.to raise_error(
+        Schema::UnknownTypeError, "unknown type :uuid for #{model_class_name}#token: no parse_uuid method " \
+                                  '(schema_include the parser module that defines it)'
+      )
+    end
+
+    it 'accepts a parser module included after the attribute' do
+      model_class.attribute :tags, :array
+      model_class.schema_include Schema::Parsers::Array
+      expect(model_class.from_hash(tags: [1]).tags).to eq([1])
+    end
+  end
+
   context 'setter/getter' do
     let(:value) { rand(1_000_000).to_s }
     let(:model) { model_class.new }
@@ -314,6 +330,31 @@ describe Schema::Model do
       let(:capture_unknown_attributes) { false }
 
       it { expect(subject).to eq(true) }
+    end
+
+    describe 'nested associations' do
+      let(:nested_class) do
+        Class.new do
+          include Schema::Model
+
+          schema_include Schema::Associations::HasOne
+
+          has_one :company do
+            attribute :name, :string
+          end
+        end
+      end
+
+      it 'applies the setting to existing associations' do
+        nested_class.capture_unknown_attributes = false
+        expect(nested_class.from_hash(company: { other: 1 }).parsing_errors.empty?).to eq(true)
+      end
+
+      it 'applies the setting to associations declared later' do
+        nested_class.capture_unknown_attributes = false
+        nested_class.has_one(:owner) { attribute :name, :string }
+        expect(nested_class.from_hash(owner: { other: 1 }).parsing_errors.empty?).to eq(true)
+      end
     end
   end
 end

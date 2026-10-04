@@ -5,6 +5,14 @@ module Schema
   module Utils
     module_function
 
+    def check_parser!(model, parser, field_name, type)
+      return if model.respond_to?(parser)
+
+      raise ::Schema::UnknownTypeError,
+            "unknown type #{type.inspect} for #{model.class.name || model.class}##{field_name}: " \
+            "no #{parser} method (schema_include the parser module that defines it)"
+    end
+
     def classify_name(name)
       name.gsub(/[^\da-z_-]/, '').gsub(/(^.|[_|-].)/) { |m| m[-1].upcase }
     end
@@ -14,6 +22,7 @@ module Schema
       kls = Class.new(options[:base_class] || Object)
       kls = base_schema_class.const_set(options[:class_name], kls)
       include_schema_modules(kls, base_schema_class.schema_config) unless options[:base_class]
+      kls.capture_unknown_attributes = base_schema_class.capture_unknown_attributes?
       kls
     end
 
@@ -54,6 +63,24 @@ module Schema
       return if !options[:type_field] && !options[:external_type_field]
 
       kls.send(:include, ::Schema::Associations::DynamicTypes)
+    end
+
+    # copies nested models and collections so the copy can be changed without touching the original
+    def deep_dup_value(value)
+      case value
+      when ::Schema::Model then value.deep_dup
+      when ::Array then value.map { |element| deep_dup_value(element) }
+      when ::Hash then value.to_h { |key, element| [key, deep_dup_value(element)] }
+      when ::String then value.frozen? ? value : value.dup
+      else value
+      end
+    end
+
+    # [attribute, message] pairs from Schema::Errors or ActiveModel::Errors
+    def parsing_error_pairs(errors)
+      return errors.map { |error| [error.attribute, error.message] } unless errors.is_a?(::Schema::Errors)
+
+      errors.errors.flat_map { |attribute, messages| messages.map { |message| [attribute, message] } }
     end
 
     # each call gets its own copy so callers can't mutate the shared default

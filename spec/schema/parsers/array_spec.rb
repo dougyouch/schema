@@ -99,11 +99,22 @@ describe Schema::Parsers::Array do
             expect(subject.costs).to eq([nil, 4, nil, 6])
           end
 
-          it 'has parsing_errors' do
+          it 'has parsing_errors for the invalid value only' do
             expect(subject.parsing_errors['costs:0']).to eq([Schema::ParsingErrors::INVALID])
-            expect(subject.parsing_errors['costs:2']).to eq([Schema::ParsingErrors::INVALID])
+            expect(subject.parsing_errors['costs:2']).to eq([])
           end
         end
+      end
+    end
+
+    describe 'unknown data_type' do
+      before do
+        schema_options = model_class.schema[:costs].merge(data_type: :money)
+        model_class.add_value_to_class_method(:schema, costs: schema_options)
+      end
+
+      it 'raises a clear error' do
+        expect { model_class.from_hash(costs: [1]) }.to raise_error(Schema::UnknownTypeError, /unknown type :money/)
       end
     end
 

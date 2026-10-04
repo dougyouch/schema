@@ -8,6 +8,9 @@ module Schema
     def self.included(base)
       base.extend InheritanceHelper::Methods
       base.send(:include, Schema::Parsers::Common)
+      base.send(:include, Schema::ParsingStatus)
+      base.send(:include, Schema::AttributeValues)
+      base.send(:include, Schema::DeepCopy)
       base.extend ClassMethods
     end
 
@@ -45,10 +48,17 @@ module Schema
         }.freeze
       end
 
+      # applies to nested association classes too, like schema_include
       def capture_unknown_attributes=(v)
         config = schema_config.dup
         config[:capture_unknown_attributes] = v
         redefine_class_method(:schema_config, config.freeze)
+
+        schema.each_value do |field_options|
+          next unless field_options[:association]
+
+          const_get(field_options[:class_name]).capture_unknown_attributes = v
+        end
       end
 
       def capture_unknown_attributes?
@@ -87,6 +97,7 @@ module Schema
       end
 
       def add_attribute_methods(name, options)
+        parser_check = parser_check_code(name, options)
         class_eval(
           <<-STR, __FILE__, __LINE__ + 1
   def #{options[:getter]}
@@ -94,6 +105,7 @@ module Schema
   end
 
   def #{options[:setter]}(v)
+    #{parser_check}
     #{options[:instance_variable]} = #{options[:parser]}(#{name.inspect}, parsing_errors, v)
   end
 
@@ -102,6 +114,13 @@ module Schema
   end
           STR
         )
+      end
+
+      # a parser that isn't defined yet may come from a module included later, so it's checked when a value is set
+      def parser_check_code(name, options)
+        return if method_defined?(options[:parser])
+
+        "::Schema::Utils.check_parser!(self, #{options[:parser].inspect}, #{name.inspect}, #{options[:type].inspect})"
       end
 
       def add_aliases(name, options)

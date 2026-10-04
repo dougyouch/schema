@@ -6,20 +6,24 @@ module Schema
   module Parsers
     # Schema::Parsers::Common are parser methods for basic types
     module Common
-      INTEGER_REGEX = /\A[-+]?(?:[1-9]\d*|0)(?:\.0+)?\z/
-      FLOAT_REGEX = /\A[-+]?(?:[1-9]\d*|0)(?:\.\d+)?([Ee][-+]?\d+)?\z/
-      BOOLEAN_REGEX = /\A(?:1|t|true|on|y|yes)\z/i
+      include StringValue
+
+      # strings are stripped first; a blank string parses to nil without an error
+      INTEGER_REGEX = /\A[-+]?\d+(?:\.0+)?\z/
+      FLOAT_REGEX = /\A[-+]?\d+(?:\.\d+)?([Ee][-+]?\d+)?\z/
+      # matched case-insensitively; any other string is invalid
+      BOOLEAN_STRINGS = {
+        '1' => true, 't' => true, 'true' => true, 'on' => true, 'y' => true, 'yes' => true,
+        '0' => false, 'f' => false, 'false' => false, 'off' => false, 'n' => false, 'no' => false
+      }.freeze
 
       def parse_integer(field_name, parsing_errors, value)
         case value
         when Integer
           value
         when String
-          if INTEGER_REGEX.match(value)
-            value.to_i
-          else
-            parsing_errors.add(field_name, ::Schema::ParsingErrors::INVALID)
-            nil
+          parse_string_value(field_name, parsing_errors, value) do |str|
+            str.to_i if INTEGER_REGEX.match?(str)
           end
         when Float
           parse_float_as_integer(field_name, parsing_errors, value)
@@ -77,11 +81,8 @@ module Schema
         when Integer
           value.to_f
         when String
-          if FLOAT_REGEX.match(value)
-            Float(value)
-          else
-            parsing_errors.add(field_name, ::Schema::ParsingErrors::INVALID)
-            nil
+          parse_string_value(field_name, parsing_errors, value) do |str|
+            Float(str) if FLOAT_REGEX.match?(str)
           end
         when nil
           nil
@@ -98,12 +99,7 @@ module Schema
         when Date
           value.to_time
         when String
-          begin
-            Time.xmlschema(value)
-          rescue ArgumentError
-            parsing_errors.add(field_name, ::Schema::ParsingErrors::INVALID)
-            nil
-          end
+          parse_string_value(field_name, parsing_errors, value) { |str| Time.xmlschema(str) }
         when nil
           nil
         else
@@ -119,12 +115,7 @@ module Schema
         when Time
           value.to_date
         when String
-          begin
-            Date.parse(value)
-          rescue ArgumentError
-            parsing_errors.add(field_name, ::Schema::ParsingErrors::INVALID)
-            nil
-          end
+          parse_string_value(field_name, parsing_errors, value) { |str| Date.iso8601(str) }
         when nil
           nil
         else
@@ -140,7 +131,7 @@ module Schema
         when Integer, Float
           value != 0
         when String
-          BOOLEAN_REGEX.match?(value)
+          parse_string_value(field_name, parsing_errors, value) { |str| BOOLEAN_STRINGS[str.downcase] }
         when nil
           nil
         else

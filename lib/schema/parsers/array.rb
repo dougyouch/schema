@@ -35,6 +35,7 @@ module Schema
         return data unless (data_type = schema_options[:data_type])
 
         parser_method = "parse_#{data_type}"
+        ::Schema::Utils.check_parser!(model, parser_method, field_name, data_type)
         data.each_with_index.map do |datum, idx|
           model.send(parser_method, "#{field_name}:#{idx}", parsing_errors, datum)
         end

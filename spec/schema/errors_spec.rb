@@ -23,6 +23,15 @@ describe Schema::Errors do
     end
   end
 
+  context 'attribute_names' do
+    it 'lists the attributes with errors' do
+      errors.add(:name, :invalid)
+      errors.add(:cost, :invalid)
+      errors.add(:name, :incompatible)
+      expect(errors.attribute_names).to eq(%i[name cost])
+    end
+  end
+
   context 'add' do
     let(:name) { :cost }
     let(:error) { :invalid }

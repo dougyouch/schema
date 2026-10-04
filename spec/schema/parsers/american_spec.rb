@@ -29,6 +29,15 @@ describe Schema::Parsers::American do
     let(:value) { model_time }
     subject { model.parse_american_time(field_name, parsing_errors, value) }
 
+    describe 'blank string' do
+      let(:value) { ' ' }
+
+      it 'is nil without errors' do
+        expect(subject).to eq(nil)
+        expect(has_parsing_errors).to eq(false)
+      end
+    end
+
     describe 'time value' do
       it 'has no errors' do
         expect(subject).to eq(value)
@@ -88,6 +97,15 @@ describe Schema::Parsers::American do
     let(:field_name) { :date }
     let(:value) { model_date }
     subject { model.parse_american_date(field_name, parsing_errors, value) }
+
+    describe 'blank string' do
+      let(:value) { ' ' }
+
+      it 'is nil without errors' do
+        expect(subject).to eq(nil)
+        expect(has_parsing_errors).to eq(false)
+      end
+    end
 
     describe 'date value' do
       it 'has no errors' do

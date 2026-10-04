@@ -91,12 +91,30 @@ describe Schema::Parsers::Common do
         end
       end
 
-      describe 'float string starting with 0' do
-        let(:value) { "0#{rand(1_000_000)}" }
+      describe 'string with leading zeros' do
+        let(:value) { '007' }
 
-        it 'has errors' do
+        it 'has no errors' do
+          expect(subject).to eq(7)
+          expect(has_parsing_errors).to eq(false)
+        end
+      end
+
+      describe 'string with surrounding whitespace' do
+        let(:value) { ' 42 ' }
+
+        it 'has no errors' do
+          expect(subject).to eq(42)
+          expect(has_parsing_errors).to eq(false)
+        end
+      end
+
+      describe 'blank string' do
+        let(:value) { '  ' }
+
+        it 'is nil without errors' do
           expect(subject).to eq(nil)
-          expect(has_parsing_errors).to eq(true)
+          expect(has_parsing_errors).to eq(false)
         end
       end
 
@@ -348,12 +366,30 @@ describe Schema::Parsers::Common do
         end
       end
 
-      describe 'float string starting with 0' do
-        let(:value) { "0#{rand(1_000_000)}" }
+      describe 'string with leading zeros' do
+        let(:value) { '007.5' }
 
-        it 'has errors' do
+        it 'has no errors' do
+          expect(subject).to eq(7.5)
+          expect(has_parsing_errors).to eq(false)
+        end
+      end
+
+      describe 'string with surrounding whitespace' do
+        let(:value) { ' 1.5 ' }
+
+        it 'has no errors' do
+          expect(subject).to eq(1.5)
+          expect(has_parsing_errors).to eq(false)
+        end
+      end
+
+      describe 'blank string' do
+        let(:value) { '' }
+
+        it 'is nil without errors' do
           expect(subject).to eq(nil)
-          expect(has_parsing_errors).to eq(true)
+          expect(has_parsing_errors).to eq(false)
         end
       end
     end
@@ -486,6 +522,33 @@ describe Schema::Parsers::Common do
           expect(has_parsing_errors).to eq(true)
         end
       end
+
+      describe 'free text' do
+        let(:value) { 'may the force' }
+
+        it 'has errors' do
+          expect(subject).to eq(nil)
+          expect(parsing_errors[:date]).to eq([Schema::ParsingErrors::INVALID])
+        end
+      end
+
+      describe 'iso 8601 date and time' do
+        let(:value) { '2020-01-20T10:00:00Z' }
+
+        it 'has no errors' do
+          expect(subject).to eq(date)
+          expect(has_parsing_errors).to eq(false)
+        end
+      end
+
+      describe 'blank string' do
+        let(:value) { ' ' }
+
+        it 'is nil without errors' do
+          expect(subject).to eq(nil)
+          expect(has_parsing_errors).to eq(false)
+        end
+      end
     end
 
     describe 'invalid type' do
@@ -594,12 +657,30 @@ describe Schema::Parsers::Common do
             'no',
             '0',
             'OFF',
-            'bad value'
+            ' false '
           ]
         end
 
         it 'false values are false' do
-          expect(false_examples.any? { |value| model.parse_boolean(field_name, parsing_errors, value) }).to eq(false)
+          expect(false_examples.map { |value| model.parse_boolean(field_name, parsing_errors, value) }.uniq).to eq([false])
+          expect(has_parsing_errors).to eq(false)
+        end
+      end
+
+      describe 'unrecognized value' do
+        let(:value) { 'bad value' }
+
+        it 'is invalid' do
+          expect(subject).to eq(nil)
+          expect(parsing_errors[field_name]).to eq([Schema::ParsingErrors::INVALID])
+        end
+      end
+
+      describe 'blank string' do
+        let(:value) { '' }
+
+        it 'is nil without errors' do
+          expect(subject).to eq(nil)
           expect(has_parsing_errors).to eq(false)
         end
       end
@@ -650,8 +731,9 @@ describe Schema::Parsers::Common do
       expect(parsing_errors[:cost]).to eq([Schema::ParsingErrors::INVALID])
     end
 
-    it 'does not treat a later line as a true value' do
-      expect(model.parse_boolean(:active, parsing_errors, "no\nyes")).to eq(false)
+    it 'rejects a boolean followed by another line' do
+      expect(model.parse_boolean(:active, parsing_errors, "no\nyes")).to eq(nil)
+      expect(parsing_errors[:active]).to eq([Schema::ParsingErrors::INVALID])
     end
   end
 end

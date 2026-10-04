@@ -24,5 +24,9 @@ module Schema
     def empty?
       @errors.empty?
     end
+
+    def attribute_names
+      @errors.keys
+    end
   end
 end

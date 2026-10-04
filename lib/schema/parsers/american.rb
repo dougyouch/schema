@@ -6,6 +6,8 @@ module Schema
   module Parsers
     # Schema::Parsers::American parses dates and times in American format
     module American
+      include StringValue
+
       DATE_FORMAT = '%m/%d/%Y'
       TIME_FORMAT = '%m/%d/%Y %H:%M:%S'
 
@@ -16,12 +18,7 @@ module Schema
         when Time
           value.to_date
         when String
-          begin
-            Date.strptime(value, DATE_FORMAT)
-          rescue ArgumentError
-            parsing_errors.add(field_name, ::Schema::ParsingErrors::INVALID)
-            nil
-          end
+          parse_string_value(field_name, parsing_errors, value) { |str| Date.strptime(str, DATE_FORMAT) }
         when nil
           nil
         else
@@ -37,12 +34,7 @@ module Schema
         when Date
           value.to_time
         when String
-          begin
-            Time.strptime(value, TIME_FORMAT)
-          rescue ArgumentError
-            parsing_errors.add(field_name, ::Schema::ParsingErrors::INVALID)
-            nil
-          end
+          parse_string_value(field_name, parsing_errors, value) { |str| Time.strptime(str, TIME_FORMAT) }
         when nil
           nil
         else

@@ -18,14 +18,21 @@ module Schema
   class ParsingException < SchemaException; end
   class ValidationException < SchemaException; end
 
+  # raised when a value is assigned to an attribute whose type has no parse_<type> method
+  class UnknownTypeError < StandardError; end
+
   autoload :ActiveModelValidations, 'schema/active_model_validations'
   autoload :All, 'schema/all'
+  autoload :ActiveModelParsingErrors, 'schema/active_model_parsing_errors'
   autoload :ArrayHeaders, 'schema/array_headers'
   autoload :Arrays, 'schema/arrays'
+  autoload :AttributeValues, 'schema/attribute_values'
   autoload :CSVParser, 'schema/csv_parser'
+  autoload :DeepCopy, 'schema/deep_copy'
   autoload :Errors, 'schema/errors'
   autoload :Model, 'schema/model'
   autoload :ParsingErrors, 'schema/parsing_errors'
+  autoload :ParsingStatus, 'schema/parsing_status'
   autoload :Utils, 'schema/utils'
 
   # Schema::Parsers are used to convert values into the correct data type
@@ -35,6 +42,7 @@ module Schema
     autoload :Common, 'schema/parsers/common'
     autoload :Hash, 'schema/parsers/hash'
     autoload :Json, 'schema/parsers/json'
+    autoload :StringValue, 'schema/parsers/string_value'
   end
 
   # Schema::Associations mange the associations between schema models
