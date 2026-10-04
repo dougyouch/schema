@@ -58,6 +58,43 @@ describe SchemaValidator do
     end
   end
 
+  describe 'nested schema with parsing errors' do
+    let(:model) do
+      model_class.from_hash(name: 'Name', item: { id: 1, name: 'Item', cost: 1.5, extra: 'unknown key' })
+    end
+
+    before(:each) { model.valid? }
+
+    it 'is invalid even though the nested validations pass' do
+      expect(model.item.valid?).to eq(true)
+      expect(model.errors[:item]).to eq(['is invalid'])
+    end
+  end
+
+  describe 'list of nested schemas' do
+    let(:list_class) do
+      kls = Class.new do
+        include Schema::All
+
+        has_many :items do
+          attribute :name, :string
+          validates :name, presence: true
+        end
+
+        validates :items, schema: true
+      end
+      Object.const_set("ModelClass#{SecureRandom.hex(10)}", kls)
+    end
+    let(:model) { list_class.from_hash(items: [{}, nil, {}]) }
+
+    before(:each) { model.valid? }
+
+    it 'validates every entry, skipping nil ones' do
+      expect(model.errors[:items]).to eq(['is invalid'])
+      expect(model.items.compact.map { |item| item.errors[:name] }).to eq([["can't be blank"], ["can't be blank"]])
+    end
+  end
+
   describe 'missing nested schema' do
     let(:model) { model_class.from_hash(name: "Name #{SecureRandom.hex(8)}") }
 
