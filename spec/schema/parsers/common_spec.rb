@@ -245,6 +245,23 @@ describe Schema::Parsers::Common do
       end
     end
 
+    describe 'whitespace-only string value' do
+      let(:value) { " \t " }
+
+      it 'returns nil' do
+        expect(subject).to eq(nil)
+        expect(has_parsing_errors).to eq(false)
+      end
+    end
+
+    describe 'string with surrounding whitespace' do
+      let(:value) { ' Joe ' }
+
+      it 'keeps the string as is' do
+        expect(subject).to eq(' Joe ')
+      end
+    end
+
     describe 'numeric value' do
       let(:value) { rand(1_000_000) }
 

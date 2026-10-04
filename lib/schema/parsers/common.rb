@@ -10,6 +10,7 @@ module Schema
 
       # strings are stripped first; a blank string parses to nil without an error
       INTEGER_REGEX = /\A[-+]?\d+(?:\.0+)?\z/
+      # Accepted float strings, e.g. "1.5", "007.5", "1e+5".
       FLOAT_REGEX = /\A[-+]?\d+(?:\.\d+)?([Ee][-+]?\d+)?\z/
       # matched case-insensitively; any other string is invalid
       BOOLEAN_STRINGS = {
@@ -17,6 +18,8 @@ module Schema
         '0' => false, 'f' => false, 'false' => false, 'off' => false, 'n' => false, 'no' => false
       }.freeze
 
+      # Parses integers; whole floats are converted, fractional ones are incompatible.
+      # @return [Integer, nil]
       def parse_integer(field_name, parsing_errors, value)
         case value
         when Integer
@@ -35,6 +38,8 @@ module Schema
         end
       end
 
+      # Converts a float for parse_integer.
+      # @api private
       def parse_float_as_integer(field_name, parsing_errors, value)
         unless value.finite?
           parsing_errors.add(field_name, ::Schema::ParsingErrors::INCOMPATIBLE)
@@ -45,6 +50,8 @@ module Schema
         value.to_i
       end
 
+      # Converts scalars to strings; hashes and arrays are incompatible.
+      # @return [String, nil]
       def parse_string(field_name, parsing_errors, value)
         case value
         when String
@@ -59,11 +66,11 @@ module Schema
         end
       end
 
-      # if the string is empty return nil
+      # a blank (empty or whitespace-only) string returns nil; other strings are kept as is
       def parse_string_or_nil(field_name, parsing_errors, value)
         case value
         when String
-          value.empty? ? nil : value
+          value.strip.empty? ? nil : value
         when ::Hash, ::Array
           parsing_errors.add(field_name, ::Schema::ParsingErrors::INCOMPATIBLE)
           nil
@@ -74,6 +81,8 @@ module Schema
         end
       end
 
+      # Parses floats.
+      # @return [Float, nil]
       def parse_float(field_name, parsing_errors, value)
         case value
         when Float
@@ -92,6 +101,8 @@ module Schema
         end
       end
 
+      # Parses ISO 8601 date-times (Time.xmlschema).
+      # @return [Time, nil]
       def parse_time(field_name, parsing_errors, value)
         case value
         when Time
@@ -108,6 +119,8 @@ module Schema
         end
       end
 
+      # Parses ISO 8601 dates (Date.iso8601).
+      # @return [Date, nil]
       def parse_date(field_name, parsing_errors, value)
         case value
         when Date
@@ -124,6 +137,8 @@ module Schema
         end
       end
 
+      # Parses booleans; see {BOOLEAN_STRINGS}. Numbers are true unless 0.
+      # @return [Boolean, nil]
       def parse_boolean(field_name, parsing_errors, value)
         case value
         when TrueClass, FalseClass
