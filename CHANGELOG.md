@@ -1,5 +1,12 @@
 # Changelog
 
+## [0.9.1](https://github.com/dougyouch/schema/compare/v0.9.0...v0.9.1) (2026-10-04)
+
+
+### Bug Fixes
+
+* **associations:** keep association defaults out of the set values ([3d90df3](https://github.com/dougyouch/schema/commit/3d90df3f8e8fa0b5da75cb313137d76a49106091))
+
 ## [0.9.0](https://github.com/dougyouch/schema/compare/v0.8.0...v0.9.0) (2026-10-04)
 
 
