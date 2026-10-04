@@ -1,5 +1,17 @@
 # Changelog
 
+## [0.9.0](https://github.com/dougyouch/schema/compare/v0.8.0...v0.9.0) (2026-10-04)
+
+
+### Features
+
+* **model:** add set_attribute_values, parsed_and_valid? and full_error_messages ([0c8b922](https://github.com/dougyouch/schema/commit/0c8b922cb4417720b70d069a8c51fb80b3b1c644))
+
+
+### Bug Fixes
+
+* **validator:** fail schema validation on nested parsing errors ([b17704a](https://github.com/dougyouch/schema/commit/b17704af2629d3a4a81ee69f748e216a8c5d7488))
+
 ## [0.8.0](https://github.com/dougyouch/schema/compare/v0.7.4...v0.8.0) (2026-10-04)
 
 
