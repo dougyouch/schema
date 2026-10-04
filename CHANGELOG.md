@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.8.0](https://github.com/dougyouch/schema/compare/v0.7.4...v0.8.0) (2026-10-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* **model:** unrecognized boolean strings, and dates that aren't ISO 8601, are now invalid instead of false or a guessed date; blank strings parse to nil instead of being invalid (integer, float, date, time) or false (boolean); with ActiveModel, parsing_errors messages are readable text such as "is invalid" instead of codes such as "invalid"; capture_unknown_attributes= now changes nested association classes; and models compare by value with ==.
+
+### Features
+
+* **model:** stricter parsing, readable parsing errors and model helpers ([9267d77](https://github.com/dougyouch/schema/commit/9267d770f79b260bae2b3890f31f583e1684bdbe))
+
 ## [0.7.4](https://github.com/dougyouch/schema/compare/v0.7.3...v0.7.4) (2026-10-04)
 
 
