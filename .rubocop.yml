@@ -48,10 +48,6 @@ Naming/FileName:
   Exclude:
     - 'lib/schema-model.rb'
 
-# Gemspec settings
-Gemspec/RequiredRubyVersion:
-  Enabled: false
-
 # DSL methods following ActiveRecord conventions (has_one, has_many)
 Naming/PredicatePrefix:
   Exclude:
