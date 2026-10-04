@@ -8,6 +8,8 @@ module Schema
         case value
         when ::Hash
           value
+        when nil
+          nil
         else
           parsing_errors.add(field_name, ::Schema::ParsingErrors::INCOMPATIBLE)
           nil

@@ -7,7 +7,7 @@ module Schema
     # Schema::Parsers::Common are parser methods for basic types
     module Common
       INTEGER_REGEX = /\A[-+]?(?:[1-9]\d*|0)(?:\.0+)?\z/
-      FLOAT_REGEX = /\A[-+]?(?:[1-9]\d*|0)(?:\.\d+)?([Ee]-?\d+)?\z/
+      FLOAT_REGEX = /\A[-+]?(?:[1-9]\d*|0)(?:\.\d+)?([Ee][-+]?\d+)?\z/
       BOOLEAN_REGEX = /\A(?:1|t|true|on|y|yes)\z/i
 
       def parse_integer(field_name, parsing_errors, value)

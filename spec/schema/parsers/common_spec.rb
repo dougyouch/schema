@@ -321,6 +321,15 @@ describe Schema::Parsers::Common do
         end
       end
 
+      describe 'explicitly signed exponential' do
+        let(:value) { '1e+5' }
+
+        it 'has no errors' do
+          expect(subject).to eq(100_000.0)
+          expect(has_parsing_errors).to eq(false)
+        end
+      end
+
       describe 'starts with zero' do
         let(:value) { rand.to_s }
 

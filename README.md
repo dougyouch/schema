@@ -82,8 +82,6 @@ attribute :metadata, :hash                        # Hash/dictionary values
 attribute :config, :json                          # Parse JSON strings
 ```
 
-Unlike the basic types, `:array`, `:hash` and `:json` record an `incompatible` parsing error when given `nil`.
-
 ## Attribute Options
 
 ### Aliases

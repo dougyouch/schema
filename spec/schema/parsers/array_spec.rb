@@ -106,5 +106,15 @@ describe Schema::Parsers::Array do
         end
       end
     end
+
+    describe 'nil payload' do
+      subject { model_class.from_hash(costs: nil) }
+
+      it 'returns nil without a parsing error' do
+        expect(subject.costs).to eq(nil)
+        expect(subject.costs_was_set?).to eq(true)
+        expect(subject.parsing_errors.empty?).to eq(true)
+      end
+    end
   end
 end

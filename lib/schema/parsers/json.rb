@@ -15,6 +15,8 @@ module Schema
             parsing_errors.add(field_name, ::Schema::ParsingErrors::INVALID)
             nil
           end
+        when nil
+          nil
         else
           parsing_errors.add(field_name, ::Schema::ParsingErrors::INCOMPATIBLE)
           nil
