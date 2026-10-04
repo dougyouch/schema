@@ -12,12 +12,15 @@ module Schema
       module ClassMethods
         attr_accessor :schema_name
 
+        # named classes are looked up by name so reloaded constants are picked up;
+        # anonymous classes have no name, so they are kept by reference
         def base_schema_class=(kls)
+          @base_schema_class = kls
           @base_schema_class_name = kls.name
         end
 
         def base_schema_class
-          Object.const_get(@base_schema_class_name)
+          @base_schema_class_name ? Object.const_get(@base_schema_class_name) : @base_schema_class
         end
 
         def schema_options

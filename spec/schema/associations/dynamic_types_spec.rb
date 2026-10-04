@@ -154,6 +154,26 @@ describe Schema::Associations::DynamicTypes do
     end
   end
 
+  context 'anonymous parent class' do
+    let(:anonymous_class) do
+      Class.new do
+        include Schema::Model
+
+        schema_include Schema::Associations::HasOne
+
+        has_one :item, type_field: :kind do
+          attribute :kind, :string
+
+          add_type('a') { attribute :a, :string }
+        end
+      end
+    end
+
+    it 'creates the dynamic association' do
+      expect(anonymous_class.from_hash(item: { kind: 'a', a: 'value' }).item.a).to eq('value')
+    end
+  end
+
   context 'type field aliases' do
     let(:aliased_class_name) { "ModelClass#{SecureRandom.hex(10)}" }
     let(:aliased_class) do
