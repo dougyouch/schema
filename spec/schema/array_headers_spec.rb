@@ -99,6 +99,33 @@ describe Schema::ArrayHeaders do
     expect(model.friends[2].game.name).to eq('Ninja')
   end
 
+  context 'association aliases' do
+    it 'maps each association once, under its name' do
+      expect(mapped_headers.keys).to eq(%i[id name company friends])
+    end
+
+    describe 'has_one alias' do
+      let(:aliased_class_name) { "ModelClass#{SecureRandom.hex(10)}" }
+      let(:aliased_class) do
+        kls = Class.new do
+          include Schema::Model
+
+          schema_include Schema::Associations::HasOne
+          schema_include Schema::ArrayHeaders
+
+          has_one :company, alias: :employer do
+            attribute :name, :string, alias: 'CompanyName'
+          end
+        end
+        Object.const_set(aliased_class_name, kls)
+      end
+
+      it 'maps the association once, under its name' do
+        expect(aliased_class.map_headers_to_attributes(%w[CompanyName])).to eq(company: { name: { index: 0 } })
+      end
+    end
+  end
+
   context 'get_unmapped_field_names' do
     it 'returns list of unmapped fields' do
       expect(subject.class.get_unmapped_field_names(mapped_headers)).to eq(%w[unknown CompanyCountry FriendsXHighScore])

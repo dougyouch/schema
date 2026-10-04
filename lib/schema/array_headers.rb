@@ -75,6 +75,8 @@ module Schema
       def map_headers_to_has_one_associations(headers, mapped_headers, header_prefix)
         schema.each do |field_name, field_options|
           next unless field_options[:type] == :has_one
+          # aliases are matched through the association's own entry
+          next if field_options[:alias_of]
 
           mapped_model = get_mapped_model(field_options, headers, header_prefix)
           next if mapped_model.empty?
@@ -87,6 +89,7 @@ module Schema
       def map_headers_to_has_many_associations(headers, mapped_headers)
         schema.each do |field_name, field_options|
           next unless field_options[:type] == :has_many
+          next if field_options[:alias_of]
 
           get_header_prefixes(field_name, field_options).each do |header_prefix|
             mapped_model = get_mapped_model(field_options, headers, header_prefix)
