@@ -34,6 +34,12 @@ jobs:
           ruby-version: '4.0'
           bundler-cache: true
       - run: bundle exec rubocop --format github
+      # every public class, module, constant and method needs a YARD doc comment, and links must resolve
+      - name: YARD docs
+        run: |
+          bundle exec yard doc --fail-on-warning --no-save --no-output
+          bundle exec yard stats --list-undoc | tee yard-stats.txt
+          grep -q '100.00% documented' yard-stats.txt
 
   test:
     name: Tests (Ruby ${{ matrix.ruby }})
