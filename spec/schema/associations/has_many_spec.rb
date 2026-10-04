@@ -140,6 +140,23 @@ describe Schema::Associations::HasMany do
       it 'with default an empty association is created' do
         expect(model.users.nil?).to eq(false)
       end
+
+      it 'reading the default does not count as set' do
+        model.as_json
+        expect(model.set_attribute_values).to eq({})
+      end
+
+      it 'keeps entries added to the default' do
+        model.users << model_class.const_get(model_class.schema[:users][:class_name]).from_hash(id: 1)
+        expect(model.as_json).to eq(users: [{ id: 1 }])
+      end
+
+      it 'deep_dup copies the default without sharing it' do
+        model.users
+        copy = model.deep_dup
+        copy.users << nil
+        expect(model.users).to eq([])
+      end
     end
 
     describe 'from hash' do

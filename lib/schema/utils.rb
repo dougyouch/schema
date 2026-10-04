@@ -108,7 +108,15 @@ module Schema
       )
     end
 
+    # where an association's default is kept once read, separate from the value set from the input
+    def association_default_instance_variable(options)
+      "#{options[:instance_variable]}_default"
+    end
+
+    # the default is memoized so changes to it stick, but in its own instance variable, so reading
+    # it doesn't make the association count as set (set_attribute_values, not_set?, inspect)
     def add_association_default_methods(kls, options)
+      default_instance_variable = association_default_instance_variable(options)
       kls.class_eval(
         <<-STR, __FILE__, __LINE__ + 1
   def #{options[:default_method]}
@@ -116,7 +124,9 @@ module Schema
   end
 
   def #{options[:getter]}
-    #{options[:instance_variable]} ||= #{options[:default_method]}
+    return #{options[:instance_variable]} unless #{options[:instance_variable]}.nil?
+
+    #{default_instance_variable} ||= #{options[:default_method]}
   end
         STR
       )

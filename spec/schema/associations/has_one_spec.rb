@@ -111,6 +111,36 @@ describe Schema::Associations::HasOne do
       it 'with default an empty association is created' do
         expect(model.user.nil?).to eq(false)
       end
+
+      it 'reading the default does not count as set' do
+        model.as_json
+        expect(model.set_attribute_values).to eq({})
+        expect(model.not_set?).to eq(true)
+      end
+
+      it 'keeps changes made to the default' do
+        model.user.name = 'Joe'
+        expect(model.user.name).to eq('Joe')
+        expect(model.as_json).to eq(user: { name: 'Joe' })
+      end
+
+      describe 'set from the input' do
+        let(:model_data) { { user: { name: 'Ann' } } }
+
+        it 'uses the input instead of the default' do
+          expect(model.user.name).to eq('Ann')
+          expect(model.set_attribute_values.keys).to eq([:user])
+        end
+      end
+
+      describe 'set to nil from the input' do
+        let(:model_data) { { user: nil } }
+
+        it 'counts as set and still falls back to the default' do
+          expect(model.set_attribute_values).to eq(user: model.user)
+          expect(model.user.nil?).to eq(false)
+        end
+      end
     end
 
     describe 'skip_fields' do

@@ -16,11 +16,17 @@ module Schema
       self.class.schema.each_value do |field_options|
         next if field_options[:alias_of]
 
-        ivar = field_options[:instance_variable]
-        next unless source.instance_variable_defined?(ivar)
+        copy_instance_variable_from(source, field_options[:instance_variable])
+        next unless field_options[:association] && field_options[:default]
 
-        instance_variable_set(ivar, ::Schema::Utils.deep_dup_value(source.instance_variable_get(ivar)))
+        copy_instance_variable_from(source, ::Schema::Utils.association_default_instance_variable(field_options))
       end
+    end
+
+    def copy_instance_variable_from(source, ivar)
+      return unless source.instance_variable_defined?(ivar)
+
+      instance_variable_set(ivar, ::Schema::Utils.deep_dup_value(source.instance_variable_get(ivar)))
     end
 
     def copy_parsing_errors_from(source)

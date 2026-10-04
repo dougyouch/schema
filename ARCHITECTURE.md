@@ -116,7 +116,7 @@ Utility methods for:
 - `classify_name`: String → ClassName conversion
 - `create_schema_class`: Dynamically creates nested schema classes
 - `add_association_class`: Wires up association with proper modules
-- `add_attribute_default_methods` / `add_association_default_methods`: Default value handling (`copy_default` hands each read a deep copy of the default)
+- `add_attribute_default_methods` / `add_association_default_methods`: Default value handling (`copy_default` hands each read a deep copy of an attribute default; an association default is built once and kept in `@<name>_default`, separate from `@<name>`, so reading it doesn't count as the association being set)
 
 ### Error Handling
 
