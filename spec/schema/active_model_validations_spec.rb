@@ -24,6 +24,38 @@ describe Schema::ActiveModelValidations do
   end
   let(:model) { model_class.from_hash(model_data) }
 
+  context '#parsed_and_valid?' do
+    it 'is true when there are no parsing or validation errors' do
+      expect(model.parsed_and_valid?).to eq(true)
+    end
+
+    describe 'parsing error' do
+      let(:model_data) { { id: 'not_a_number' } }
+
+      it 'is false and still runs the validations' do
+        expect(model.parsed_and_valid?).to eq(false)
+        expect(model.errors[:id]).to eq(["can't be blank"])
+      end
+    end
+
+    describe 'validation error' do
+      let(:id) { nil }
+
+      it 'is false' do
+        expect(model.parsed_and_valid?).to eq(false)
+      end
+    end
+  end
+
+  context '#full_error_messages' do
+    let(:model_data) { { id: 'not_a_number', other: 1 } }
+
+    it 'lists parsing messages then validation messages' do
+      model.parsed_and_valid?
+      expect(model.full_error_messages).to eq(['Id is invalid', 'Other is an unknown attribute', "Id can't be blank"])
+    end
+  end
+
   context '#valid!' do
     subject { model.valid! }
 

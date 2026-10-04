@@ -29,6 +29,24 @@ describe Schema::AttributeValues do
     end
   end
 
+  context '#set_attribute_values' do
+    let(:data) { { 'name' => nil, 'phones' => [{ number: '555' }] } }
+
+    it 'returns only the attributes and associations in the input' do
+      expect(model.set_attribute_values.keys).to eq(%i[name phones])
+      expect(model.set_attribute_values[:name]).to eq(nil)
+      expect(model.set_attribute_values[:phones].map(&:number)).to eq(['555'])
+    end
+
+    it 'includes attributes set through an alias' do
+      expect(model_class.from_hash(full_name: 'Joe').set_attribute_values).to eq(name: 'Joe')
+    end
+
+    it 'is empty when nothing was set' do
+      expect(model_class.new.set_attribute_values).to eq({})
+    end
+  end
+
   context '#==' do
     it 'is equal to a model with the same values' do
       expect(model).to eq(model_class.from_hash(full_name: 'Joe', age: '0', phones: [{ number: '555' }]))

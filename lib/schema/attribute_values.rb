@@ -12,6 +12,12 @@ module Schema
       end
     end
 
+    # only the attributes and associations present in the input (including ones set to nil),
+    # e.g. the fields a PATCH request sent
+    def set_attribute_values
+      set_field_options.to_h { |field_options| [field_options[:name], public_send(field_options[:getter])] }
+    end
+
     def ==(other)
       other.instance_of?(self.class) && other.attribute_values == attribute_values
     end

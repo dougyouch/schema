@@ -25,6 +25,17 @@ module Schema
       valid_model!
     end
 
+    # runs validations even when there are parsing errors, so full_error_messages has both
+    def parsed_and_valid?
+      valid = valid?
+      valid && parsed?
+    end
+
+    # parsing error messages followed by the messages from the last validation run
+    def full_error_messages
+      parsing_errors.full_messages + errors.full_messages
+    end
+
     # no-doc
     module OverrideParsingErrors
       def parsing_errors
