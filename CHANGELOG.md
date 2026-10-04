@@ -1,5 +1,24 @@
 # Changelog
 
+## [0.10.0](https://github.com/dougyouch/schema/compare/v0.9.1...v0.10.0) (2026-10-04)
+
+
+### ⚠ BREAKING CHANGES
+
+* **parsers:** string_or_nil now returns nil for whitespace-only strings such as "   ", matching how blank strings parse for the other types. Other strings are still kept as is.
+
+### Features
+
+* **model:** add as_json only_set and handle input that is not a hash ([bdda922](https://github.com/dougyouch/schema/commit/bdda922bd6e4b7fbb2c31e0ada74596b67a3d5e7))
+* **parsers:** treat whitespace-only strings as nil for string_or_nil ([7313c99](https://github.com/dougyouch/schema/commit/7313c99bb0de5e340ad92cc958a1b601a5e3e15c))
+
+
+### Bug Fixes
+
+* **arrays:** raise a clear error for has_many without size ([617cb89](https://github.com/dougyouch/schema/commit/617cb89d9cbb028560d2148d4450e7d77689b877))
+* **cli:** report malformed json without a backtrace ([fc2f1f9](https://github.com/dougyouch/schema/commit/fc2f1f95df5681184cc80850a18d40cffeede121))
+* **csv:** strip the utf-8 byte order mark and handle empty header cells ([ad0216d](https://github.com/dougyouch/schema/commit/ad0216d429c881582d949ee2785e2e729d28bd23))
+
 ## [0.9.1](https://github.com/dougyouch/schema/compare/v0.9.0...v0.9.1) (2026-10-04)
 
 
