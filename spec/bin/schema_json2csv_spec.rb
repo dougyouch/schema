@@ -73,6 +73,14 @@ describe 'bin/schema-json2csv' do
     expect(CSV.read(csv_file)).to eq(expected_rows + expected_rows.drop(1))
   end
 
+  it 'fails with a message when the json is malformed' do
+    File.write(json_file, '{"id": ')
+    _stdout, stderr, status = run_script('--require', schema_file, '--schema', 'PersonJson2CsvSchema', '--json', json_file)
+    expect(status.success?).to eq(false)
+    expect(stderr).to start_with('invalid json:')
+    expect(stderr).not_to include('.rb:')
+  end
+
   it 'fails with a message when no schema file is given' do
     _stdout, stderr, status = run_script('--schema', 'PersonJson2CsvSchema', '--json', json_file)
     expect(status.success?).to eq(false)

@@ -61,7 +61,11 @@ io = csv_file ? File.open(csv_file, 'ab') : $stdout
 
 io.print CSV.generate_line(schema_class.to_headers) if write_headers
 
-json_data = JSON.parse(json_data)
+begin
+  json_data = JSON.parse(json_data)
+rescue JSON::ParserError => e
+  abort("invalid json: #{e.message.lines.first.strip}")
+end
 json_data = [json_data] unless json_data.is_a?(Array)
 
 json_data.each do |data|
