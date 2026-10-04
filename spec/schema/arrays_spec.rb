@@ -235,6 +235,29 @@ describe Schema::Arrays do
     end
   end
 
+  context 'has_many without a size' do
+    let(:unsized_class) do
+      Class.new do
+        include Schema::Model
+
+        schema_include Schema::Associations::HasMany
+        schema_include Schema::Arrays
+
+        has_many :phones do
+          attribute :number, :string
+        end
+      end
+    end
+
+    it 'raises a clear error' do
+      expect { unsized_class.to_headers }.to raise_error(
+        ArgumentError, 'has_many :phones needs a size: option to be converted to and from arrays'
+      )
+      expect { unsized_class.to_empty_array }.to raise_error(ArgumentError)
+      expect { unsized_class.new.to_a }.to raise_error(ArgumentError)
+    end
+  end
+
   context '.to_headers' do
     subject { model_class.to_headers }
     let(:expected_array) do
