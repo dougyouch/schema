@@ -1,4 +1,5 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
 require 'schema-model'
 require 'csv'
@@ -13,7 +14,7 @@ options = {
 }
 
 OptionParser.new do |opts|
-  opts.banner = "Usage: " + File.basename(__FILE__)
+  opts.banner = "Usage: #{File.basename(__FILE__)} --require FILE --schema CLASS (--json FILE | -) [--csv FILE]"
 
   opts.on('--json JSON_FILE', 'JSON data') do |v|
     options[:json_file] = v
@@ -23,7 +24,7 @@ OptionParser.new do |opts|
     options[:require_file] = v
   end
 
-  opts.on('--csv CSV_FILE', 'File to output csv data') do |v|
+  opts.on('--csv CSV_FILE', 'File to output csv data (appended to if it exists)') do |v|
     options[:csv_file] = v
   end
 
@@ -32,54 +33,39 @@ OptionParser.new do |opts|
   end
 end.parse!
 
-raise('no filed required') unless options[:require_file]
-raise('no schema specified') unless options[:schema_class_name]
+abort('no file required') unless options[:require_file]
+abort('no schema specified') unless options[:schema_class_name]
+abort("file #{options[:require_file]} not found") unless File.exist?(options[:require_file])
 
-$LOAD_PATH << '.'
-raise("file #{options[:require_file]} not found") unless require(options[:require_file])
+require File.expand_path(options[:require_file])
 
-raise("schema #{options[:schema_class_name]} not found") unless Object.const_defined?(options[:schema_class_name])
+abort("schema #{options[:schema_class_name]} not found") unless Object.const_defined?(options[:schema_class_name])
 
 schema_class = Object.const_get(options[:schema_class_name])
 schema_class.schema_include Schema::Arrays
 
 json_data =
   if options[:json_file]
-    raise("json file #{options[:json_file]} not found") unless File.exist?(options[:json_file])
+    abort("json file #{options[:json_file]} not found") unless File.exist?(options[:json_file])
     File.read(options[:json_file])
   elsif ARGV.last == '-'
-    ARGF.read
+    $stdin.read
   else
-    raise('no json data specified')
+    abort('no json data specified')
   end
 
-def output_csv(schema, io)
-  str = CSV.generate do |csv|
-    csv << schema.to_a.flatten
-  end
+# headers are written to stdout and to new files; an existing file is appended to as is
+csv_file = options[:csv_file]
+write_headers = csv_file.nil? || !File.exist?(csv_file)
+io = csv_file ? File.open(csv_file, 'ab') : $stdout
 
-  io.print str
-end
-
-io =
-  if file = options[:csv_file]
-    if File.exist?(file)
-      File.open(options[:csv_file], 'ab')
-    else
-      headers = CSV.generate do |csv|
-        csv << schema_class.to_headers
-      end
-      f = File.open(options[:csv_file], 'wb')
-      f.print headers
-      f
-    end
-  else
-    $stdout
-  end
+io.print CSV.generate_line(schema_class.to_headers) if write_headers
 
 json_data = JSON.parse(json_data)
 json_data = [json_data] unless json_data.is_a?(Array)
 
 json_data.each do |data|
-  output_csv(schema_class.from_hash(data), io)
+  io.print CSV.generate_line(schema_class.from_hash(data).to_a.flatten)
 end
+
+io.close if csv_file
