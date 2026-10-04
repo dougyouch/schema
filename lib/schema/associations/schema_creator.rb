@@ -10,7 +10,6 @@ module Schema
         options = base_schema.class.schema[name]
         @schema_name = name
         @schema_class = base_schema.class.const_get(options[:class_name])
-        @aliases = options.fetch(:aliases, [])
         @ignorecase = options[:type_ignorecase]
         @is_list = options[:from] != :hash
         @hash_key_field = options[:hash_key_field]
@@ -38,7 +37,7 @@ module Schema
         elsif !is_list? && list.is_a?(Hash)
           list.map do |(key, data)|
             schema = create_schema(base_schema, data, "#{@schema_name}:#{key}", skip_fields)
-            schema.send(schema.class.schema[@hash_key_field][:setter], key)
+            schema&.public_send(schema.class.schema[@hash_key_field][:setter], key)
             schema
           end
         elsif !list.nil?
@@ -91,11 +90,12 @@ module Schema
         end
       end
 
+      # the type field and its attribute aliases, as symbols and strings
       def type_fields
-        @type_fields ||= [
-          @type_field,
-          @type_field.to_s
-        ] + @aliases
+        @type_fields ||= begin
+          aliases = @schema_class.schema.dig(@type_field.to_sym, :aliases) || []
+          [@type_field, *aliases].flat_map { |name| [name.to_sym, name.to_s] }.uniq
+        end
       end
 
       def add_parsing_error(base_schema, error_name, error_msg)

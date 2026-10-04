@@ -163,6 +163,24 @@ describe Schema::Associations::HasMany do
       it { expect(subject.size).to eq(2) }
       it { expect(subject.map(&:name)).to eq(['Building 1C', 'Store Front']) }
       it { expect(subject.map(&:code)).to eq(%w[51 021]) }
+
+      describe 'with a value that is not a hash' do
+        let(:model_data) { { buildings: { '1c' => 'not a hash', '33' => { name: 'Store Front' } } } }
+
+        it 'leaves that entry nil and records an error' do
+          expect(subject.first).to eq(nil)
+          expect(subject.last.id2).to eq('33')
+          expect(parsing_errors['buildings:1c']).to eq([Schema::ParsingErrors::INCOMPATIBLE])
+        end
+      end
+    end
+
+    describe 'as_json with a nil entry' do
+      let(:model_data) { { items: [nil, { name: 'Widget' }] } }
+
+      it 'serializes the nil entry as nil' do
+        expect(model.as_json).to eq(items: [nil, { name: 'Widget' }], users: [])
+      end
     end
 
     describe 'without a block' do
@@ -191,6 +209,40 @@ describe Schema::Associations::HasMany do
 
       it 'sets item id to nil' do
         expect(model.items.map(&:id)).to eq([nil, nil])
+      end
+
+      describe 'with string keys' do
+        let(:model_data) { { 'items' => [{ 'id' => 1, 'name' => 'Widget' }] } }
+
+        it 'sets item id to nil' do
+          expect(model.items.map(&:id)).to eq([nil])
+          expect(model.items.map(&:name)).to eq(['Widget'])
+        end
+      end
+
+      describe 'set through the association alias' do
+        let(:model_data) { { my_items: [{ id: 1, name: 'Widget' }] } }
+
+        it 'sets item id to nil' do
+          expect(model.items.map(&:id)).to eq([nil])
+        end
+      end
+
+      describe 'mixed with other skip_fields' do
+        let(:skip_fields) { [:name, { users: [:id] }, { items: [:id] }] }
+
+        it 'applies the matching nested list' do
+          expect(model.name).to eq(nil)
+          expect(model.items.map(&:id)).to eq([nil, nil])
+        end
+      end
+
+      describe 'skipping the whole association' do
+        let(:skip_fields) { [:items] }
+
+        it 'leaves items unset' do
+          expect(model.items).to eq(nil)
+        end
       end
     end
   end

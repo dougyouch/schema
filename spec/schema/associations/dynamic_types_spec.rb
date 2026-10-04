@@ -154,6 +154,37 @@ describe Schema::Associations::DynamicTypes do
     end
   end
 
+  context 'type field aliases' do
+    let(:aliased_class_name) { "ModelClass#{SecureRandom.hex(10)}" }
+    let(:aliased_class) do
+      kls = Object.const_set(aliased_class_name, Class.new)
+      kls.class_eval do
+        include Schema::Model
+
+        schema_include Schema::Associations::HasOne
+
+        has_one :item, alias: :thing, type_field: :kind do
+          attribute :kind, :string, alias: :category
+          attribute :thing, :string
+
+          add_type('a') { attribute :a, :string }
+          add_type('b') { attribute :b, :string }
+        end
+      end
+      kls
+    end
+
+    it 'reads the type from an alias of the type field' do
+      expect(aliased_class.from_hash(item: { category: 'b' }).item.class.name).to end_with('AssociationTypeB')
+    end
+
+    it 'does not read the type from a key named after the association alias' do
+      model = aliased_class.from_hash(item: { thing: 'b' })
+      expect(model.item).to eq(nil)
+      expect(model.parsing_errors[:item]).to eq([Schema::ParsingErrors::UNKNOWN])
+    end
+  end
+
   context 'external_type_field option' do
     before(:each) do
       schema_options = model_class.schema[:item].dup
