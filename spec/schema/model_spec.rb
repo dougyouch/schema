@@ -49,6 +49,40 @@ describe Schema::Model do
         it 'default value' do
           expect(model.cost).to eq(0.0)
         end
+
+        describe 'non-literal default' do
+          let(:default_date) { Date.new(2020, 1, 1) }
+
+          before { model_class.attribute :starts_on, :date, default: default_date }
+
+          it 'returns the default' do
+            expect(model.starts_on).to eq(default_date)
+          end
+        end
+
+        describe 'mutable default' do
+          before do
+            model_class.schema_include Schema::Parsers::Hash
+            model_class.attribute :settings, :hash, default: { 'tags' => [] }
+          end
+
+          it 'gives each call its own copy' do
+            model.settings['tags'] << 'changed'
+            expect(model_class.new.settings).to eq('tags' => [])
+          end
+        end
+
+        describe 'default that cannot be marshaled' do
+          before do
+            model_class.schema_include Schema::Parsers::Hash
+            model_class.attribute :counts, :hash, default: Hash.new { |hash, key| hash[key] = 0 }
+          end
+
+          it 'returns a copy of the default' do
+            model.counts[:a] += 1
+            expect(model_class.new.counts).to eq({})
+          end
+        end
       end
     end
 
@@ -57,6 +91,31 @@ describe Schema::Model do
 
       it 'skips id field' do
         expect(model.id).to eq(nil)
+      end
+
+      describe 'string keys' do
+        let(:model_data) { { 'id' => 5, 'name' => 'Joe' } }
+
+        it 'skips id field' do
+          expect(model.id).to eq(nil)
+          expect(model.name).to eq('Joe')
+        end
+      end
+
+      describe 'set through an alias' do
+        let(:model_data) { { identifier: 5 } }
+
+        it 'skips id field' do
+          expect(model.id).to eq(nil)
+        end
+      end
+
+      describe 'listed as a string' do
+        let(:skip_fields) { ['id'] }
+
+        it 'skips id field' do
+          expect(model.id).to eq(nil)
+        end
       end
     end
 
@@ -96,6 +155,39 @@ describe Schema::Model do
 
   context 'from_hash' do
     let(:value) { rand(1_000_000).to_s }
+
+    describe 'no data' do
+      subject { model_class.from_hash }
+
+      it 'returns an empty model' do
+        expect(subject.not_set?).to eq(true)
+        expect(subject.parsing_errors.empty?).to eq(true)
+      end
+    end
+
+    describe 'mixed symbol and string keys' do
+      subject { model_class.from_hash(:id => value, 'name' => 'Joe') }
+
+      it 'sets both fields' do
+        expect(subject.id).to eq(value.to_i)
+        expect(subject.name).to eq('Joe')
+        expect(subject.parsing_errors.empty?).to eq(true)
+      end
+    end
+
+    describe 'attribute added after a string keyed parse' do
+      subject { model_class.from_hash('nickname' => 'Joey') }
+
+      before do
+        model_class.from_hash('name' => 'Joe')
+        model_class.attribute :nickname, :string
+      end
+
+      it 'sets the new attribute' do
+        expect(subject.nickname).to eq('Joey')
+        expect(subject.parsing_errors.empty?).to eq(true)
+      end
+    end
 
     subject { model_class.from_hash({ id: value }, skip_fields) }
 

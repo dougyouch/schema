@@ -56,13 +56,20 @@ module Schema
       kls.send(:include, ::Schema::Associations::DynamicTypes)
     end
 
+    # each call gets its own copy so callers can't mutate the shared default
+    def copy_default(value)
+      return value if value.frozen?
+
+      Marshal.load(Marshal.dump(value))
+    rescue TypeError
+      value.dup
+    end
+
     def add_attribute_default_methods(kls, options)
+      default = options[:default]
+      kls.send(:define_method, options[:default_method]) { ::Schema::Utils.copy_default(default) }
       kls.class_eval(
         <<-STR, __FILE__, __LINE__ + 1
-  def #{options[:default_method]}
-    #{options[:default].inspect}
-  end
-
   def #{options[:getter]}
     if #{options[:instance_variable]}.nil?
       #{options[:default_method]}

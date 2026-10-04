@@ -29,13 +29,13 @@ module Schema
         {}.freeze
       end
 
+      # rebuilt whenever schema is redefined, e.g. by an attribute added after the first lookup
       def schema_with_string_keys
-        @schema_with_string_keys ||=
-          begin
-            hsh = {}
-            schema.each { |field_name, field_options| hsh[field_name.to_s] = field_options }
-            hsh.freeze
-          end
+        current_schema = schema
+        return @schema_with_string_keys if @schema_with_string_keys_source.equal?(current_schema)
+
+        @schema_with_string_keys_source = current_schema
+        @schema_with_string_keys = current_schema.transform_keys(&:to_s).freeze
       end
 
       def schema_config
@@ -116,9 +116,10 @@ module Schema
     end
 
     def update_attributes(data = nil, skip_fields = [])
-      schema = get_schema(data)
-      update_model_attributes(schema, data, skip_fields)
-      update_associations(schema, data, skip_fields)
+      return self if data.nil?
+
+      update_model_attributes(data, skip_fields)
+      update_associations(data, skip_fields)
       self
     end
 
@@ -131,11 +132,7 @@ module Schema
         next if opts[:select_filter] && !opts[:select_filter].call(field_name, value, field_options)
         next if opts[:reject_filter]&.call(field_name, value, field_options)
 
-        memo[field_name] = if value.is_a?(Array)
-                             value.map { |e| e.as_json(opts) }
-                           else
-                             value.respond_to?(:as_json) ? value.as_json(opts) : value
-                           end
+        memo[field_name] = value.is_a?(Array) ? value.map { |e| value_as_json(e, opts) } : value_as_json(value, opts)
       end
     end
 
@@ -156,38 +153,54 @@ module Schema
 
     private
 
-    def get_schema(data)
-      return self.class.schema_with_string_keys unless data.is_a?(Hash)
-
-      first_key = data.each_key.first
-      return self.class.schema_with_string_keys unless first_key.is_a?(Symbol)
-
-      self.class.schema
+    # values without as_json (no ActiveSupport JSON extension) are returned as is
+    def value_as_json(value, opts)
+      value.respond_to?(:as_json) ? value.as_json(opts) : value
     end
 
-    def update_model_attributes(schema, data, skip_fields)
+    # symbol keys use the schema directly, anything else is matched by its string form
+    def field_options_for_key(key)
+      key.is_a?(Symbol) ? self.class.schema[key] : self.class.schema_with_string_keys[key.to_s]
+    end
+
+    # names a field can be listed under in skip_fields: its name or the alias used in the data
+    def skip_field_names(field_options)
+      [field_options[:name], field_options[:key]].flat_map { |name| [name.to_sym, name.to_s] }
+    end
+
+    def update_model_attributes(data, skip_fields)
       data.each do |key, value|
-        unless schema.key?(key)
+        unless (field_options = field_options_for_key(key))
           parsing_errors.add(key, ::Schema::ParsingErrors::UNKNOWN_ATTRIBUTE) if self.class.capture_unknown_attributes?
           next
         end
 
-        next if schema[key][:association]
-        next if skip_fields.include?(key)
+        next if field_options[:association]
+        next if skip_fields.intersect?(skip_field_names(field_options))
 
-        public_send(schema[key][:setter], value)
+        public_send(field_options[:setter], value)
       end
     end
 
-    def update_associations(schema, data, skip_fields)
+    def update_associations(data, skip_fields)
       data.each do |key, value|
-        next unless schema.key?(key)
-        next unless schema[key][:association]
+        next unless (field_options = field_options_for_key(key))
+        next unless field_options[:association]
 
-        association_skip_fields = skip_fields.detect { |f| f.is_a?(Hash) && f.include?(key) }
-        association_skip_fields = association_skip_fields ? association_skip_fields[key] : []
-        public_send(schema[key][:setter], value, association_skip_fields)
+        names = skip_field_names(field_options)
+        next if skip_fields.intersect?(names)
+
+        public_send(field_options[:setter], value, association_skip_fields(skip_fields, names))
       end
+    end
+
+    def association_skip_fields(skip_fields, names)
+      skip_fields.each do |skip_field|
+        next unless skip_field.is_a?(Hash)
+
+        names.each { |name| return skip_field[name] if skip_field.key?(name) }
+      end
+      []
     end
   end
 end

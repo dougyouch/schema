@@ -33,6 +33,10 @@ describe Schema::Parsers::Array do
       it 'set the array attribute' do
         expect(subject.costs).to eq(costs)
       end
+
+      it 'serializes the array' do
+        expect(subject.as_json[:costs]).to eq(costs)
+      end
     end
 
     describe 'invalid payload' do
