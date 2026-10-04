@@ -55,7 +55,7 @@ This is a Ruby gem (`schema-model`) for data transformation, validation, and typ
 
 **Attribute Definition**: Each `attribute` call generates getter, setter, and `<name>_was_set?` predicate. Setter invokes type-specific parser.
 
-**Parsing Errors**: Stored in `parsing_errors` as codes from `Schema::ParsingErrors` (`Schema::Errors`), or as readable messages with ActiveModelValidations (`ActiveModelParsingErrors`). Parsers add errors for invalid values rather than raising exceptions. Use `parsed?`/`parsed!` on any model; `valid?` does not check parsing errors.
+**Parsing Errors**: Stored in `parsing_errors` as codes from `Schema::ParsingErrors` (`Schema::Errors`), or as readable messages with ActiveModelValidations (`ActiveModelParsingErrors`). Parsers add errors for invalid values rather than raising exceptions. Use `parsed?`/`parsed!` on any model; `valid?` does not check parsing errors, while `parsed_and_valid?` and `SchemaValidator` check both.
 
 **Schema Inheritance**: Uses `inheritance-helper` gem. Schema definitions accumulate via `add_value_to_class_method(:schema, ...)`.
 

@@ -59,6 +59,128 @@ user.active        # => true (parsed from "yes")
 user.tags          # => ["ruby", "rails", "developer"]
 ```
 
+## Use Cases
+
+### Typed JSON columns on ActiveRecord models
+
+Wrap a JSON/JSONB column in a schema so the record works with typed values, rejects bad data, and writes back clean JSON:
+
+```ruby
+class ConfigSchema
+  include Schema::All
+
+  attribute :api_key, :string
+  attribute :timeout, :integer, default: 30
+  attribute :enabled, :boolean
+
+  has_many :endpoints do
+    attribute :url, :string
+    validates :url, presence: true
+  end
+
+  validates :api_key, presence: true
+  validates :endpoints, schema: true
+end
+
+class Integration < ActiveRecord::Base
+  validate :validate_config, if: :config_updated?
+  before_save :update_data_from_config, if: :config_updated?
+
+  def config=(config_data)
+    @config = ConfigSchema.from_hash(config_data)
+  end
+
+  def config
+    @config ||= ConfigSchema.from_hash(data)
+  end
+
+  # reading config counts as an update, since the caller may change it in place
+  def config_updated?
+    defined?(@config)
+  end
+
+  private
+
+  def update_data_from_config
+    self.data = config.as_json
+  end
+
+  # parsing errors (e.g. timeout: "abc") don't make valid? false, so check both
+  def validate_config
+    return if config.parsed_and_valid?
+
+    config.full_error_messages.each { |message| errors.add(:config, message) }
+  end
+end
+
+integration.config = { 'api_key' => 'abc', 'timeout' => '60', 'endpoints' => [{ 'url' => 'https://example.com' }] }
+integration.config.timeout  # => 60
+integration.save            # writes data as { api_key: "abc", timeout: 60, endpoints: [{ url: "https://example.com" }] }
+```
+
+Use `from_hash`, not `new`, to build a schema from data. `from_hash(nil)` returns an empty model, so a record whose column is still `NULL` works too.
+
+If a single "Config is invalid" error is enough, `validates :config, schema: true, if: :config_updated?` replaces `validate_config`; it fails on parsing errors as well as validation errors.
+
+### Validating API input in controllers
+
+Describe the JSON an endpoint accepts as a schema. Values arrive converted to the right types, unknown keys are reported, and the schema acts as the allowlist, so strong parameters aren't needed:
+
+```ruby
+class CreateUserSchema
+  include Schema::All
+
+  attribute :name, :string
+  attribute :email, :string
+  attribute :age, :integer
+
+  validates :name, :email, presence: true
+end
+
+class UsersController < ApplicationController
+  def create
+    input = CreateUserSchema.from_hash(JSON.parse(request.raw_post))
+    unless input.parsed_and_valid?
+      return render json: { errors: input.full_error_messages }, status: :unprocessable_entity
+    end
+
+    user = User.create!(input.as_json)
+    render json: user, status: :created
+  end
+end
+```
+
+`parsed_and_valid?` runs the validations even when there are parsing errors, so `full_error_messages` reports everything wrong with the input at once, e.g. `["Age is invalid", "Admin is an unknown attribute", "Email can't be blank"]`.
+
+The body is parsed from `request.raw_post` rather than taken from `params`, because Rails adds keys to `params` (`controller`, `action`, and the wrapped parameters key) that the schema would report as unknown attributes.
+
+### PATCH endpoints
+
+`set_attribute_values` returns only the fields that were present in the input, including ones sent as `null`. That separates "not sent" from "sent as null", which is what a PATCH route needs:
+
+```ruby
+class UpdateUserSchema
+  include Schema::All
+
+  attribute :name, :string
+  attribute :email, :string
+  attribute :age, :integer
+end
+
+def update
+  input = UpdateUserSchema.from_hash(JSON.parse(request.raw_post))
+  unless input.parsed_and_valid?
+    return render json: { errors: input.full_error_messages }, status: :unprocessable_entity
+  end
+
+  # body {"name": "Joe", "age": null} => { name: "Joe", age: nil }: updates name, clears age, leaves email alone
+  user.update!(input.set_attribute_values)
+  render json: user
+end
+```
+
+Associations in `set_attribute_values` are schema models; call `as_json` on them if the record expects hashes. For a single attribute, `input.name_was_set?` answers the same question.
+
 ## Data Types
 
 ### Basic Types
@@ -330,9 +452,20 @@ user.parsing_errors.full_messages  # => ["Age is invalid"]
 
 A plain `Schema::Model` uses `Schema::Errors`, which stores the codes themselves (`user.parsing_errors[:age] # => ["invalid"]`).
 
+### Checking Everything at Once
+
+```ruby
+user = UserSchema.from_hash(name: 'John', age: 'not-a-number', email: nil)
+
+user.parsed_and_valid?    # => false; runs validations even though parsing failed
+user.full_error_messages  # => ["Age is invalid", "Email can't be blank"] (parsing messages, then validation messages)
+```
+
+`full_error_messages` reports the last validation run, so call `parsed_and_valid?` (or `valid?`) first.
+
 ### Validating Nested Schemas
 
-`validates ..., schema: true` (`SchemaValidator`) marks the parent invalid when a nested model, or any model in a has-many list, is invalid:
+`validates ..., schema: true` (`SchemaValidator`) marks the parent invalid when a nested model, or any model in a has-many list, has parsing errors or fails its validations:
 
 ```ruby
 class OrderSchema
@@ -408,13 +541,14 @@ user.as_json(reject_filter: ->(name, value, opts) { value.nil? })
 a = ContactSchema.from_hash(name: 'John')
 b = ContactSchema.from_hash('name' => 'John')
 
-a == b               # => true (same class and attribute values, nested models included)
-a.attribute_values   # => { name: "John", email: nil }
-a.inspect            # => #<ContactSchema name: "John"> (only attributes that were set)
+a == b                   # => true (same class and attribute values, nested models included)
+a.attribute_values       # => { name: "John", email: nil }
+a.set_attribute_values   # => { name: "John" } (only fields present in the input)
+a.inspect                # => #<ContactSchema name: "John"> (only attributes that were set)
 
-copy = a.deep_dup    # copies nested models, arrays, hashes, strings and parsing errors
+copy = a.deep_dup        # copies nested models, arrays, hashes, strings and parsing errors
 copy.name << '!'
-a.name               # => "John"
+a.name                   # => "John"
 ```
 
 `dup` is Ruby's shallow copy, so nested models are shared with the original.

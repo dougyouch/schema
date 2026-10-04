@@ -59,7 +59,7 @@ The foundation module providing:
 
 - **`capture_unknown_attributes=`**: stored in `schema_config` and applied to nested association classes, both existing ones and ones created later (`Utils.create_schema_class` copies the parent's setting).
 
-- **Model helpers** (small modules included by `Schema::Model`): `ParsingStatus` (`parsed?`, `parsed!`), `AttributeValues` (`attribute_values`, `==` by class and values, `inspect` listing set attributes) and `DeepCopy` (`deep_dup`, copying nested models, collections, strings and parsing errors via `Utils.deep_dup_value` / `Utils.parsing_error_pairs`).
+- **Model helpers** (small modules included by `Schema::Model`): `ParsingStatus` (`parsed?`, `parsed!`), `AttributeValues` (`attribute_values`, `set_attribute_values` for fields present in the input, `==` by class and values, `inspect` listing set attributes) and `DeepCopy` (`deep_dup`, copying nested models, collections, strings and parsing errors via `Utils.deep_dup_value` / `Utils.parsing_error_pairs`).
 
 - **`as_json` / `to_hash`**: Serialization back to hash format
 
@@ -130,7 +130,7 @@ Parsing errors are distinct from validation errors:
 - **Parsing errors**: Type conversion failures (string "abc" → integer)
 - **Validation errors**: Business rule failures (via `validates` DSL)
 
-`parsed!` raises `ParsingException` when there are parsing errors and `valid_model!` raises `ValidationException` when validations fail; `valid!` calls both. `valid?` runs validations only and does not look at parsing errors.
+`parsed!` raises `ParsingException` when there are parsing errors and `valid_model!` raises `ValidationException` when validations fail; `valid!` calls both. `valid?` runs validations only and does not look at parsing errors. `parsed_and_valid?` runs validations and checks parsing errors, and `full_error_messages` joins both sets of messages. `SchemaValidator` (`schema: true`) treats a nested model as invalid when it has parsing errors or fails validation, and validates every entry in a list.
 
 Parsing errors use these codes from `Schema::ParsingErrors`: `invalid`, `incompatible`, `unknown`, `unknown_attribute`, `unhandled_type`.
 
