@@ -45,13 +45,11 @@ module Schema
 
       private
 
+      # has_many columns are reported as <prefix>X<field>; has_one fields share the parent's prefix
       def get_model_field_names(field_name, field_options, mapped_headers, header_prefix, mapped)
         mapped_model = mapped_headers[field_name] || {}
-        const_get(field_options[:class_name]).get_field_names(
-          mapped_model,
-          header_prefix || field_options[:aliases]&.first,
-          mapped
-        )
+        header_prefix ||= (field_options[:aliases]&.first || field_name).to_s if field_options[:type] == :has_many
+        const_get(field_options[:class_name]).get_field_names(mapped_model, header_prefix, mapped)
       end
 
       def skip_field?(field_name, mapped_headers, mapped)
@@ -72,18 +70,34 @@ module Schema
         const_get(field_options[:class_name]).map_headers_to_attributes(headers, header_prefix)
       end
 
+      # a column already claimed by the parent (or an earlier has_one) isn't reused for a nested field
       def map_headers_to_has_one_associations(headers, mapped_headers, header_prefix)
+        claimed_indexes = mapped_header_indexes(mapped_headers)
         schema.each do |field_name, field_options|
           next unless field_options[:type] == :has_one
           # aliases are matched through the association's own entry
           next if field_options[:alias_of]
 
-          mapped_model = get_mapped_model(field_options, headers, header_prefix)
+          available_headers = headers.each_with_index.map { |header, idx| claimed_indexes.include?(idx) ? nil : header }
+          mapped_model = get_mapped_model(field_options, available_headers, header_prefix)
           next if mapped_model.empty?
 
           mapped_headers[field_name] = mapped_model
+          claimed_indexes.concat(mapped_header_indexes(mapped_model))
         end
         mapped_headers
+      end
+
+      def mapped_header_indexes(mapped_headers)
+        mapped_headers.each_value.flat_map do |info|
+          if info.key?(:index)
+            [info[:index]]
+          elsif info.key?(:indexes)
+            info[:indexes]
+          else
+            mapped_header_indexes(info)
+          end
+        end
       end
 
       def map_headers_to_has_many_associations(headers, mapped_headers)
@@ -104,6 +118,9 @@ module Schema
 
       def map_headers_to_fields(headers, mapped_headers, header_prefix)
         schema.each do |field_name, field_options|
+          # associations are mapped through their nested fields, not a column of their own
+          next if field_options[:association]
+
           if header_prefix
             unless (indexes = find_indexes_for_field(headers, field_options, header_prefix)).empty?
               mapped_headers[field_options[:alias_of] || field_name] = { indexes: indexes }

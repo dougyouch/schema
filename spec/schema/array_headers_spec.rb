@@ -123,6 +123,44 @@ describe Schema::ArrayHeaders do
       it 'maps the association once, under its name' do
         expect(aliased_class.map_headers_to_attributes(%w[CompanyName])).to eq(company: { name: { index: 0 } })
       end
+
+      it 'reports nested field names without the association alias' do
+        mapped = aliased_class.map_headers_to_attributes(%w[CompanyName])
+        expect(aliased_class.get_mapped_field_names(mapped)).to eq(%w[CompanyName])
+      end
+    end
+  end
+
+  context 'column named after an association' do
+    it 'is not mapped to the association' do
+      expect(model_class.map_headers_to_attributes(%w[company])).to eq({})
+    end
+  end
+
+  context 'nested has_one field with the same name as a parent field' do
+    let(:nested_class_name) { "ModelClass#{SecureRandom.hex(10)}" }
+    let(:nested_class) do
+      kls = Class.new do
+        include Schema::Model
+
+        schema_include Schema::Associations::HasOne
+        schema_include Schema::ArrayHeaders
+
+        attribute :name, :string
+
+        has_one :company do
+          attribute :name, :string
+        end
+      end
+      Object.const_set(nested_class_name, kls)
+    end
+
+    it 'leaves the column to the parent' do
+      expect(nested_class.map_headers_to_attributes(%w[name])).to eq(name: { index: 0 })
+    end
+
+    it 'gives the nested field the next matching column' do
+      expect(nested_class.map_headers_to_attributes(%w[name name])).to eq(name: { index: 0 }, company: { name: { index: 1 } })
     end
   end
 
@@ -158,6 +196,11 @@ describe Schema::ArrayHeaders do
       expect(unaliased_class.map_headers_to_attributes(%w[friends1name friends2name])).to eq(
         friends: { name: { indexes: [0, 1] } }
       )
+    end
+
+    it 'reports field names with the association name as the prefix' do
+      mapped = unaliased_class.map_headers_to_attributes(%w[friends1name friends2name])
+      expect(unaliased_class.get_mapped_field_names(mapped)).to eq(%w[friendsXname])
     end
   end
 end
