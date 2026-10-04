@@ -14,11 +14,14 @@ Gem::Specification.new do |s|
   s.authors     = ['Doug Youch']
   s.email       = 'dougyouch@gmail.com'
   s.homepage    = 'https://github.com/dougyouch/schema'
-  s.files       = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
+  s.files       = Dir['lib/**/*.rb', 'bin/*', 'README.md', 'LICENSE.txt', 'CHANGELOG.md']
   s.required_ruby_version = '>= 3.2'
   s.bindir      = 'bin'
   s.executables = s.files.grep(%r{^bin/}) { |f| File.basename(f) }
 
   s.add_dependency 'inheritance-helper'
   s.metadata['rubygems_mfa_required'] = 'true'
+  s.metadata['source_code_uri'] = 'https://github.com/dougyouch/schema'
+  s.metadata['changelog_uri'] = 'https://github.com/dougyouch/schema/blob/master/CHANGELOG.md'
+  s.metadata['bug_tracker_uri'] = 'https://github.com/dougyouch/schema/issues'
 end
