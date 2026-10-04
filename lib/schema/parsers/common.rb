@@ -6,9 +6,9 @@ module Schema
   module Parsers
     # Schema::Parsers::Common are parser methods for basic types
     module Common
-      INTEGER_REGEX = /^[-+]?(?:[1-9]\d*|0)(?:\.0+)?$/
-      FLOAT_REGEX = /^[-+]?(?:[1-9]\d*|0)(?:\.\d+)?([Ee]-?\d+)?$/
-      BOOLEAN_REGEX = /^(?:1|t|true|on|y|yes)$/i
+      INTEGER_REGEX = /\A[-+]?(?:[1-9]\d*|0)(?:\.0+)?\z/
+      FLOAT_REGEX = /\A[-+]?(?:[1-9]\d*|0)(?:\.\d+)?([Ee]-?\d+)?\z/
+      BOOLEAN_REGEX = /\A(?:1|t|true|on|y|yes)\z/i
 
       def parse_integer(field_name, parsing_errors, value)
         case value
@@ -22,14 +22,23 @@ module Schema
             nil
           end
         when Float
-          parsing_errors.add(field_name, ::Schema::ParsingErrors::INCOMPATIBLE) if (value % 1) > 0.0
-          value.to_i
+          parse_float_as_integer(field_name, parsing_errors, value)
         when nil
           nil
         else
           parsing_errors.add(field_name, ::Schema::ParsingErrors::UNHANDLED_TYPE)
           nil
         end
+      end
+
+      def parse_float_as_integer(field_name, parsing_errors, value)
+        unless value.finite?
+          parsing_errors.add(field_name, ::Schema::ParsingErrors::INCOMPATIBLE)
+          return nil
+        end
+
+        parsing_errors.add(field_name, ::Schema::ParsingErrors::INCOMPATIBLE) if (value % 1) > 0.0
+        value.to_i
       end
 
       def parse_string(field_name, parsing_errors, value)

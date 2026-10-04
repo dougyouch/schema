@@ -614,4 +614,35 @@ describe Schema::Parsers::Common do
       end
     end
   end
+
+  context 'non-finite floats as integers' do
+    subject { model.parse_integer(:id, parsing_errors, value) }
+
+    [Float::NAN, Float::INFINITY, -Float::INFINITY].each do |non_finite|
+      describe non_finite.to_s do
+        let(:value) { non_finite }
+
+        it 'returns nil with an error' do
+          expect(subject).to eq(nil)
+          expect(parsing_errors[:id]).to eq([Schema::ParsingErrors::INCOMPATIBLE])
+        end
+      end
+    end
+  end
+
+  context 'multi-line strings' do
+    it 'rejects an integer followed by another line' do
+      expect(model.parse_integer(:id, parsing_errors, "12\nabc")).to eq(nil)
+      expect(parsing_errors[:id]).to eq([Schema::ParsingErrors::INVALID])
+    end
+
+    it 'rejects a float followed by another line' do
+      expect(model.parse_float(:cost, parsing_errors, "1.5\nabc")).to eq(nil)
+      expect(parsing_errors[:cost]).to eq([Schema::ParsingErrors::INVALID])
+    end
+
+    it 'does not treat a later line as a true value' do
+      expect(model.parse_boolean(:active, parsing_errors, "no\nyes")).to eq(false)
+    end
+  end
 end
