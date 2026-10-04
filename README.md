@@ -102,7 +102,10 @@ attribute :name, :string, aliases: [:full_name, :display_name]
 attribute :status, :string, default: 'pending'
 attribute :count, :integer, default: 0
 attribute :tags, :array, default: []
+attribute :starts_on, :date, default: Date.new(2024, 1, 1)
 ```
+
+Each read of a default returns a fresh copy (frozen values are shared), so mutating it doesn't change the default for other instances.
 
 ### Checking If Attribute Was Set
 
@@ -247,7 +250,8 @@ company.employees[1].team_size              # => 5
 ```ruby
 # Type field within nested data (default)
 has_many :items, type_field: :kind do
-  # looks for :kind in each item's data
+  # looks for :kind in each item's data, or an alias of the kind attribute
+  attribute :kind, :string, alias: :category
 end
 
 # Type determined by parent field
@@ -390,7 +394,12 @@ user.created_at  # => nil (not set)
 
 # Nested skip_fields for associations
 order = OrderSchema.from_hash(data, [:id, { items: [:id] }])
+
+# Skip an association entirely
+order = OrderSchema.from_hash(data, [:items])
 ```
+
+A skipped field is ignored whether the data uses symbol keys, string keys, or one of the field's aliases.
 
 ## Array and CSV Support
 

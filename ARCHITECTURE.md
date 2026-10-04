@@ -50,7 +50,7 @@ The foundation module providing:
 
 - **`from_hash(data, skip_fields)`**: Class method that creates instance and calls `update_attributes`
 
-- **`update_attributes(data, skip_fields)`**: Iterates the data's key/value pairs, matches them against the schema, and invokes setters. Plain attributes are set before associations, so an association's `external_type_field` can read a sibling attribute. The schema used for lookups is chosen from the first key: symbol keys use `schema`, anything else (string keys, or key/value pairs that aren't a `Hash`) uses `schema_with_string_keys`.
+- **`update_attributes(data, skip_fields)`**: Iterates the data's key/value pairs, matches them against the schema, and invokes setters. Plain attributes are set before associations, so an association's `external_type_field` can read a sibling attribute. Each key is looked up on its own: symbol keys in `schema`, anything else in `schema_with_string_keys` (rebuilt whenever `schema` changes). `skip_fields` entries match a field by name or alias, as a symbol or string; a `{ association: [...] }` entry passes a nested list down.
 
 - **Aliases**: each alias adds a second schema entry with `alias_of:` pointing at the real attribute, plus aliased getter/setter methods. Serialization and array conversion skip entries with `alias_of`.
 
@@ -97,7 +97,7 @@ has_many(:items, type_field: :kind) do
 end
 ```
 
-The `type_field` option tells SchemaCreator which key in the nested data determines the subclass; `external_type_field` reads the type from an attribute on the parent instead. `type_ignorecase: true` compares type names case-insensitively. Each `add_type` creates a subclass of the association class, defined on the parent class as `<Name>AssociationType<Type>`.
+The `type_field` option tells SchemaCreator which key in the nested data determines the subclass (the type field attribute's aliases are checked too); `external_type_field` reads the type from an attribute on the parent instead. `type_ignorecase: true` compares type names case-insensitively. Each `add_type` creates a subclass of the association class, defined on the parent class as `<Name>AssociationType<Type>`.
 
 `Associations::Base` stores the parent class by name and resolves it with `Object.const_get`, so a parent class must be assigned to a constant before any association that uses dynamic types is declared.
 
@@ -107,7 +107,7 @@ Utility methods for:
 - `classify_name`: String → ClassName conversion
 - `create_schema_class`: Dynamically creates nested schema classes
 - `add_association_class`: Wires up association with proper modules
-- `add_attribute_default_methods` / `add_association_default_methods`: Default value handling
+- `add_attribute_default_methods` / `add_association_default_methods`: Default value handling (`copy_default` hands each read a deep copy of the default)
 
 ### Error Handling
 
