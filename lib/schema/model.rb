@@ -14,6 +14,8 @@ module Schema
       base.extend ClassMethods
     end
 
+    # Options every attribute starts with.
+    # @api private
     def self.default_attribute_options(name, type)
       {
         key: name.to_s.freeze,
@@ -28,6 +30,7 @@ module Schema
 
     # no-doc
     module ClassMethods
+      # @return [Hash{Symbol => Hash}] field name => options, including alias entries
       def schema
         {}.freeze
       end
@@ -41,6 +44,8 @@ module Schema
         @schema_with_string_keys = current_schema.transform_keys(&:to_s).freeze
       end
 
+      # Modules to include in nested classes, and the unknown attribute setting.
+      # @api private
       def schema_config
         {
           schema_includes: [],
@@ -65,6 +70,12 @@ module Schema
         schema_config[:capture_unknown_attributes]
       end
 
+      # Declares an attribute with a getter, a parsing setter and a `<name>_was_set?` predicate.
+      # @param name [Symbol]
+      # @param type [Symbol] parsed by `parse_<type>`, e.g. :integer
+      # @param options [Hash] `alias:`/`aliases:`, `default:`, and parser options such as
+      #   `separator:`/`data_type:` for :array
+      # @return [void]
       def attribute(name, type, options = {})
         options[:aliases] = [options[:alias]] if options.key?(:alias)
 
@@ -79,10 +90,15 @@ module Schema
         add_aliases(name, options)
       end
 
+      # Builds a model from data. See {Schema::Model#update_attributes}.
+      # @return [Schema::Model]
       def from_hash(data = nil, skip_fields = [])
         new.update_attributes(data, skip_fields)
       end
 
+      # Includes mod here and in every nested association class, current and future.
+      # @param mod [Module]
+      # @return [void]
       def schema_include(mod)
         config = schema_config.dup
         config[:schema_includes] = config[:schema_includes] + [mod]
@@ -96,6 +112,8 @@ module Schema
         end
       end
 
+      # Defines an attribute's getter, setter and predicate.
+      # @api private
       def add_attribute_methods(name, options)
         parser_check = parser_check_code(name, options)
         class_eval(
@@ -123,6 +141,8 @@ module Schema
         "::Schema::Utils.check_parser!(self, #{options[:parser].inspect}, #{name.inspect}, #{options[:type].inspect})"
       end
 
+      # Adds schema entries and methods for an attribute's aliases.
+      # @api private
       def add_aliases(name, options)
         return unless options[:aliases]
 
@@ -134,32 +154,47 @@ module Schema
       end
     end
 
+    # Sets attributes, then associations, from data.
+    # @param data [Hash, Array, nil] a hash with symbol or string keys, or [key, value] pairs;
+    #   anything else records an incompatible error on :base
+    # @param skip_fields [Array] fields to ignore, e.g. `[:id, { items: [:id] }]`
+    # @return [self]
     def update_attributes(data = nil, skip_fields = [])
       return self if data.nil?
+      return add_incompatible_data_error unless attributes_data?(data)
 
       update_model_attributes(data, skip_fields)
       update_associations(data, skip_fields)
       self
     end
 
+    # The model as a hash; nested models become hashes.
+    # @param opts [Hash]
+    # @option opts [Boolean] :include_nils include nil values
+    # @option opts [Boolean] :only_set include only fields present in the input (nils included), at every level
+    # @option opts [Proc] :select_filter keep a field when it returns true; called with (name, value, options)
+    # @option opts [Proc] :reject_filter drop a field when it returns true; called with (name, value, options)
+    # @return [Hash]
     def as_json(opts = {})
       self.class.schema.each_with_object({}) do |(field_name, field_options), memo|
         next if field_options[:alias_of]
+        next if opts[:only_set] && !instance_variable_defined?(field_options[:instance_variable])
 
         value = public_send(field_options[:getter])
-        next if value.nil? && !opts[:include_nils]
-        next if opts[:select_filter] && !opts[:select_filter].call(field_name, value, field_options)
-        next if opts[:reject_filter]&.call(field_name, value, field_options)
+        next unless include_in_json?(field_name, value, field_options, opts)
 
         memo[field_name] = value.is_a?(Array) ? value.map { |e| value_as_json(e, opts) } : value_as_json(value, opts)
       end
     end
 
+    # {#as_json} with nil values included.
+    # @return [Hash]
     def to_hash
       as_json(include_nils: true)
     end
     alias to_h to_hash
 
+    # @return [Schema::Errors] parsing error codes by field
     def parsing_errors
       @parsing_errors ||= Errors.new
     end
@@ -171,6 +206,26 @@ module Schema
     end
 
     private
+
+    # a Hash (or anything with each_pair), or an array of [key, value] pairs
+    def attributes_data?(data)
+      return true if data.respond_to?(:each_pair)
+
+      data.is_a?(Array) && data.all? { |pair| pair.is_a?(Array) && pair.size == 2 }
+    end
+
+    def add_incompatible_data_error
+      parsing_errors.add(:base, ::Schema::ParsingErrors::INCOMPATIBLE)
+      self
+    end
+
+    # only_set keeps nils that came from the input, since they mean "set to null"
+    def include_in_json?(field_name, value, field_options, opts)
+      return false if value.nil? && !opts[:include_nils] && !opts[:only_set]
+      return false if opts[:select_filter] && !opts[:select_filter].call(field_name, value, field_options)
+
+      !opts[:reject_filter]&.call(field_name, value, field_options)
+    end
 
     # values without as_json (no ActiveSupport JSON extension) are returned as is
     def value_as_json(value, opts)

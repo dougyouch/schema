@@ -228,6 +228,54 @@ describe Schema::Model do
     end
   end
 
+  context 'as_json only_set' do
+    let(:nested_class) do
+      Class.new do
+        include Schema::Model
+
+        schema_include Schema::Associations::HasOne
+        schema_include Schema::Associations::HasMany
+
+        attribute :name, :string
+        attribute :age, :integer, default: 0
+
+        has_one :address do
+          attribute :city, :string
+          attribute :zip, :string
+        end
+
+        has_many :phones do
+          attribute :number, :string
+          attribute :label, :string
+        end
+      end
+    end
+
+    it 'includes only fields present in the input, at every level, keeping nils that were sent' do
+      model = nested_class.from_hash(
+        'name' => nil, 'address' => { 'zip' => nil }, 'phones' => [{ 'number' => '555' }]
+      )
+      expect(model.as_json(only_set: true)).to eq(name: nil, address: { zip: nil }, phones: [{ number: '555' }])
+    end
+
+    it 'leaves out defaults that were not in the input' do
+      expect(nested_class.from_hash({}).as_json(only_set: true)).to eq({})
+    end
+  end
+
+  context 'data that is not a hash' do
+    ['a string', 5, [{ 'id' => 1 }]].each do |data|
+      describe data.inspect do
+        subject { model_class.from_hash(data) }
+
+        it 'records an incompatible error instead of raising' do
+          expect(subject.parsing_errors[:base]).to eq([Schema::ParsingErrors::INCOMPATIBLE])
+          expect(subject.not_set?).to eq(true)
+        end
+      end
+    end
+  end
+
   context 'as_json' do
     let(:include_nils) { false }
     let(:select_filter) { nil }
