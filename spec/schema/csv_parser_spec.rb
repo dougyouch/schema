@@ -112,6 +112,19 @@ describe Schema::CSVParser do
     expect(model.friends[2].game.name).to eq('Ninja')
   end
 
+  context '#shift' do
+    it 'returns nil once every row has been read' do
+      expect(csv_parser.shift).not_to eq(nil)
+      expect(csv_parser.shift).to eq(nil)
+    end
+  end
+
+  context '#each' do
+    it 'yields a model for each row' do
+      expect(csv_parser.map(&:id)).to eq([4])
+    end
+  end
+
   context '#missing_fields' do
     subject { csv_parser.missing_fields(required_data_headers) }
 

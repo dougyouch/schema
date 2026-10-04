@@ -12,7 +12,7 @@ describe Schema::Arrays do
       schema_include Schema::Associations::HasMany
 
       attribute :id, :integer
-      attribute :name, :string
+      attribute :name, :string, alias: :full_name
       attribute :unknown, :string
 
       has_one :company do
@@ -203,6 +203,33 @@ describe Schema::Arrays do
       end
 
       it 'returns empty arrays for all attributes' do
+        expect(subject).to eq(expected_array)
+      end
+    end
+
+    describe 'without association headers' do
+      let(:mapped_headers) do
+        {
+          id: { index: 0 },
+          name: { index: 2 }
+        }
+      end
+      let(:expected_array) do
+        [
+          4, # :id
+          'Joe Smith', # :name
+          nil, # :unknown
+          [nil, [nil, nil]], # company
+          [[nil, nil, [nil]], [nil, nil, [nil]], [nil, nil, [nil]]] # friends
+        ]
+      end
+
+      it 'leaves the associations unset' do
+        expect(model.company).to eq(nil)
+        expect(model.friends).to eq(nil)
+      end
+
+      it 'returns empty arrays for the associations' do
         expect(subject).to eq(expected_array)
       end
     end

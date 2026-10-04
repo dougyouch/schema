@@ -120,5 +120,11 @@ describe Schema::Associations::HasOne do
         expect(model.item.id).to eq(nil)
       end
     end
+
+    describe 'as_json' do
+      it 'includes the associated object as a hash' do
+        expect(model.as_json).to eq(model_data.merge(user: {}))
+      end
+    end
   end
 end

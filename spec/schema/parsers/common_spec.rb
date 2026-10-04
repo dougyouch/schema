@@ -206,6 +206,55 @@ describe Schema::Parsers::Common do
     end
   end
 
+  context 'parse_string_or_nil' do
+    let(:field_name) { :name }
+    let(:value) { model_name }
+    subject { model.parse_string_or_nil(field_name, parsing_errors, value) }
+
+    describe 'string value' do
+      it 'has no errors' do
+        expect(subject).to eq(model_name)
+        expect(has_parsing_errors).to eq(false)
+      end
+    end
+
+    describe 'empty string value' do
+      let(:value) { '' }
+
+      it 'returns nil' do
+        expect(subject).to eq(nil)
+        expect(has_parsing_errors).to eq(false)
+      end
+    end
+
+    describe 'numeric value' do
+      let(:value) { rand(1_000_000) }
+
+      it 'has no errors' do
+        expect(subject).to eq(value.to_s)
+        expect(has_parsing_errors).to eq(false)
+      end
+    end
+
+    describe 'hash value' do
+      let(:value) { { a: 1 } }
+
+      it 'has errors' do
+        expect(subject).to eq(nil)
+        expect(has_parsing_errors).to eq(true)
+      end
+    end
+
+    describe 'nil value' do
+      let(:value) { nil }
+
+      it 'has no errors' do
+        expect(subject).to eq(nil)
+        expect(has_parsing_errors).to eq(false)
+      end
+    end
+  end
+
   context 'parse_float' do
     let(:field_name) { :cost }
     let(:value) { model_cost }

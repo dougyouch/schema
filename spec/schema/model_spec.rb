@@ -110,6 +110,14 @@ describe Schema::Model do
         expect(subject.id).to eq(value.to_i)
       end
     end
+
+    describe 'key/value pairs' do
+      subject { model_class.from_hash [['id', value]] }
+
+      it 'uses the string keys schema' do
+        expect(subject.id).to eq(value.to_i)
+      end
+    end
   end
 
   context 'as_json' do

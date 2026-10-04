@@ -206,6 +206,15 @@ describe Schema::Associations::DynamicTypes do
       it 'parsing_errors unknown item' do
         expect(subject.parsing_errors[:item]).to eq([Schema::ParsingErrors::UNKNOWN])
       end
+
+      describe 'without capturing unknown attributes' do
+        before { model_class.capture_unknown_attributes = false }
+
+        it 'association is nil without a parsing error' do
+          expect(subject.item).to eq(nil)
+          expect(subject.parsing_errors.empty?).to eq(true)
+        end
+      end
     end
   end
 end

@@ -58,6 +58,18 @@ describe SchemaValidator do
     end
   end
 
+  describe 'missing nested schema' do
+    let(:model) { model_class.from_hash(name: "Name #{SecureRandom.hex(8)}") }
+
+    subject { model.errors }
+
+    before(:each) { model.valid? }
+
+    it 'only reports the presence error' do
+      expect(subject[:item]).to eq(["can't be blank"])
+    end
+  end
+
   describe 'invalid payload' do
     let(:payload) do
       {

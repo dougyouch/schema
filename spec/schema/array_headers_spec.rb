@@ -110,4 +110,27 @@ describe Schema::ArrayHeaders do
       expect(subject.class.get_mapped_field_names(mapped_headers)).to eq(%w[ID PersonName CompanyName CompanyCity CompanyStateCode FriendsXName FriendsXStatus FriendsXFavoriteGameName])
     end
   end
+
+  context 'has_many without aliases' do
+    let(:unaliased_class_name) { "ModelClass#{SecureRandom.hex(10)}" }
+    let(:unaliased_class) do
+      kls = Class.new do
+        include Schema::Model
+
+        schema_include Schema::Associations::HasMany
+        schema_include Schema::ArrayHeaders
+
+        has_many :friends do
+          attribute :name, :string
+        end
+      end
+      Object.const_set(unaliased_class_name, kls)
+    end
+
+    it 'uses the association name as the header prefix' do
+      expect(unaliased_class.map_headers_to_attributes(%w[friends1name friends2name])).to eq(
+        friends: { name: { indexes: [0, 1] } }
+      )
+    end
+  end
 end

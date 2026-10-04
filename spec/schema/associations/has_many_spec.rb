@@ -22,6 +22,8 @@ describe Schema::Associations::HasMany do
         attribute :name, :string
       end
 
+      has_many :tags
+
       has_many :buildings, from: :hash, hash_key_field: :id2 do
         attribute :id2, :string
         attribute :name, :string
@@ -161,6 +163,15 @@ describe Schema::Associations::HasMany do
       it { expect(subject.size).to eq(2) }
       it { expect(subject.map(&:name)).to eq(['Building 1C', 'Store Front']) }
       it { expect(subject.map(&:code)).to eq(%w[51 021]) }
+    end
+
+    describe 'without a block' do
+      let(:model_data) { { tags: [{}, {}] } }
+
+      it 'creates an empty schema for each element' do
+        expect(model.tags.size).to eq(2)
+        expect(has_parsing_errors).to eq(false)
+      end
     end
 
     describe 'append_to' do
