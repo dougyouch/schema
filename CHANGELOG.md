@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.12.0](https://github.com/dougyouch/schema/compare/v0.11.0...v0.12.0) (2026-10-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* with Schema::All, a parsing error's type is now the code symbol (e.g. :invalid) instead of the message string; messages are unchanged.
+
+### Features
+
+* decimal type, datetime alias, association was_set? and parsing error codes ([e93e683](https://github.com/dougyouch/schema/commit/e93e6836e98efcdf01da656818f70ec305f59871))
+
 ## [0.11.0](https://github.com/dougyouch/schema/compare/v0.10.0...v0.11.0) (2026-10-05)
 
 
