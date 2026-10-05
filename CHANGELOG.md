@@ -1,5 +1,16 @@
 # Changelog
 
+## [0.11.0](https://github.com/dougyouch/schema/compare/v0.10.0...v0.11.0) (2026-10-05)
+
+
+### ⚠ BREAKING CHANGES
+
+* **gem:** Ruby 3.2 reached end of life in March 2026 and is no longer supported. CI now tests Ruby 3.3 and the .ruby-version Ruby, both with Gemfile.lock and the coverage gate.
+
+### Build System
+
+* **gem:** require ruby 3.3 ([412cb95](https://github.com/dougyouch/schema/commit/412cb95c84f26623fb9b3d67257f3339390e952f))
+
 ## [0.10.0](https://github.com/dougyouch/schema/compare/v0.9.1...v0.10.0) (2026-10-04)
 
 
