@@ -19,7 +19,7 @@ Gem::Specification.new do |s|
   s.bindir      = 'bin'
   s.executables = s.files.grep(%r{^bin/}) { |f| File.basename(f) }
 
-  s.add_dependency 'inheritance-helper', '~> 0.2'
+  s.add_dependency 'inheritance-helper', '>= 0.2', '< 2'
   s.metadata['rubygems_mfa_required'] = 'true'
   s.metadata['source_code_uri'] = 'https://github.com/dougyouch/schema'
   s.metadata['changelog_uri'] = 'https://github.com/dougyouch/schema/blob/master/CHANGELOG.md'
