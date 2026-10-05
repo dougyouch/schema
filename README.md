@@ -10,7 +10,7 @@ A powerful Ruby gem for data transformation, validation, and type safety. Schema
 
 ## Installation
 
-Requires Ruby 3.2 or newer. Add this line to your application's Gemfile:
+Requires Ruby 3.3 or newer. Add this line to your application's Gemfile:
 
 ```ruby
 gem 'schema-model'

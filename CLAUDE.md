@@ -67,7 +67,7 @@ This is a Ruby gem (`schema-model`) for data transformation, validation, and typ
 
 ## CI
 
-`.github/workflows/ci.yml` runs RuboCop, and the specs on Ruby 3.2 (the gemspec minimum; gems resolved without `Gemfile.lock`, `COVERAGE=false`) and on the `.ruby-version` Ruby (with `Gemfile.lock` and the 100% line/branch coverage gate). On pushes to `master`, it publishes `coverage.svg` (line) and `branches.svg` (branch) from `script/coverage_badge.rb` to the orphan `badges` branch for the README badges.
+`.github/workflows/ci.yml` runs RuboCop, the YARD docs check, and the specs with `Gemfile.lock` and the 100% line/branch coverage gate on Ruby 3.3 (the gemspec minimum) and on the `.ruby-version` Ruby. On pushes to `master`, it publishes `coverage.svg` (line) and `branches.svg` (branch) from `script/coverage_badge.rb` to the orphan `badges` branch for the README badges.
 
 ## Releases
 
