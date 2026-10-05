@@ -124,7 +124,7 @@ Two error storage mechanisms:
 
 1. **Schema::Errors** (`lib/schema/errors.rb`): Simple hash-based storage, used standalone
 
-2. **Schema::ActiveModelParsingErrors** (`lib/schema/active_model_parsing_errors.rb`): When `Schema::ActiveModelValidations` is included, `parsing_errors` returns this `ActiveModel::Errors` subclass, which turns error codes into readable messages (overridable under the `schema.parsing_errors.<code>` I18n keys). Messages are stored as strings because parsing error keys like `items:0` aren't model attributes.
+2. **Schema::ActiveModelParsingErrors** (`lib/schema/active_model_parsing_errors.rb`): When `Schema::ActiveModelValidations` is included, `parsing_errors` returns this `ActiveModel::Errors` subclass, which turns error codes into readable messages (overridable under the `schema.parsing_errors.<code>` I18n keys) while keeping the code as the error's type. Each is a `Schema::ActiveModelParsingError`, whose message is resolved when it's added: a plain `ActiveModel::Error` would read the attribute to build its message, and parsing error keys like `items:0` aren't model attributes. `add_message` registers more codes; other strings are stored as messages.
 
 Parsing errors are distinct from validation errors:
 - **Parsing errors**: Type conversion failures (string "abc" → integer)

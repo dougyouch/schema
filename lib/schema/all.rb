@@ -15,6 +15,7 @@ module Schema
       # parsers
       base.schema_include ::Schema::Parsers::American
       base.schema_include ::Schema::Parsers::Array
+      base.schema_include ::Schema::Parsers::Decimal
       base.schema_include ::Schema::Parsers::Hash
       base.schema_include ::Schema::Parsers::Json
 

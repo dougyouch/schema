@@ -26,6 +26,7 @@ module Schema
 
   autoload :ActiveModelValidations, 'schema/active_model_validations'
   autoload :All, 'schema/all'
+  autoload :ActiveModelParsingError, 'schema/active_model_parsing_error'
   autoload :ActiveModelParsingErrors, 'schema/active_model_parsing_errors'
   autoload :ArrayHeaders, 'schema/array_headers'
   autoload :Arrays, 'schema/arrays'
@@ -43,6 +44,7 @@ module Schema
     autoload :American, 'schema/parsers/american'
     autoload :Array, 'schema/parsers/array'
     autoload :Common, 'schema/parsers/common'
+    autoload :Decimal, 'schema/parsers/decimal'
     autoload :Hash, 'schema/parsers/hash'
     autoload :Json, 'schema/parsers/json'
     autoload :StringValue, 'schema/parsers/string_value'

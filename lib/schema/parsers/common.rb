@@ -119,6 +119,11 @@ module Schema
         end
       end
 
+      # @!method parse_datetime(field_name, parsing_errors, value)
+      #   Same as {#parse_time}, so `attribute :created_at, :datetime` matches ActiveRecord's type name.
+      #   @return [Time, nil]
+      alias parse_datetime parse_time
+
       # Parses ISO 8601 dates (Date.iso8601).
       # @return [Date, nil]
       def parse_date(field_name, parsing_errors, value)
