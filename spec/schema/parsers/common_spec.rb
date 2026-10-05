@@ -754,3 +754,15 @@ describe Schema::Parsers::Common do
     end
   end
 end
+
+describe Schema::Parsers::Common, 'parse_datetime' do
+  it 'is parse_time under ActiveRecord type name' do
+    kls = Class.new do
+      include Schema::Model
+
+      attribute :created_at, :datetime
+    end
+
+    expect(kls.from_hash(created_at: '2026-01-02T03:04:05Z').created_at).to eq(Time.utc(2026, 1, 2, 3, 4, 5))
+  end
+end

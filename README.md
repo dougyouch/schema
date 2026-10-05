@@ -181,7 +181,7 @@ def update
 end
 ```
 
-Associations in `set_attribute_values` are schema models; call `as_json` on them if the record expects hashes. For a single attribute, `input.name_was_set?` answers the same question.
+Associations in `set_attribute_values` are schema models; call `as_json` on them if the record expects hashes. For a single attribute or association, `input.name_was_set?` answers the same question.
 
 For nested input, `as_json(only_set: true)` keeps only the fields that were sent, at every level, so it can be merged into a JSON column without wiping fields the client left out:
 
@@ -201,18 +201,22 @@ record.data = record.data.deep_merge(input.as_json(only_set: true).deep_stringif
 attribute :name, :string              # String values
 attribute :count, :integer            # Integer values (parses "123", " 123 " and "0123" to 123)
 attribute :price, :float              # Float values (parses "9.99" to 9.99, also "1e+5")
+attribute :total, :decimal            # BigDecimal (parses "9.99" exactly); with Schema::All
 attribute :active, :boolean           # see below
 attribute :notes, :string_or_nil      # String, but nil when empty or whitespace-only
 ```
 
 Booleans accept `1, t, true, on, y, yes` as `true` and `0, f, false, off, n, no` as `false` (any case). Any other string is an `invalid` parsing error, and numbers are `true` unless they're 0.
 
-For `:integer`, `:float`, `:boolean`, `:date`, `:time`, `:american_date` and `:american_time`, strings are stripped first and a blank string parses to `nil` without an error, so empty CSV cells don't count as bad input.
+`:decimal` needs the `bigdecimal` gem on Ruby 3.4+; ActiveModel already depends on it.
+
+For `:integer`, `:float`, `:decimal`, `:boolean`, `:date`, `:time`, `:american_date` and `:american_time`, strings are stripped first and a blank string parses to `nil` without an error, so empty CSV cells don't count as bad input.
 
 ### Date and Time Types
 
 ```ruby
 attribute :created_at, :time          # ISO 8601 date and time (Time.xmlschema)
+attribute :updated_at, :datetime      # same as :time, matching ActiveRecord's type name
 attribute :birth_date, :date          # ISO 8601 (Date.iso8601), e.g. "2024-01-31"; free text like "May 1" is invalid
 attribute :us_date, :american_date    # MM/DD/YYYY format
 attribute :us_time, :american_time    # MM/DD/YYYY HH:MM:SS format
@@ -255,7 +259,7 @@ Each read of a default returns a fresh copy (frozen values are shared), so mutat
 
 ### Checking If Attribute Was Set
 
-Every attribute generates a `_was_set?` predicate method:
+Every attribute and association generates a `_was_set?` predicate method:
 
 ```ruby
 user = UserSchema.from_hash(name: 'John')
@@ -461,6 +465,8 @@ user.parsing_errors.full_messages  # => ["Age is invalid"]
 | `unknown` | has an unknown type | `schema.parsing_errors.unknown` |
 | `unknown_attribute` | is an unknown attribute | `schema.parsing_errors.unknown_attribute` |
 | `unhandled_type` | is an unhandled type | `schema.parsing_errors.unhandled_type` |
+
+The code is kept as each error's type, so `user.parsing_errors.details # => { age: [{ error: :invalid }] }`. Register codes for your own parsers with `Schema::ActiveModelParsingErrors.add_message(:read_only, 'is read only')`; other strings added to `parsing_errors` are kept as messages.
 
 A plain `Schema::Model` uses `Schema::Errors`, which stores the codes themselves (`user.parsing_errors[:age] # => ["invalid"]`).
 

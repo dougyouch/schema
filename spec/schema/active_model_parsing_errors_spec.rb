@@ -37,3 +37,37 @@ describe Schema::ActiveModelParsingErrors do
     I18n.backend.reload!
   end
 end
+
+describe Schema::ActiveModelParsingErrors, 'codes' do
+  let(:model_class) do
+    Class.new do
+      include Schema::All
+
+      def self.name
+        'CodeModel'
+      end
+
+      attribute :age, :integer
+      has_many(:items) { attribute :qty, :integer }
+    end
+  end
+
+  after { described_class.messages.delete('read_only') }
+
+  it 'keeps the code as the error type, for unknown keys and nested markers too' do
+    model = model_class.from_hash(age: 'x', other: 1, items: [{ qty: 'y' }])
+
+    expect(model.parsing_errors.details).to eq(age: [{ error: :invalid }], other: [{ error: :unknown_attribute }],
+                                               'items:0' => [{ error: :invalid }])
+    expect(model.parsing_errors.full_messages).to include('Other is an unknown attribute')
+  end
+
+  it 'registers custom codes' do
+    described_class.add_message(:read_only, 'is read only')
+    model = model_class.new
+    model.parsing_errors.add(:age, :read_only)
+
+    expect(model.parsing_errors.details).to eq(age: [{ error: :read_only }])
+    expect(model.parsing_errors.full_messages).to eq(['Age is read only'])
+  end
+end

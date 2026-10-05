@@ -39,7 +39,8 @@ This is a Ruby gem (`schema-model`) for data transformation, validation, and typ
 - **Schema::All** (`lib/schema/all.rb`) - Convenience module bundling Model + Associations + Parsers + ActiveModel validations. This is the typical include.
 
 - **Schema::Parsers** - Type parsers in `lib/schema/parsers/`:
-  - `Common` - integer, string, string_or_nil, float, time, date, boolean (included by `Schema::Model`). Strings are stripped and blank ones parse to nil via `StringValue`.
+  - `Common` - integer, string, string_or_nil, float, time (alias datetime), date, boolean (included by `Schema::Model`). Strings are stripped and blank ones parse to nil via `StringValue`.
+  - `Decimal` - decimal (BigDecimal); included by `Schema::All`
   - `American` - american_date, american_time (MM/DD/YYYY format)
   - `Array` - array with optional separator and data_type
   - `Hash` - hash/dictionary values
@@ -57,9 +58,9 @@ This is a Ruby gem (`schema-model`) for data transformation, validation, and typ
 
 ### Key Patterns
 
-**Attribute Definition**: Each `attribute` call generates getter, setter, and `<name>_was_set?` predicate. Setter invokes type-specific parser.
+**Attribute Definition**: Each `attribute` call generates getter, setter, and `<name>_was_set?` predicate (`has_one`/`has_many` generate the predicate too). Setter invokes type-specific parser.
 
-**Parsing Errors**: Stored in `parsing_errors` as codes from `Schema::ParsingErrors` (`Schema::Errors`), or as readable messages with ActiveModelValidations (`ActiveModelParsingErrors`). Parsers add errors for invalid values rather than raising exceptions. Use `parsed?`/`parsed!` on any model; `valid?` does not check parsing errors, while `parsed_and_valid?` and `SchemaValidator` check both.
+**Parsing Errors**: Stored in `parsing_errors` as codes from `Schema::ParsingErrors` (`Schema::Errors`), or with ActiveModelValidations as `ActiveModelParsingErrors`: readable messages with the code kept as the error type (`ActiveModelParsingError`); register codes with `ActiveModelParsingErrors.add_message`. Parsers add errors for invalid values rather than raising exceptions. Use `parsed?`/`parsed!` on any model; `valid?` does not check parsing errors, while `parsed_and_valid?` and `SchemaValidator` check both.
 
 **Schema Inheritance**: Uses `inheritance-helper` gem. Schema definitions accumulate via `add_value_to_class_method(:schema, ...)`.
 

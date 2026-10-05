@@ -26,6 +26,10 @@ module Schema
     #{options[:instance_variable]}
   end
 
+  def #{options[:getter]}_was_set?
+    instance_variable_defined?(:#{options[:instance_variable]})
+  end
+
   def #{name}_schema_creator
     @#{name}_schema_creator ||= ::Schema::Associations::SchemaCreator.new(self, #{name.inspect})
   end
